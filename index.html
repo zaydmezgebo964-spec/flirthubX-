@@ -227,10 +227,7 @@ Choose Your Match ❤️
 </div>
 
 <script>
-function showProfile(){
-document.getElementById("home").classList.add("hidden");
-document.getElementById("profile").classList.remove("hidden");
-}
+document.getElementById("avatar").classList.remove("hidden");
 function goHome(){
 document.getElementById("profile").classList.add("hidden");
 document.getElementById("home").classList.remove("hidden");
@@ -238,15 +235,15 @@ document.getElementById("home").classList.remove("hidden");
 
 function continueGame(){
 
-const username=document.getElementById("username").value.trim();
+const username = document.getElementById("username").value.trim();
 
-if(username===""){
+if(username === ""){
 alert("Please enter your username.");
 return;
 }
 
 document.getElementById("profile").classList.add("hidden");
-document.getElementById("match").classList.remove("hidden");
+document.getElementById("avatar").classList.remove("hidden");
 
 }
 
