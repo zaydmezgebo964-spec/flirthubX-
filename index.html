@@ -202,7 +202,10 @@ Choose Your Match ❤️
 </div>
 
 <script>
-
+function showProfile(){
+document.getElementById("home").classList.add("hidden");
+document.getElementById("profile").classList.remove("hidden");
+}
 function goHome(){
 document.getElementById("profile").classList.add("hidden");
 document.getElementById("home").classList.remove("hidden");
