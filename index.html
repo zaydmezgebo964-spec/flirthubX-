@@ -5,41 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FlirtHubX</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-
 <style>
-body{
+*{
 margin:0;
 padding:0;
+box-sizing:border-box;
 font-family:Arial,sans-serif;
+}
+
+body{
+background:#111827;
+color:white;
 overflow:hidden;
 }
 
-.bg{
+.screen{
 position:fixed;
-inset:0;
-background:
-linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.7)),
-url("grok_1785922772462.jpg");
-background-size:cover;
-background-position:center;
-background-repeat:no-repeat;
+top:0;
+left:0;
+width:100%;
+height:100%;
 display:flex;
 flex-direction:column;
-justify-content:space-between;
+justify-content:center;
 align-items:center;
 }
 
+.hidden{
+display:none;
+}
+
+#home{
+background:
+linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.75)),
+url("grok_1785922772462.jpg");
+background-size:cover;
+background-position:center;
+}
+
 .logo{
-margin-top:70px;
 text-align:center;
-color:white;
+margin-bottom:auto;
+padding-top:80px;
 }
 
 .logo h1{
-font-size:55px;
-font-weight:900;
-margin:0;
+font-size:58px;
+font-weight:bold;
 }
 
 .logo span{
@@ -47,12 +59,12 @@ color:#e11d48;
 }
 
 .logo p{
-opacity:.8;
 margin-top:10px;
+opacity:.8;
 }
 
-.start{
-margin-bottom:60px;
+.startBtn{
+margin-bottom:70px;
 width:280px;
 height:55px;
 border:none;
@@ -63,155 +75,111 @@ font-size:18px;
 font-weight:bold;
 cursor:pointer;
 }
-</style>
 
+#profile{
+background:#111827;
+padding:25px;
+}
+
+.card{
+width:100%;
+max-width:350px;
+background:#1f2937;
+padding:20px;
+border-radius:20px;
+}
+
+.card h2{
+text-align:center;
+margin-bottom:20px;
+}
+
+.input{
+width:100%;
+padding:14px;
+margin-top:15px;
+border:none;
+border-radius:12px;
+font-size:16px;
+background:#374151;
+color:white;
+}
+
+.nextBtn{
+width:100%;
+padding:15px;
+margin-top:25px;
+border:none;
+border-radius:999px;
+background:#e11d48;
+color:white;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
+}
+</style>
 </head>
 
-<body> <div id="profileScreen" style="
-display:none;
-position:fixed;
-inset:0;
-background:#111827;
-padding:30px;
-color:white;
-">
+<body>
 
-<h2 style="text-align:center;font-size:32px;">
-Create Profile
-</h2>
+<div id="home" class="screen">
 
-<input
-id="username"
-placeholder="Username"
-style="
-width:100%;
-padding:15px;
-margin-top:30px;
-border-radius:12px;
-border:none;
-font-size:16px;
-">
+<div class="logo">
+<h1>FlirtHub<span>X</span></h1>
+<p>Every choice creates a new story.</p>
+</div>
 
-<input
-id="age"
-type="number"
-placeholder="Age"
-style="
-width:100%;
-padding:15px;
-margin-top:15px;
-border-radius:12px;
-border:none;
-font-size:16px;
-">
+<button class="startBtn" onclick="showProfile()">
+❤️ START GAME
+</button>
 
-<select
-id="gender"
-style="
-width:100%;
-padding:15px;
-margin-top:15px;
-border-radius:12px;
-border:none;
-font-size:16px;
-">
+</div>
+
+<div id="profile" class="screen hidden">
+
+<div class="card">
+
+<h2>Create Profile</h2>
+
+<input id="username" class="input" placeholder="Username">
+
+<input id="age" class="input" type="number" placeholder="Age">
+
+<select id="gender" class="input">
 <option>Male</option>
 <option>Female</option>
 <option>Non-binary</option>
 </select>
 
-<button
-style="
-width:100%;
-margin-top:30px;
-padding:15px;
-background:#e11d48;
-color:white;
-border:none;
-border-radius:999px;
-font-size:18px;
-font-weight:bold;
-"
-onclick="continueGame()"
->
+<button class="nextBtn" onclick="continueGame()">
 Continue ❤️
 </button>
 
 </div>
 
-<script>
-function showProfile(){
-document.querySelector(".bg").style.display="none";
-document.getElementById("profileScreen").style.display="block";
-}
+</div>
+<div id="match" class="screen hidden" style="background:#111827;padding:20px;overflow:auto;justify-content:flex-start;">
 
-function continueGame(){
-const name=document.getElementById("username").value;
-
-if(name===""){
-alert("Please enter your username.");
-return;
-}
-
-document.getElementById("profileScreen").style.display="none";
-document.getElementById("matchScreen").style.display="block";
-</script> <div id="matchScreen" style="
-display:none;
-position:fixed;
-inset:0;
-background:#111827;
-padding:20px;
-overflow:auto;
-color:white;
-">
-
-<h2 style="text-align:center;font-size:30px;margin-bottom:20px;">
+<h2 style="margin-top:40px;margin-bottom:25px;font-size:30px;">
 Choose Your Match ❤️
 </h2>
 
-<div class="card" onclick="chooseGirl('Sophia')">
-<img src="https://picsum.photos/400/500?random=1" style="width:100%;border-radius:15px;">
-<h3>Sophia, 20</h3>
+<div onclick="chooseGirl('Sophia')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
+<img src="https://picsum.photos/400/500?random=1" style="width:100%;border-radius:12px;">
+<h3 style="margin-top:10px;">Sophia, 20</h3>
 <p>📚 Loves books • ☕ Coffee addict</p>
 </div>
 
-<div class="card" onclick="chooseGirl('Luna')">
-<img src="https://picsum.photos/400/500?random=2" style="width:100%;border-radius:15px;">
-<h3>Luna, 22</h3>
+<div onclick="chooseGirl('Luna')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
+<img src="https://picsum.photos/400/500?random=2" style="width:100%;border-radius:12px;">
+<h3 style="margin-top:10px;">Luna, 22</h3>
 <p>🎮 Gamer • 😂 Funny</p>
 </div>
 
-<div class="card" onclick="chooseGirl('Emma')">
-<img src="https://picsum.photos/400/500?random=3" style="width:100%;border-radius:15px;">
-<h3>Emma, 21</h3>
-<p>🎵 Music Lover • 💖 Sweet</p>
-</div>
-
-</div> function chooseGirl(name){
-<!-- MATCH SCREEN -->
-
-<div id="match" class="screen hidden" style="background:#111827;padding:20px;overflow:auto;">
-
-<h2 style="text-align:center;font-size:32px;margin-bottom:25px;">
-Choose Your Match ❤️
-</h2>
-
-<div onclick="chooseGirl('Sophia')" style="background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
-<img src="https://picsum.photos/500/600?random=11" style="width:100%;border-radius:14px;">
-<h3 style="margin-top:10px;">Sophia, 20</h3>
-<p style="opacity:.8;">📚 Loves books • ☕ Coffee addict</p>
-</div>
-
-<div onclick="chooseGirl('Luna')" style="background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
-<img src="https://picsum.photos/500/600?random=12" style="width:100%;border-radius:14px;">
-<h3 style="margin-top:10px;">Luna, 22</h3>
-<p style="opacity:.8;">🎮 Gamer • 😂 Funny</p>
-</div>
-
-<div onclick="chooseGirl('Emma')" style="background:#1f2937;border-radius:18px;padding:15px;cursor:pointer;">
-<img src="https://picsum.photos/500/600?random=13" style="width:100%;border-radius:14px;">
+<div onclick="chooseGirl('Emma')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;cursor:pointer;">
+<img src="https://picsum.photos/400/500?random=3" style="width:100%;border-radius:12px;">
 <h3 style="margin-top:10px;">Emma, 21</h3>
-<p style="opacity:.8;">🎵 Music Lover • 💖 Sweet</p>
+<p>🎵 Music Lover • 💖 Sweet</p>
 </div>
 
 </div>
@@ -238,9 +206,10 @@ document.getElementById("match").classList.remove("hidden");
 }
 
 function chooseGirl(name){
-alert("You matched with "+name+" ❤️");
-  </script>
+alert("You matched with " + name + " ❤️");
+}
+
+</script>
 
 </body>
 </html>
-}
