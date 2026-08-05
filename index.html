@@ -153,9 +153,43 @@ alert("Please enter your username.");
 return;
 }
 
-alert("Welcome to FlirtHubX, "+name+"!");
+document.getElementById("profileScreen").style.display="none";
+document.getElementById("matchScreen").style.display="block";
+</script> <div id="matchScreen" style="
+display:none;
+position:fixed;
+inset:0;
+background:#111827;
+padding:20px;
+overflow:auto;
+color:white;
+">
+
+<h2 style="text-align:center;font-size:30px;margin-bottom:20px;">
+Choose Your Match ❤️
+</h2>
+
+<div class="card" onclick="chooseGirl('Sophia')">
+<img src="https://picsum.photos/400/500?random=1" style="width:100%;border-radius:15px;">
+<h3>Sophia, 20</h3>
+<p>📚 Loves books • ☕ Coffee addict</p>
+</div>
+
+<div class="card" onclick="chooseGirl('Luna')">
+<img src="https://picsum.photos/400/500?random=2" style="width:100%;border-radius:15px;">
+<h3>Luna, 22</h3>
+<p>🎮 Gamer • 😂 Funny</p>
+</div>
+
+<div class="card" onclick="chooseGirl('Emma')">
+<img src="https://picsum.photos/400/500?random=3" style="width:100%;border-radius:15px;">
+<h3>Emma, 21</h3>
+<p>🎵 Music Lover • 💖 Sweet</p>
+</div>
+
+</div> function chooseGirl(name){
+alert("You matched with " + name + " ❤️");
 }
-</script>
 
 <div class="bg">
 
