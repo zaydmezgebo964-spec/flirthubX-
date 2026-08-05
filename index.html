@@ -188,21 +188,59 @@ Choose Your Match ❤️
 </div>
 
 </div> function chooseGirl(name){
-alert("You matched with " + name + " ❤️");
+<!-- MATCH SCREEN -->
+
+<div id="match" class="screen hidden" style="background:#111827;padding:20px;overflow:auto;">
+
+<h2 style="text-align:center;font-size:32px;margin-bottom:25px;">
+Choose Your Match ❤️
+</h2>
+
+<div onclick="chooseGirl('Sophia')" style="background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
+<img src="https://picsum.photos/500/600?random=11" style="width:100%;border-radius:14px;">
+<h3 style="margin-top:10px;">Sophia, 20</h3>
+<p style="opacity:.8;">📚 Loves books • ☕ Coffee addict</p>
+</div>
+
+<div onclick="chooseGirl('Luna')" style="background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
+<img src="https://picsum.photos/500/600?random=12" style="width:100%;border-radius:14px;">
+<h3 style="margin-top:10px;">Luna, 22</h3>
+<p style="opacity:.8;">🎮 Gamer • 😂 Funny</p>
+</div>
+
+<div onclick="chooseGirl('Emma')" style="background:#1f2937;border-radius:18px;padding:15px;cursor:pointer;">
+<img src="https://picsum.photos/500/600?random=13" style="width:100%;border-radius:14px;">
+<h3 style="margin-top:10px;">Emma, 21</h3>
+<p style="opacity:.8;">🎵 Music Lover • 💖 Sweet</p>
+</div>
+
+</div>
+
+<script>
+
+function showProfile(){
+document.getElementById("home").classList.add("hidden");
+document.getElementById("profile").classList.remove("hidden");
 }
 
-<div class="bg">
+function continueGame(){
 
-<div class="logo">
-<h1>FlirtHub<span>X</span></h1>
-<p>Every choice creates a new story.</p>
-</div>
+const username=document.getElementById("username").value.trim();
 
-<button class="start" onclick="showProfile()">
-❤️ START GAME
-</button>
+if(username===""){
+alert("Please enter your username.");
+return;
+}
 
-</div>
+document.getElementById("profile").classList.add("hidden");
+document.getElementById("match").classList.remove("hidden");
+
+}
+
+function chooseGirl(name){
+alert("You matched with "+name+" ❤️");
+  </script>
 
 </body>
 </html>
+}
