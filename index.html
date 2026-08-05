@@ -213,6 +213,18 @@ document.getElementById("home").classList.remove("hidden");
 
 function continueGame(){
 
+const username = document.getElementById("username").value.trim();
+
+if(username === ""){
+alert("Please enter your username.");
+return;
+}
+
+document.getElementById("profile").classList.add("hidden");
+document.getElementById("avatar").classList.remove("hidden");
+
+}
+
 const username=document.getElementById("username").value.trim();
 
 if(username===""){
