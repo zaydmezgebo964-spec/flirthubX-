@@ -269,7 +269,35 @@ document.getElementById("match").classList.remove("hidden");
 
 function chooseGirl(name){
 
-alert("You matched with " + name + " ❤️");
+document.getElementById("match").classList.add("hidden");
+
+document.getElementById("chat").classList.remove("hidden");
+
+document.getElementById("girlName").innerHTML = "Chat with " + name + " ❤️";
+
+document.getElementById("messages").innerHTML =
+"<p>👩: Hi, nice to meet you!</p>";
+
+}
+
+
+function reply(choice){
+
+let box = document.getElementById("messages");
+
+if(choice==1){
+
+box.innerHTML += "<p>🙂 You: Hey, nice to meet you</p>";
+box.innerHTML += "<p>👩: You seem friendly 😊</p>";
+
+}
+
+else{
+
+box.innerHTML += "<p>❤️ You: I think you're interesting</p>";
+box.innerHTML += "<p>👩: Haha, thank you ❤️</p>";
+
+}
 
 }
 
