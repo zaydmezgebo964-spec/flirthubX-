@@ -58,15 +58,34 @@ button:hover{
 </style>
 </head>
 
-<body>
+<body> <script>
+function showProfile(){
+document.body.innerHTML=`
+<div class="container">
+<h1>Create Profile</h1>
+
+<input type="text" placeholder="Username"><br><br>
+
+<input type="number" placeholder="Age"><br><br>
+
+<select>
+<option>Male</option>
+<option>Female</option>
+<option>Other</option>
+</select><br><br>
+
+<button>Continue ❤️</button>
+</div>
+`;
+}
+</script>
 
 <div class="container">
 
 <h1>💚 FlirtHubX</h1>
 
 <p>Find your perfect match.</p>
-
-<button>❤️ Start Dating</button>
+<button onclick="showProfile()">❤️ Start Dating</button>
 
 <button>👤 Create Profile</button>
 
