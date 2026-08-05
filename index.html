@@ -67,7 +67,95 @@ cursor:pointer;
 
 </head>
 
-<body>
+<body> <div id="profileScreen" style="
+display:none;
+position:fixed;
+inset:0;
+background:#111827;
+padding:30px;
+color:white;
+">
+
+<h2 style="text-align:center;font-size:32px;">
+Create Profile
+</h2>
+
+<input
+id="username"
+placeholder="Username"
+style="
+width:100%;
+padding:15px;
+margin-top:30px;
+border-radius:12px;
+border:none;
+font-size:16px;
+">
+
+<input
+id="age"
+type="number"
+placeholder="Age"
+style="
+width:100%;
+padding:15px;
+margin-top:15px;
+border-radius:12px;
+border:none;
+font-size:16px;
+">
+
+<select
+id="gender"
+style="
+width:100%;
+padding:15px;
+margin-top:15px;
+border-radius:12px;
+border:none;
+font-size:16px;
+">
+<option>Male</option>
+<option>Female</option>
+<option>Non-binary</option>
+</select>
+
+<button
+style="
+width:100%;
+margin-top:30px;
+padding:15px;
+background:#e11d48;
+color:white;
+border:none;
+border-radius:999px;
+font-size:18px;
+font-weight:bold;
+"
+onclick="continueGame()"
+>
+Continue ❤️
+</button>
+
+</div>
+
+<script>
+function showProfile(){
+document.querySelector(".bg").style.display="none";
+document.getElementById("profileScreen").style.display="block";
+}
+
+function continueGame(){
+const name=document.getElementById("username").value;
+
+if(name===""){
+alert("Please enter your username.");
+return;
+}
+
+alert("Welcome to FlirtHubX, "+name+"!");
+}
+</script>
 
 <div class="bg">
 
@@ -76,7 +164,7 @@ cursor:pointer;
 <p>Every choice creates a new story.</p>
 </div>
 
-<button class="start">
+<button class="start" onclick="showProfile()">
 ❤️ START GAME
 </button>
 
