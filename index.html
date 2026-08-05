@@ -175,32 +175,7 @@ Choose Avatar →
 </div>
 
 </div>
-<di
-<div id="avatar" class="screen hidden">
-
-<div class="card">
-
-<h2>Choose Your Avatar</h2>
-
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:20px;">
-
-<img src="https://i.pravatar.cc/200?img=1" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
-
-<img src="https://i.pravatar.cc/200?img=2" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
-
-<img src="https://i.pravatar.cc/200?img=3" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
-
-<img src="https://i.pravatar.cc/200?img=4" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
-
-</div>
-
-<button class="nextBtn" onclick="openMatch()">
-Continue ❤️
-</button>
-
-</div>
-
-</div>
+<div id="match" class="screen hidden" style="background:#111827;padding:20px;overflow:auto;justify-content:flex-start;">
 
 <h2 style="margin-top:40px;margin-bottom:25px;font-size:30px;">
 Choose Your Match ❤️
@@ -227,7 +202,10 @@ Choose Your Match ❤️
 </div>
 
 <script>
-document.getElementById("avatar").classList.remove("hidden");
+function showProfile(){
+document.getElementById("home").classList.add("hidden");
+document.getElementById("profile").classList.remove("hidden");
+}
 function goHome(){
 document.getElementById("profile").classList.add("hidden");
 document.getElementById("home").classList.remove("hidden");
@@ -235,15 +213,15 @@ document.getElementById("home").classList.remove("hidden");
 
 function continueGame(){
 
-const username = document.getElementById("username").value.trim();
+const username=document.getElementById("username").value.trim();
 
-if(username === ""){
+if(username===""){
 alert("Please enter your username.");
 return;
 }
 
 document.getElementById("profile").classList.add("hidden");
-document.getElementById("avatar").classList.remove("hidden");
+document.getElementById("match").classList.remove("hidden");
 
 }
 
