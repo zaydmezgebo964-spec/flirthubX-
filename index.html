@@ -51,6 +51,7 @@ padding-top:80px;
 
 .logo h1{
 font-size:58px;
+font-weight:bold;
 }
 
 .logo span{
@@ -62,21 +63,17 @@ margin-top:10px;
 opacity:.8;
 }
 
-.startBtn,
-.nextBtn{
-background:#e11d48;
-color:white;
+.startBtn{
+margin-bottom:70px;
+width:280px;
+height:55px;
 border:none;
 border-radius:999px;
+background:#e11d48;
+color:white;
 font-size:18px;
 font-weight:bold;
 cursor:pointer;
-}
-
-.startBtn{
-width:280px;
-height:55px;
-margin-bottom:70px;
 }
 
 #profile{
@@ -112,33 +109,23 @@ color:white;
 width:100%;
 padding:15px;
 margin-top:25px;
-}
-
-.matchCard{
-width:100%;
-max-width:350px;
-background:#1f2937;
-border-radius:18px;
-padding:15px;
-margin-bottom:20px;
+border:none;
+border-radius:999px;
+background:#e11d48;
+color:white;
+font-size:18px;
+font-weight:bold;
 cursor:pointer;
 }
-
-.matchCard img{
-width:100%;
-border-radius:12px;
-}
 </style>
-
 </head>
 
 <body>
 
-
 <div id="home" class="screen">
 
 <div class="logo">
-<h1>Flirt<span>HubX</span></h1>
+
 <p>Every choice creates a new story.</p>
 </div>
 
@@ -148,18 +135,32 @@ border-radius:12px;
 
 </div>
 
-
-
 <div id="profile" class="screen hidden">
 
 <div class="card">
 
+<div style="display:flex;align-items:center;margin-bottom:20px;">
+
+<button
+onclick="goHome()"
+style="
+background:none;
+border:none;
+color:white;
+font-size:24px;
+cursor:pointer;
+margin-right:15px;
+">
+←
+</button>
+
 <h2>Create Profile</h2>
+
+</div> 
 
 <input id="username" class="input" placeholder="Username">
 
 <input id="age" class="input" type="number" placeholder="Age">
-
 
 <select id="gender" class="input">
 <option>Male</option>
@@ -167,143 +168,68 @@ border-radius:12px;
 <option>Non-binary</option>
 </select>
 
-
 <button class="nextBtn" onclick="continueGame()">
 Choose Avatar →
 </button>
 
-
 </div>
 
 </div>
+<div id="match" class="screen hidden" style="background:#111827;padding:20px;overflow:auto;justify-content:flex-start;">
 
-
-
-<div id="match" class="screen hidden" 
-style="background:#111827;padding:20px;overflow:auto;justify-content:flex-start;">
-
-
-<h2 style="margin-top:40px;margin-bottom:25px;">
+<h2 style="margin-top:40px;margin-bottom:25px;font-size:30px;">
 Choose Your Match ❤️
 </h2>
 
-
-
-<div class="matchCard" onclick="chooseGirl('Sophia')">
-
-<img src="https://picsum.photos/400/500?random=1">
-
-<h3>Sophia, 20</h3>
-
+<div onclick="chooseGirl('Sophia')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
+<img src="https://picsum.photos/400/500?random=1" style="width:100%;border-radius:12px;">
+<h3 style="margin-top:10px;">Sophia, 20</h3>
 <p>📚 Loves books • ☕ Coffee addict</p>
-
 </div>
 
-
-
-
-<div class="matchCard" onclick="chooseGirl('Luna')">
-
-<img src="https://picsum.photos/400/500?random=2">
-
-<h3>Luna, 22</h3>
-
+<div onclick="chooseGirl('Luna')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
+<img src="https://picsum.photos/400/500?random=2" style="width:100%;border-radius:12px;">
+<h3 style="margin-top:10px;">Luna, 22</h3>
 <p>🎮 Gamer • 😂 Funny</p>
-
 </div>
 
-
-
-
-<div class="matchCard" onclick="chooseGirl('Emma')">
-
-<img src="https://picsum.photos/400/500?random=3">
-
-<h3>Emma, 21</h3>
-
+<div onclick="chooseGirl('Emma')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;cursor:pointer;">
+<img src="https://picsum.photos/400/500?random=3" style="width:100%;border-radius:12px;">
+<h3 style="margin-top:10px;">Emma, 21</h3>
 <p>🎵 Music Lover • 💖 Sweet</p>
-
 </div>
 
-
-
 </div>
-
-
-
 
 <script>
-
 function showProfile(){
-
 document.getElementById("home").classList.add("hidden");
-
 document.getElementById("profile").classList.remove("hidden");
-
 }
-
-
+function goHome(){
+document.getElementById("profile").classList.add("hidden");
+document.getElementById("home").classList.remove("hidden");
+}
 
 function continueGame(){
 
-const username = document.getElementById("username").value.trim();
+const username=document.getElementById("username").value.trim();
 
-
-if(username === ""){
-
+if(username===""){
 alert("Please enter your username.");
-
 return;
-
 }
-
 
 document.getElementById("profile").classList.add("hidden");
-
 document.getElementById("match").classList.remove("hidden");
 
-
 }
-
-
 
 function chooseGirl(name){
-
-document.getElementById("match").classList.add("hidden");
-
-document.getElementById("chat").classList.remove("hidden");
-
-document.getElementById("girlName").innerHTML = "Chat with " + name + " ❤️";
-
-document.getElementById("messages").innerHTML =
-"<p>👩: Hi, nice to meet you!</p>";
-
+alert("You matched with " + name + " ❤️");
 }
-
-
-function reply(choice){
-
-let box = document.getElementById("messages");
-
-if(choice==1){
-
-box.innerHTML += "<p>🙂 You: Hey, nice to meet you</p>";
-box.innerHTML += "<p>👩: You seem friendly 😊</p>";
-
-}
-
-else{
-
-box.innerHTML += "<p>❤️ You: I think you're interesting</p>";
-box.innerHTML += "<p>👩: Haha, thank you ❤️</p>";
-
-}
-
-}
-
 
 </script>
-
 
 </body>
 </html>
