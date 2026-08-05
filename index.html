@@ -5,79 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FlirtHubX</title>
 
+<script src="https://cdn.tailwindcss.com"></script>
+
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
+body{
+margin:0;
+padding:0;
+font-family:Arial,sans-serif;
+overflow:hidden;
 }
 
-<body class="bg-gray-900 text-white h-screen w-screen overflow-hidden flex flex-col justify-between">
-
-.container{
-  width:90%;
-  max-width:420px;
-  text-align:center;
+.bg{
+position:fixed;
+inset:0;
+background:
+linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.7)),
+url("grok_1785922772462.jpg");
+background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+align-items:center;
 }
 
-h1{
-  font-size:48px;
-  text-shadow:0 0 15px #39ff14;
-  margin-bottom:15px;
+.logo{
+margin-top:70px;
+text-align:center;
+color:white;
 }
 
-p{
-  color:#bfbfbf;
-  margin-bottom:30px;
+.logo h1{
+font-size:55px;
+font-weight:900;
+margin:0;
 }
 
-button{
-  width:100%;
-  padding:15px;
-  margin:10px 0;
-  border:none;
-  border-radius:12px;
-  background:#39ff14;
-  color:#000;
-  font-size:18px;
-  font-weight:bold;
-  cursor:pointer;
+.logo span{
+color:#e11d48;
 }
 
-button:hover{
-  background:#62ff4a;
+.logo p{
+opacity:.8;
+margin-top:10px;
+}
+
+.start{
+margin-bottom:60px;
+width:280px;
+height:55px;
+border:none;
+border-radius:999px;
+background:#e11d48;
+color:white;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
 }
 </style>
+
 </head>
 
-<body> <script>
-function showProfile(){
-document.body.innerHTML=`
-<div class="container">
-<h1>Create Profile</h1>
+<body>
 
-<input type="text" placeholder="Username"><br><br>
+<div class="bg">
 
-<input type="number" placeholder="Age"><br><br>
-
-<select>
-<option>Male</option>
-<option>Female</option>
-<option>Other</option>
-</select><br><br>
-
-<button>Continue ❤️</button>
+<div class="logo">
+<h1>FlirtHub<span>X</span></h1>
+<p>Every choice creates a new story.</p>
 </div>
-`;
-}
-</script>
 
-<div class="container">
-
-<h1>💚 FlirtHubX</h1>
-
-<p>Find your perfect match.</p>
-<button onclick="showProfile()">❤️ Start Dating</button>
+<button class="start">
+❤️ START GAME
+</button>
 
 </div>
 
