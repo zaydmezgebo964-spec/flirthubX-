@@ -120,7 +120,37 @@ cursor:pointer;
 </style>
 </head>
 
-<body>
+<body> <!-- HOME SCREEN -->
+<div id="gameHome" class="screen hidden" style="background:#111827;">
+
+<div style="width:100%;max-width:400px;padding:20px;">
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:30px;">
+
+<div style="display:flex;align-items:center;">
+
+<img id="playerAvatar" src="" style="width:60px;height:60px;border-radius:50%;margin-right:15px;">
+
+<div>
+<h3 id="playerName">Player</h3>
+<p>Welcome back ❤️</p>
+</div>
+
+</div>
+
+</div>
+
+<button onclick="openMessages()" class="nextBtn">
+💬 Messages
+</button>
+
+<button onclick="openAccount()" class="nextBtn">
+👤 Account
+</button>
+
+</div>
+
+</div>
 
 <div id="home" class="screen">
 
@@ -272,9 +302,22 @@ i.style.border="none";
 
 img.style.border="4px solid #e11d48";
 
-} 
-function chooseGirl(name){
-alert("You matched with " + name + " ❤️");
+} function chooseGirl(name){
+
+document.getElementById("match").classList.add("hidden");
+document.getElementById("gameHome").classList.remove("hidden");
+
+document.getElementById("playerName").innerText =
+document.getElementById("username").value;
+
+document.getElementById("playerAvatar").src = selectedAvatar;
+
+} function openMessages(){
+alert("Messages screen coming next!");
+}
+
+function openAccount(){
+alert("Account screen coming next!");
 }
 
 </script>
