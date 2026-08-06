@@ -312,14 +312,86 @@ document.getElementById("username").value;
 
 document.getElementById("playerAvatar").src = selectedAvatar;
 
-} function openMessages(){
-alert("Messages screen coming next!");
+function openMessages(){
+
+document.getElementById("gameHome").classList.add("hidden");
+document.getElementById("messages").classList.remove("hidden");
+
+}
+
+function openAccount(){
+
+document.getElementById("gameHome").classList.add("hidden");
+document.getElementById("account").classList.remove("hidden");
+
+document.getElementById("accountAvatar").src = selectedAvatar;
+document.getElementById("accountName").innerText =
+document.getElementById("username").value;
+
+}
+
+function backHome(){
+
+document.getElementById("messages").classList.add("hidden");
+document.getElementById("account").classList.add("hidden");
+document.getElementById("gameHome").classList.remove("hidden");
+
 }
 
 function openAccount(){
 alert("Account screen coming next!");
 }
+<!-- MESSAGES SCREEN -->
+<div id="messages" class="screen hidden" style="background:#111827;padding:20px;">
 
+<div style="width:100%;max-width:400px;">
+
+<button onclick="backHome()" style="background:none;border:none;color:white;font-size:22px;margin-bottom:20px;cursor:pointer;">
+← Back
+</button>
+
+<h2>💬 Messages</h2>
+
+<div style="margin-top:20px;background:#1f2937;padding:15px;border-radius:15px;">
+<h3>Sophia ❤️</h3>
+<p>Hey! Nice to meet you 😊</p>
+</div>
+
+<div style="margin-top:15px;background:#1f2937;padding:15px;border-radius:15px;">
+<h3>Luna 🎮</h3>
+<p>Ready to play a game? 😄</p>
+</div>
+
+<div style="margin-top:15px;background:#1f2937;padding:15px;border-radius:15px;">
+<h3>Emma 🎵</h3>
+<p>I love music! 🎶</p>
+</div>
+
+</div>
+
+</div>
+  <!-- ACCOUNT SCREEN -->
+<div id="account" class="screen hidden" style="background:#111827;padding:20px;">
+
+<div class="card">
+
+<button onclick="backHome()" style="background:none;border:none;color:white;font-size:22px;cursor:pointer;">
+← Back
+</button>
+
+<div style="text-align:center;margin-top:20px;">
+
+<img id="accountAvatar" src="" style="width:120px;height:120px;border-radius:50%;">
+
+<h2 id="accountName" style="margin-top:15px;">Player</h2>
+
+<p>Welcome to your profile ❤️</p>
+
+</div>
+
+</div>
+
+</div>
 </script>
 
 </body>
