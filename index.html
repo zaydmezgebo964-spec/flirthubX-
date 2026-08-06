@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FlirtHubX</title>
+<title>Dating Game</title>
 
 <style>
 
@@ -16,8 +16,8 @@ font-family:Arial,sans-serif;
 
 body{
 background:#111827;
-color:white;
 overflow:hidden;
+color:white;
 }
 
 .screen{
@@ -36,17 +36,48 @@ justify-content:center;
 display:none;
 }
 
+#start{
+background:
+linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.75)),
+url("grok_1785922772462.jpg");
+background-size:cover;
+background-position:center;
+}
+
+.startBtn{
+width:280px;
+height:56px;
+border:none;
+border-radius:999px;
+background:#e11d48;
+color:white;
+font-size:20px;
+font-weight:bold;
+cursor:pointer;
+margin-top:auto;
+margin-bottom:80px;
+}
+
 .card{
 width:90%;
 max-width:380px;
 background:#1f2937;
-padding:20px;
+padding:22px;
 border-radius:20px;
+}
+
+.backBtn{
+background:none;
+border:none;
+color:white;
+font-size:28px;
+cursor:pointer;
+margin-bottom:20px;
 }
 
 .input{
 width:100%;
-padding:14px;
+padding:15px;
 margin-top:15px;
 border:none;
 border-radius:12px;
@@ -68,49 +99,6 @@ font-weight:bold;
 cursor:pointer;
 }
 
-#home{
-background:
-linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.75)),
-url("grok_1785922772462.jpg");
-background-size:cover;
-background-position:center;
-}
-
-.startBtn{
-width:280px;
-height:56px;
-border:none;
-border-radius:999px;
-background:#e11d48;
-color:white;
-font-size:20px;
-font-weight:bold;
-margin-top:auto;
-margin-bottom:80px;
-cursor:pointer;
-}
-
-.bottomNav{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-height:65px;
-background:#111827;
-display:flex;
-justify-content:space-around;
-align-items:center;
-border-top:1px solid #222;
-}
-
-.navBtn{
-background:none;
-border:none;
-color:white;
-font-size:28px;
-cursor:pointer;
-}
-
 .avatarGrid{
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -122,14 +110,15 @@ margin-top:20px;
 width:100%;
 border-radius:15px;
 cursor:pointer;
+transition:.2s;
 }
 
 .matchCard{
 width:100%;
 max-width:350px;
 background:#1f2937;
-border-radius:18px;
 padding:15px;
+border-radius:18px;
 margin-bottom:20px;
 cursor:pointer;
 }
@@ -139,29 +128,55 @@ width:100%;
 border-radius:12px;
 }
 
+.bottomNav{
+position:fixed;
+left:0;
+bottom:0;
+width:100%;
+height:65px;
+background:#111827;
+display:flex;
+justify-content:space-around;
+align-items:center;
+}
+
+.navBtn{
+background:none;
+border:none;
+cursor:pointer;
+}
+
+.navBtn svg{
+width:28px;
+height:28px;
+stroke:white;
+fill:none;
+stroke-width:2;
+}
+
 </style>
+
 </head>
 
 <body>
 
-<div id="home" class="screen">
+<!-- START -->
 
-<h1 style="font-size:60px;">❤️ FlirtHubX</h1>
-
-<p style="margin-top:15px;">
-Every choice creates a new story.
-</p>
+<div id="start" class="screen">
 
 <button class="startBtn" onclick="showProfile()">
 START GAME
 </button>
 
 </div> <!-- PROFILE SCREEN -->
+
 <div id="profile" class="screen hidden">
 
 <div class="card">
 
-<h2 style="text-align:center;">Create Profile</h2>
+<button class="backBtn" onclick="backStart()">←</button>
+
+<h2>Create Profile</h2>
 
 <input id="username" class="input" placeholder="Username">
 
@@ -182,88 +197,55 @@ Choose Avatar →
 </div>
 
 <!-- AVATAR SCREEN -->
+
 <div id="avatar" class="screen hidden">
 
 <div class="card">
 
-<h2 style="text-align:center;">Choose Avatar</h2>
+<button class="backBtn" onclick="backProfile()">←</button>
+
+<h2>Choose Avatar</h2>
 
 <div class="avatarGrid">
 
 <img src="https://i.pravatar.cc/200?img=1" onclick="selectAvatar(this)">
+
 <img src="https://i.pravatar.cc/200?img=2" onclick="selectAvatar(this)">
+
 <img src="https://i.pravatar.cc/200?img=3" onclick="selectAvatar(this)">
+
 <img src="https://i.pravatar.cc/200?img=4" onclick="selectAvatar(this)">
 
-</div>
-
-<button class="nextBtn" onclick="openMatch()">
-Continue ❤️
-</button>
-
-</div>
-
-</div>
-
-<!-- MATCH SCREEN -->
-<div id="match" class="screen hidden" style="padding:20px;justify-content:flex-start;overflow:auto;">
-
-<h2 style="margin:40px 0 25px;">Choose Your Match ❤️</h2>
-
-<div class="matchCard" onclick="chooseGirl('Sophia')">
-<img src="https://picsum.photos/400/500?random=1">
-<h3>Sophia, 20</h3>
-<p>📚 Loves books • ☕ Coffee addict</p>
-</div>
-
-<div class="matchCard" onclick="chooseGirl('Luna')">
-<img src="https://picsum.photos/400/500?random=2">
-<h3>Luna, 22</h3>
-<p>🎮 Gamer • 😂 Funny</p>
-</div>
-
-<div class="matchCard" onclick="chooseGirl('Emma')">
-<img src="https://picsum.photos/400/500?random=3">
-<h3>Emma, 21</h3>
-<p>🎵 Music Lover • 💖 Sweet</p>
-</div>
-
-</div>
-
-<!-- GAME HOME -->
-<div id="gameHome" class="screen hidden">
-
-<img id="playerAvatar" src="" style="width:90px;height:90px;border-radius:50%;">
-
-<h2 id="playerName" style="margin-top:15px;">Player</h2>
-
-<p>Welcome back ❤️</p>
-
-<div class="bottomNav">
-
-<button class="navBtn">🏠</button>
-<button class="navBtn">💬</button>
-<button class="navBtn">❤️</button>
-<button class="navBtn">🎁</button>
-<button class="navBtn">👤</button>
-
-</div>
-
-</div> <script>
+</ <script>
 
 let selectedAvatar="";
 
 function showProfile(){
-document.getElementById("home").classList.add("hidden");
+document.getElementById("start").classList.add("hidden");
 document.getElementById("profile").classList.remove("hidden");
+}
+
+function backStart(){
+document.getElementById("profile").classList.add("hidden");
+document.getElementById("start").classList.remove("hidden");
+}
+
+function backProfile(){
+document.getElementById("avatar").classList.add("hidden");
+document.getElementById("profile").classList.remove("hidden");
+}
+
+function backAvatar(){
+document.getElementById("match").classList.add("hidden");
+document.getElementById("avatar").classList.remove("hidden");
 }
 
 function continueGame(){
 
-const username=document.getElementById("username").value.trim();
+let username=document.getElementById("username").value.trim();
 
-if(username===""){
-alert("Please enter your username.");
+if(username==""){
+alert("Enter your username");
 return;
 }
 
@@ -286,7 +268,7 @@ img.style.border="4px solid #e11d48";
 
 function openMatch(){
 
-if(selectedAvatar===""){
+if(selectedAvatar==""){
 alert("Please choose an avatar.");
 return;
 }
@@ -299,16 +281,4 @@ document.getElementById("match").classList.remove("hidden");
 function chooseGirl(name){
 
 document.getElementById("match").classList.add("hidden");
-document.getElementById("gameHome").classList.remove("hidden");
-
-document.getElementById("playerName").innerText=
-document.getElementById("username").value;
-
-document.getElementById("playerAvatar").src=selectedAvatar;
-
-}
-
-</script>
-
-</body>
-</html>
+document.getElementById("gameHome").classList.remove("hidden
