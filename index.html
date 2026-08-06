@@ -5,232 +5,315 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>FlirtHubX</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;}
-  body{background:#0f0f13;color:#fff;overflow:hidden;height:100vh;}
-  
-  /* Loading Screen */
-  #loading{
-    position:fixed;inset:0;background:#0f0f13;display:flex;flex-direction:column;
-    justify-content:center;align-items:center;z-index:9999;transition:opacity .5s;
-  }
-  .loader{width:60px;height:60px;border:4px solid #333;border-top:4px solid #e11d48;
-    border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .loading-text{font-size:18px;opacity:.8;letter-spacing:1px;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+body{background:#111827;color:white;overflow:hidden;height:100vh;}
 
-  /* Screens */
-  .screen{position:fixed;inset:0;display:none;flex-direction:column;padding-bottom:70px;overflow-y:auto;}
-  .screen.active{display:flex;}
+/* ========== NEW LOADING ANIMATION ========== */
+#loading{
+  position:fixed;inset:0;background:#0f0f13;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;z-index:9999;transition:opacity .6s;
+}
+.heart-loader{
+  width:80px;height:80px;position:relative;margin-bottom:25px;
+}
+.heart-loader:before,
+.heart-loader:after{
+  content:"";position:absolute;top:0;width:40px;height:64px;border-radius:40px 40px 0 0;
+  background:#e11d48;animation:heartbeat 1.2s infinite ease-in-out;
+}
+.heart-loader:before{left:40px;transform:rotate(-45deg);transform-origin:0 100%;}
+.heart-loader:after{left:0;transform:rotate(45deg);transform-origin:100% 100%;animation-delay:.15s;}
+@keyframes heartbeat{
+  0%,100%{transform:rotate(45deg) scale(1);}
+  15%{transform:rotate(45deg) scale(1.25);}
+  30%{transform:rotate(45deg) scale(1);}
+}
+.loading-text{font-size:22px;font-weight:bold;letter-spacing:2px;}
+.loading-text span{color:#e11d48;}
 
-  /* Bottom Nav - TikTok style */
-  .bottom-nav{
-    position:fixed;bottom:0;left:0;right:0;height:65px;background:#111;
-    display:flex;border-top:1px solid #222;z-index:100;
-  }
-  .nav-item{
-    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    color:#888;font-size:11px;cursor:pointer;transition:.2s;
-  }
-  .nav-item.active{color:#e11d48;}
-  .nav-item svg{width:24px;height:24px;margin-bottom:3px;}
+/* Screens */
+.screen{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;}
+.hidden{display:none!important;}
 
-  /* Home / Character Game */
-  .header{padding:20px 20px 10px;display:flex;justify-content:space-between;align-items:center;}
-  .header h1{font-size:22px;}
-  .header span{color:#e11d48;}
+/* Original Home */
+#home{
+  background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.75)),
+  url("https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800");
+  background-size:cover;background-position:center;
+}
+.logo{text-align:center;margin-bottom:auto;padding-top:80px;}
+.logo h1{font-size:52px;font-weight:bold;}
+.logo span{color:#e11d48;}
+.logo p{margin-top:10px;opacity:.85;font-size:16px;}
+.startBtn{
+  margin-bottom:70px;width:280px;height:55px;border:none;border-radius:999px;
+  background:#e11d48;color:white;font-size:18px;font-weight:bold;cursor:pointer;
+}
 
-  .character-area{padding:0 20px;text-align:center;}
-  .character-preview{
-    width:180px;height:260px;margin:15px auto;background:#1a1a22;border-radius:20px;
-    display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
-    border:3px solid #333;
-  }
-  .character-preview img{width:100%;height:100%;object-fit:cover;}
+/* Profile */
+#profile{background:#111827;padding:25px;}
+.card{width:100%;max-width:350px;background:#1f2937;padding:20px;border-radius:20px;}
+.card h2{text-align:center;margin-bottom:20px;}
+.input{
+  width:100%;padding:14px;margin-top:15px;border:none;border-radius:12px;
+  font-size:16px;background:#374151;color:white;
+}
+.nextBtn{
+  width:100%;padding:15px;margin-top:25px;border:none;border-radius:999px;
+  background:#e11d48;color:white;font-size:18px;font-weight:bold;cursor:pointer;
+}
 
-  .outfit-section{padding:10px 20px;}
-  .section-title{font-size:15px;margin-bottom:12px;opacity:.9;}
-  .options{display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;}
-  .option{
-    min-width:70px;height:70px;border-radius:14px;background:#1f1f28;
-    display:flex;align-items:center;justify-content:center;font-size:28px;
-    cursor:pointer;border:2px solid transparent;transition:.2s;
-  }
-  .option.selected{border-color:#e11d48;background:#2a1a22;}
+/* Avatar */
+#avatar{background:#111827;}
+#avatar .card{max-width:360px;}
 
-  .gift-btn{
-    margin:20px auto;display:block;width:90%;max-width:320px;padding:16px;
-    background:linear-gradient(135deg,#e11d48,#be123c);border:none;border-radius:50px;
-    color:white;font-size:17px;font-weight:600;cursor:pointer;
-  }
+/* Match */
+#match{background:#111827;padding:20px;overflow:auto;justify-content:flex-start;}
 
-  /* Characters List */
-  .characters-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:20px;}
-  .char-card{
-    background:#1a1a22;border-radius:18px;overflow:hidden;cursor:pointer;
-    border:2px solid transparent;transition:.2s;
-  }
-  .char-card:active{border-color:#e11d48;}
-  .char-card img{width:100%;height:160px;object-fit:cover;}
-  .char-info{padding:12px;}
-  .char-info h3{font-size:16px;margin-bottom:4px;}
-  .char-info p{font-size:12px;opacity:.7;}
+/* ========== AFTER MATCH - MAIN APP ========== */
+#mainApp{display:none;flex-direction:column;height:100vh;padding-bottom:70px;}
+#mainApp.active{display:flex;}
 
-  /* Messages / Chat */
-  .chat-list{padding:10px 15px;}
-  .chat-item{
-    display:flex;align-items:center;gap:15px;padding:14px 10px;
-    border-bottom:1px solid #1f1f28;cursor:pointer;
-  }
-  .chat-item img{width:52px;height:52px;border-radius:50%;object-fit:cover;}
-  .chat-info h4{font-size:16px;margin-bottom:3px;}
-  .chat-info p{font-size:13px;opacity:.6;}
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;height:65px;background:#111;
+  display:flex;border-top:1px solid #222;z-index:100;
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#888;font-size:11px;cursor:pointer;
+}
+.nav-item.active{color:#e11d48;}
+.nav-item svg{width:24px;height:24px;margin-bottom:3px;}
 
-  /* Chat Window */
-  #chatWindow{position:fixed;inset:0;background:#0f0f13;z-index:200;display:none;flex-direction:column;}
-  .chat-header{
-    padding:15px 15px 15px 10px;display:flex;align-items:center;gap:12px;
-    background:#111;border-bottom:1px solid #222;
-  }
-  .chat-header img{width:40px;height:40px;border-radius:50%;}
-  .messages{flex:1;overflow-y:auto;padding:20px 15px;display:flex;flex-direction:column;gap:12px;}
-  .msg{max-width:75%;padding:12px 16px;border-radius:18px;font-size:15px;line-height:1.4;}
-  .msg.them{background:#1f1f28;align-self:flex-start;border-bottom-left-radius:4px;}
-  .msg.me{background:#e11d48;align-self:flex-end;border-bottom-right-radius:4px;}
-  .msg .translated{display:block;font-size:12px;opacity:.7;margin-top:6px;border-top:1px solid rgba(255,255,255,.15);padding-top:5px;}
+/* Character Game (Home tab) */
+.game-header{padding:20px;text-align:center;}
+.character-preview{
+  width:170px;height:240px;margin:10px auto;background:#1a1a22;border-radius:18px;
+  overflow:hidden;border:3px solid #333;
+}
+.character-preview img{width:100%;height:100%;object-fit:cover;}
+.outfit-section{padding:8px 20px;}
+.section-title{font-size:14px;margin-bottom:8px;opacity:.9;}
+.options{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;}
+.option{
+  min-width:65px;height:65px;border-radius:14px;background:#1f1f28;
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  cursor:pointer;border:2px solid transparent;
+}
+.option.selected{border-color:#e11d48;background:#2a1a22;}
+.gift-btn{
+  margin:15px auto;display:block;width:90%;max-width:300px;padding:14px;
+  background:linear-gradient(135deg,#e11d48,#be123c);border:none;border-radius:50px;
+  color:white;font-size:16px;font-weight:600;cursor:pointer;
+}
+.characters-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px;}
+.char-card{background:#1a1a22;border-radius:16px;overflow:hidden;cursor:pointer;}
+.char-card img{width:100%;height:150px;object-fit:cover;}
+.char-info{padding:10px;}
+.char-info h3{font-size:15px;}
+.char-info p{font-size:12px;opacity:.7;}
 
-  .chat-input-area{
-    padding:12px 15px;background:#111;display:flex;gap:10px;align-items:center;
-    border-top:1px solid #222;
-  }
-  .chat-input{
-    flex:1;background:#1f1f28;border:none;border-radius:25px;padding:12px 18px;
-    color:white;font-size:15px;outline:none;
-  }
-  .send-btn{background:#e11d48;border:none;width:44px;height:44px;border-radius:50%;
-    color:white;font-size:18px;cursor:pointer;}
-  .translate-btn{
-    background:#222;border:none;color:#aaa;padding:8px 12px;border-radius:20px;
-    font-size:12px;cursor:pointer;
-  }
+/* Messages */
+.chat-list{padding:10px 15px;overflow-y:auto;flex:1;}
+.chat-item{display:flex;align-items:center;gap:14px;padding:12px 8px;border-bottom:1px solid #1f1f28;cursor:pointer;}
+.chat-item img{width:50px;height:50px;border-radius:50%;object-fit:cover;}
+.chat-info h4{font-size:15px;}
+.chat-info p{font-size:13px;opacity:.6;}
 
-  /* Account */
-  .profile-box{text-align:center;padding:30px 20px;}
-  .profile-box img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #e11d48;}
-  .stats{display:flex;justify-content:center;gap:40px;margin:25px 0;}
-  .stat strong{display:block;font-size:20px;}
-  .stat span{font-size:13px;opacity:.6;}
-  .menu-list{padding:0 20px;}
-  .menu-item{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:18px 0;border-bottom:1px solid #1f1f28;font-size:16px;
-  }
+/* Chat Window */
+#chatWindow{position:fixed;inset:0;background:#0f0f13;z-index:200;display:none;flex-direction:column;}
+.chat-header{padding:12px 10px;display:flex;align-items:center;gap:12px;background:#111;border-bottom:1px solid #222;}
+.chat-header img{width:40px;height:40px;border-radius:50%;}
+.messages{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px;}
+.msg{max-width:78%;padding:11px 15px;border-radius:18px;font-size:15px;line-height:1.4;}
+.msg.them{background:#1f1f28;align-self:flex-start;border-bottom-left-radius:4px;}
+.msg.me{background:#e11d48;align-self:flex-end;border-bottom-right-radius:4px;}
+.msg .translated{display:block;font-size:12px;opacity:.7;margin-top:5px;border-top:1px solid rgba(255,255,255,.15);padding-top:4px;}
+.chat-input-area{padding:10px 12px;background:#111;display:flex;gap:8px;align-items:center;border-top:1px solid #222;}
+.chat-input{flex:1;background:#1f1f28;border:none;border-radius:25px;padding:11px 16px;color:white;font-size:15px;outline:none;}
+.send-btn{background:#e11d48;border:none;width:42px;height:42px;border-radius:50%;color:white;font-size:17px;cursor:pointer;}
+.translate-btn{background:#222;border:none;color:#aaa;padding:7px 11px;border-radius:20px;font-size:12px;cursor:pointer;}
 
-  /* Modal */
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:300;}
-  .modal-content{background:#1a1a22;border-radius:20px;padding:25px;width:90%;max-width:340px;text-align:center;}
-  .gift-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0;}
-  .gift-item{background:#252530;border-radius:14px;padding:15px 5px;cursor:pointer;font-size:28px;}
-  .gift-item:active{background:#e11d48;}
+/* Account */
+.profile-box{text-align:center;padding:30px 20px;}
+.profile-box img{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #e11d48;}
+.stats{display:flex;justify-content:center;gap:35px;margin:20px 0;}
+.stat strong{display:block;font-size:18px;}
+.stat span{font-size:12px;opacity:.6;}
+.menu-list{padding:0 20px;}
+.menu-item{display:flex;justify-content:space-between;padding:16px 0;border-bottom:1px solid #1f1f28;font-size:15px;}
+
+/* Gift Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:300;}
+.modal-content{background:#1a1a22;border-radius:20px;padding:22px;width:90%;max-width:320px;text-align:center;}
+.gift-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0;}
+.gift-item{background:#252530;border-radius:14px;padding:14px 5px;cursor:pointer;font-size:28px;}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
+<!-- ========== NEW LOADING ========== -->
 <div id="loading">
-  <div class="loader"></div>
-  <div class="loading-text">FlirtHubX</div>
+  <div class="heart-loader"></div>
+  <div class="loading-text">Flirt<span>HubX</span></div>
 </div>
 
-<!-- HOME -->
-<div id="home" class="screen active">
-  <div class="header">
-    <h1>Create <span>Your Girl</span></h1>
+<!-- ========== ORIGINAL HOME ========== -->
+<div id="home" class="screen">
+  <div class="logo">
+    <h1>Flirt<span>HubX</span></h1>
+    <p>Every choice creates a new story.</p>
   </div>
+  <button class="startBtn" onclick="showProfile()">❤️ START GAME</button>
+</div>
 
-  <div class="character-area">
-    <div class="character-preview" id="charPreview">
-      <img id="baseChar" src="https://i.pravatar.cc/300?img=5" alt="character">
+<!-- ========== ORIGINAL PROFILE ========== -->
+<div id="profile" class="screen hidden">
+  <div class="card">
+    <div style="display:flex;align-items:center;margin-bottom:20px;">
+      <button onclick="goHome()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;margin-right:15px;">←</button>
+      <h2>Create Profile</h2>
     </div>
-    <p style="opacity:.7;font-size:14px;">Tap options below to customize</p>
-  </div>
-
-  <div class="outfit-section">
-    <div class="section-title">Hair</div>
-    <div class="options" id="hairOptions">
-      <div class="option selected" onclick="selectOption(this,'hair')">👩</div>
-      <div class="option" onclick="selectOption(this,'hair')">👧</div>
-      <div class="option" onclick="selectOption(this,'hair')">👱‍♀️</div>
-      <div class="option" onclick="selectOption(this,'hair')">👩‍🦰</div>
-    </div>
-  </div>
-
-  <div class="outfit-section">
-    <div class="section-title">Outfit</div>
-    <div class="options" id="outfitOptions">
-      <div class="option selected" onclick="selectOption(this,'outfit')">👗</div>
-      <div class="option" onclick="selectOption(this,'outfit')">👚</div>
-      <div class="option" onclick="selectOption(this,'outfit')">👙</div>
-      <div class="option" onclick="selectOption(this,'outfit')">👘</div>
-    </div>
-  </div>
-
-  <div class="outfit-section">
-    <div class="section-title">Accessories</div>
-    <div class="options">
-      <div class="option" onclick="selectOption(this,'acc')">🎀</div>
-      <div class="option" onclick="selectOption(this,'acc')">👓</div>
-      <div class="option" onclick="selectOption(this,'acc')">👑</div>
-      <div class="option" onclick="selectOption(this,'acc')">💎</div>
-    </div>
-  </div>
-
-  <button class="gift-btn" onclick="saveCharacter()">Save Character & Meet Girls ❤️</button>
-
-  <!-- After saving, show girls -->
-  <div id="girlsSection" style="display:none;">
-    <div class="header"><h1>Your Matches</h1></div>
-    <div class="characters-grid" id="girlsGrid"></div>
+    <input id="username" class="input" placeholder="Username">
+    <input id="age" class="input" type="number" placeholder="Age">
+    <select id="gender" class="input">
+      <option value="">Select Gender</option>
+      <option>Male</option>
+      <option>Female</option>
+      <option>Non-binary</option>
+    </select>
+    <button class="nextBtn" onclick="continueGame()">Choose Avatar →</button>
   </div>
 </div>
 
-<!-- MESSAGES -->
-<div id="messages" class="screen">
-  <div class="header"><h1>Messages</h1></div>
-  <div class="chat-list" id="chatList">
-    <!-- Will be filled by JS -->
+<!-- ========== ORIGINAL AVATAR ========== -->
+<div id="avatar" class="screen hidden" style="background:#111827;">
+  <div class="card">
+    <h2>Choose Your Avatar</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:20px;">
+      <img src="https://i.pravatar.cc/200?img=1" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
+      <img src="https://i.pravatar.cc/200?img=2" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
+      <img src="https://i.pravatar.cc/200?img=3" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
+      <img src="https://i.pravatar.cc/200?img=4" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
+    </div>
+    <button class="nextBtn" onclick="openMatch()">Continue ❤️</button>
   </div>
 </div>
 
-<!-- ACCOUNT -->
-<div id="account" class="screen">
-  <div class="profile-box">
-    <img id="myAvatar" src="https://i.pravatar.cc/150?img=12" alt="me">
-    <h2 style="margin-top:15px;" id="myName">Player</h2>
-    <p style="opacity:.6;">Level 1 · New User</p>
+<!-- ========== ORIGINAL MATCH ========== -->
+<div id="match" class="screen hidden" style="background:#111827;padding:20px;overflow:auto;justify-content:flex-start;">
+  <h2 style="margin-top:40px;margin-bottom:25px;font-size:28px;">Choose Your Match ❤️</h2>
+  <div onclick="chooseGirl('Sophia')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
+    <img src="https://picsum.photos/400/500?random=1" style="width:100%;border-radius:12px;">
+    <h3 style="margin-top:10px;">Sophia, 20</h3>
+    <p>📚 Loves books • ☕ Coffee addict</p>
   </div>
-  <div class="stats">
-    <div class="stat"><strong>3</strong><span>Matches</span></div>
-    <div class="stat"><strong>12</strong><span>Gifts Sent</span></div>
-    <div class="stat"><strong>5</strong><span>Chats</span></div>
+  <div onclick="chooseGirl('Luna')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
+    <img src="https://picsum.photos/400/500?random=2" style="width:100%;border-radius:12px;">
+    <h3 style="margin-top:10px;">Luna, 22</h3>
+    <p>🎮 Gamer • 😂 Funny</p>
   </div>
-  <div class="menu-list">
-    <div class="menu-item">Edit Profile <span>›</span></div>
-    <div class="menu-item">Language / Translation <span>›</span></div>
-    <div class="menu-item">Privacy <span>›</span></div>
-    <div class="menu-item">Help & Support <span>›</span></div>
-    <div class="menu-item" style="color:#e11d48;">Log Out</div>
+  <div onclick="chooseGirl('Emma')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;cursor:pointer;">
+    <img src="https://picsum.photos/400/500?random=3" style="width:100%;border-radius:12px;">
+    <h3 style="margin-top:10px;">Emma, 21</h3>
+    <p>🎵 Music Lover • 💖 Sweet</p>
   </div>
 </div>
 
-<!-- CHAT WINDOW -->
+<!-- ========== MAIN APP (after matching) ========== -->
+<div id="mainApp">
+  <!-- HOME TAB - Character + Outfits + Gifts -->
+  <div id="tab-home" class="tab-content" style="flex:1;overflow-y:auto;">
+    <div class="game-header">
+      <h2>Create & Dress Your Girl</h2>
+      <p style="opacity:.7;font-size:14px;">Customize then send gifts</p>
+    </div>
+    <div class="character-preview">
+      <img id="baseChar" src="https://i.pravatar.cc/300?img=5">
+    </div>
+    <div class="outfit-section">
+      <div class="section-title">Hair</div>
+      <div class="options">
+        <div class="option selected" onclick="selectOption(this)">👩</div>
+        <div class="option" onclick="selectOption(this)">👧</div>
+        <div class="option" onclick="selectOption(this)">👱‍♀️</div>
+        <div class="option" onclick="selectOption(this)">👩‍🦰</div>
+      </div>
+    </div>
+    <div class="outfit-section">
+      <div class="section-title">Outfit</div>
+      <div class="options">
+        <div class="option selected" onclick="selectOption(this)">👗</div>
+        <div class="option" onclick="selectOption(this)">👚</div>
+        <div class="option" onclick="selectOption(this)">👙</div>
+        <div class="option" onclick="selectOption(this)">👘</div>
+      </div>
+    </div>
+    <div class="outfit-section">
+      <div class="section-title">Accessories</div>
+      <div class="options">
+        <div class="option" onclick="selectOption(this)">🎀</div>
+        <div class="option" onclick="selectOption(this)">👓</div>
+        <div class="option" onclick="selectOption(this)">👑</div>
+        <div class="option" onclick="selectOption(this)">💎</div>
+      </div>
+    </div>
+    <button class="gift-btn" onclick="showGirls()">Save & Meet Girls ❤️</button>
+    <div id="girlsSection" style="display:none;">
+      <h3 style="text-align:center;margin:15px 0 10px;">Tap a girl to send gift</h3>
+      <div class="characters-grid" id="girlsGrid"></div>
+    </div>
+  </div>
+
+  <!-- MESSAGES TAB -->
+  <div id="tab-messages" class="tab-content" style="display:none;flex:1;overflow-y:auto;">
+    <div style="padding:20px 15px 10px;"><h2>Messages</h2></div>
+    <div class="chat-list" id="chatList"></div>
+  </div>
+
+  <!-- ACCOUNT TAB -->
+  <div id="tab-account" class="tab-content" style="display:none;flex:1;overflow-y:auto;">
+    <div class="profile-box">
+      <img id="myAvatar" src="https://i.pravatar.cc/150?img=12">
+      <h2 style="margin-top:12px;" id="myName">Player</h2>
+      <p style="opacity:.6;">Level 1</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><strong>3</strong><span>Matches</span></div>
+      <div class="stat"><strong>8</strong><span>Gifts</span></div>
+      <div class="stat"><strong>5</strong><span>Chats</span></div>
+    </div>
+    <div class="menu-list">
+      <div class="menu-item">Edit Profile <span>›</span></div>
+      <div class="menu-item">Translation Settings <span>›</span></div>
+      <div class="menu-item">Privacy <span>›</span></div>
+      <div class="menu-item" style="color:#e11d48;">Log Out</div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="showTab('home')">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Home
+    </div>
+    <div class="nav-item" onclick="showTab('messages')">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      Messages
+    </div>
+    <div class="nav-item" onclick="showTab('account')">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      Account
+    </div>
+  </div>
+</div>
+
+<!-- Chat Window -->
 <div id="chatWindow">
   <div class="chat-header">
     <button onclick="closeChat()" style="background:none;border:none;color:white;font-size:24px;padding:0 8px;">←</button>
-    <img id="chatAvatar" src="" alt="">
-    <div>
-      <h3 id="chatName" style="font-size:16px;"></h3>
-      <p style="font-size:12px;opacity:.6;">Online</p>
-    </div>
+    <img id="chatAvatar" src="">
+    <div><h3 id="chatName" style="font-size:16px;"></h3><p style="font-size:12px;opacity:.6;">Online</p></div>
   </div>
   <div class="messages" id="messagesBox"></div>
   <div class="chat-input-area">
@@ -240,10 +323,10 @@
   </div>
 </div>
 
-<!-- GIFT MODAL -->
+<!-- Gift Modal -->
 <div class="modal" id="giftModal">
   <div class="modal-content">
-    <h3>Send a Gift to <span id="giftTarget"></span></h3>
+    <h3>Send Gift to <span id="giftTarget"></span></h3>
     <div class="gift-grid">
       <div class="gift-item" onclick="sendGift('🌹')">🌹</div>
       <div class="gift-item" onclick="sendGift('🍫')">🍫</div>
@@ -252,181 +335,164 @@
       <div class="gift-item" onclick="sendGift('🎁')">🎁</div>
       <div class="gift-item" onclick="sendGift('💍')">💍</div>
     </div>
-    <button onclick="closeGift()" style="background:#333;border:none;color:white;padding:10px 30px;border-radius:20px;margin-top:10px;">Cancel</button>
-  </div>
-</div>
-
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <div class="nav-item active" onclick="showScreen('home')">
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-    Home
-  </div>
-  <div class="nav-item" onclick="showScreen('messages')">
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-    Messages
-  </div>
-  <div class="nav-item" onclick="showScreen('account')">
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-    Account
+    <button onclick="closeGift()" style="background:#333;border:none;color:white;padding:9px 28px;border-radius:20px;">Cancel</button>
   </div>
 </div>
 
 <script>
-  // ========== LOADING ==========
-  setTimeout(() => {
-    document.getElementById('loading').style.opacity = '0';
-    setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
-  }, 1800);
+// ===== LOADING =====
+setTimeout(()=>{
+  document.getElementById('loading').style.opacity='0';
+  setTimeout(()=>document.getElementById('loading').style.display='none',600);
+},2000);
 
-  // ========== NAVIGATION ==========
-  function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+// ===== ORIGINAL FLOW =====
+function showProfile(){
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("profile").classList.remove("hidden");
+}
+function goHome(){
+  document.getElementById("profile").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
+}
+function continueGame(){
+  const username=document.getElementById("username").value.trim();
+  const age=document.getElementById("age").value.trim();
+  if(username===""){alert("Please enter your username.");return;}
+  if(age===""||age<18){alert("Please enter a valid age (18+).");return;}
+  document.getElementById("myName").textContent=username;
+  document.getElementById("profile").classList.add("hidden");
+  document.getElementById("avatar").classList.remove("hidden");
+}
+let selectedAvatar="";
+function selectAvatar(img){
+  selectedAvatar=img.src;
+  document.querySelectorAll("#avatar img").forEach(i=>i.style.border="none");
+  img.style.border="4px solid #e11d48";
+  document.getElementById("myAvatar").src=img.src;
+}
+function openMatch(){
+  if(selectedAvatar===""){alert("Please choose an avatar.");return;}
+  document.getElementById("avatar").classList.add("hidden");
+  document.getElementById("match").classList.remove("hidden");
+}
+function chooseGirl(name){
+  alert("You matched with "+name+" ❤️");
+  // Go to main app
+  document.getElementById("match").classList.add("hidden");
+  document.getElementById("mainApp").classList.add("active");
+  document.getElementById("mainApp").style.display="flex";
+}
+
+// ===== MAIN APP TABS =====
+function showTab(tab){
+  document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
+  document.getElementById('tab-'+tab).style.display='block';
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+// ===== CHARACTER CUSTOMIZER =====
+function selectOption(el){
+  el.parentElement.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function showGirls(){
+  document.getElementById('girlsSection').style.display='block';
+  const girls=[
+    {name:'Sophia',age:20,img:'https://i.pravatar.cc/300?img=5',bio:'📚 Books & Coffee'},
+    {name:'Luna',age:22,img:'https://i.pravatar.cc/300?img=9',bio:'🎮 Gamer Girl'},
+    {name:'Emma',age:21,img:'https://i.pravatar.cc/300?img=10',bio:'🎵 Music Lover'},
+    {name:'Mia',age:19,img:'https://i.pravatar.cc/300?img=20',bio:'✈️ Travel'},
+    {name:'Ava',age:23,img:'https://i.pravatar.cc/300?img=25',bio:'🎨 Artist'},
+    {name:'Chloe',age:20,img:'https://i.pravatar.cc/300?img=32',bio:'☕ Cafe'}
+  ];
+  const grid=document.getElementById('girlsGrid');
+  grid.innerHTML='';
+  girls.forEach(g=>{
+    const card=document.createElement('div');
+    card.className='char-card';
+    card.innerHTML=`<img src="\( {g.img}"><div class="char-info"><h3> \){g.name}, \( {g.age}</h3><p> \){g.bio}</p></div>`;
+    card.onclick=()=>openGiftModal(g.name);
+    grid.appendChild(card);
+  });
+  updateChatList(girls);
+}
+
+// ===== GIFTS =====
+let currentGiftTarget='';
+function openGiftModal(name){
+  currentGiftTarget=name;
+  document.getElementById('giftTarget').textContent=name;
+  document.getElementById('giftModal').style.display='flex';
+}
+function closeGift(){document.getElementById('giftModal').style.display='none';}
+function sendGift(emoji){
+  alert(`You sent ${emoji} to ${currentGiftTarget}! She loved it ❤️`);
+  closeGift();
+}
+
+// ===== CHAT + TRANSLATION =====
+let translateOn=false;
+const chatHistory={};
+function updateChatList(girls){
+  const list=document.getElementById('chatList');
+  list.innerHTML='';
+  girls.forEach(g=>{
+    const item=document.createElement('div');
+    item.className='chat-item';
+    item.innerHTML=`<img src="\( {g.img}"><div class="chat-info"><h4> \){g.name}</h4><p>Tap to chat...</p></div>`;
+    item.onclick=()=>openChat(g);
+    list.appendChild(item);
+  });
+}
+function openChat(girl){
+  document.getElementById('chatWindow').style.display='flex';
+  document.getElementById('chatAvatar').src=girl.img;
+  document.getElementById('chatName').textContent=girl.name;
+  if(!chatHistory[girl.name]){
+    chatHistory[girl.name]=[{from:'them',text:'Hey! Nice to match with you 😊',trans:'Hey! Nice to match with you 😊'}];
   }
-
-  // ========== CHARACTER CUSTOMIZER ==========
-  function selectOption(el, type) {
-    el.parentElement.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
-  }
-
-  function saveCharacter() {
-    document.querySelector('.character-area').style.display = 'none';
-    document.querySelectorAll('.outfit-section').forEach(s => s.style.display = 'none');
-    document.querySelector('.gift-btn').style.display = 'none';
-    document.getElementById('girlsSection').style.display = 'block';
-
-    // Generate girls
-    const girls = [
-      {name:'Sophia', age:20, img:'https://i.pravatar.cc/300?img=5', bio:'📚 Books & Coffee'},
-      {name:'Luna', age:22, img:'https://i.pravatar.cc/300?img=9', bio:'🎮 Gamer Girl'},
-      {name:'Emma', age:21, img:'https://i.pravatar.cc/300?img=10', bio:'🎵 Music Lover'},
-      {name:'Mia', age:19, img:'https://i.pravatar.cc/300?img=20', bio:'✈️ Travel Addict'},
-      {name:'Ava', age:23, img:'https://i.pravatar.cc/300?img=25', bio:'🎨 Artist'},
-      {name:'Chloe', age:20, img:'https://i.pravatar.cc/300?img=32', bio:'☕ Cafe Hopper'}
+  renderMessages(girl.name);
+}
+function closeChat(){document.getElementById('chatWindow').style.display='none';}
+function renderMessages(name){
+  const box=document.getElementById('messagesBox');
+  box.innerHTML='';
+  chatHistory[name].forEach(m=>{
+    const div=document.createElement('div');
+    div.className=`msg ${m.from}`;
+    div.innerHTML=m.text+(translateOn&&m.trans!==m.text?`<span class="translated">${m.trans}</span>`:'');
+    box.appendChild(div);
+  });
+  box.scrollTop=box.scrollHeight;
+}
+function sendMessage(){
+  const input=document.getElementById('msgInput');
+  const text=input.value.trim();
+  if(!text)return;
+  const name=document.getElementById('chatName').textContent;
+  chatHistory[name].push({from:'me',text:text,trans:text});
+  input.value='';
+  renderMessages(name);
+  setTimeout(()=>{
+    const replies=[
+      {text:'Haha you’re sweet 😍',trans:'Haha you’re sweet 😍'},
+      {text:'I like talking with you!',trans:'I like talking with you!'},
+      {text:'Want to send me a gift? 🎁',trans:'Want to send me a gift? 🎁'},
+      {text:'Tell me more\~',trans:'Tell me more\~'}
     ];
-
-    const grid = document.getElementById('girlsGrid');
-    grid.innerHTML = '';
-    girls.forEach(g => {
-      const card = document.createElement('div');
-      card.className = 'char-card';
-      card.innerHTML = `
-        <img src="\( {g.img}" alt=" \){g.name}">
-        <div class="char-info">
-          <h3>${g.name}, ${g.age}</h3>
-          <p>${g.bio}</p>
-        </div>
-      `;
-      card.onclick = () => openGiftModal(g.name);
-      grid.appendChild(card);
-    });
-
-    // Also add them to Messages
-    updateChatList(girls);
-  }
-
-  // ========== GIFTS ==========
-  let currentGiftTarget = '';
-  function openGiftModal(name) {
-    currentGiftTarget = name;
-    document.getElementById('giftTarget').textContent = name;
-    document.getElementById('giftModal').style.display = 'flex';
-  }
-  function closeGift() {
-    document.getElementById('giftModal').style.display = 'none';
-  }
-  function sendGift(emoji) {
-    alert(`You sent ${emoji} to ${currentGiftTarget}! She loves it ❤️`);
-    closeGift();
-  }
-
-  // ========== MESSAGES & CHAT ==========
-  let translateOn = false;
-  const chatHistory = {};
-
-  function updateChatList(girls) {
-    const list = document.getElementById('chatList');
-    list.innerHTML = '';
-    girls.forEach(g => {
-      const item = document.createElement('div');
-      item.className = 'chat-item';
-      item.innerHTML = `
-        <img src="${g.img}">
-        <div class="chat-info">
-          <h4>${g.name}</h4>
-          <p>Tap to start chatting...</p>
-        </div>
-      `;
-      item.onclick = () => openChat(g);
-      list.appendChild(item);
-    });
-  }
-
-  function openChat(girl) {
-    document.getElementById('chatWindow').style.display = 'flex';
-    document.getElementById('chatAvatar').src = girl.img;
-    document.getElementById('chatName').textContent = girl.name;
-    document.getElementById('messagesBox').innerHTML = '';
-
-    // Load history or start new
-    if (!chatHistory[girl.name]) {
-      chatHistory[girl.name] = [
-        {from:'them', text:'Hey! I saw your profile 😊', trans:'Hey! I saw your profile 😊'}
-      ];
-    }
-    renderMessages(girl.name);
-  }
-
-  function closeChat() {
-    document.getElementById('chatWindow').style.display = 'none';
-  }
-
-  function renderMessages(name) {
-    const box = document.getElementById('messagesBox');
-    box.innerHTML = '';
-    chatHistory[name].forEach(m => {
-      const div = document.createElement('div');
-      div.className = `msg ${m.from}`;
-      div.innerHTML = m.text + (translateOn && m.trans !== m.text ? `<span class="translated">${m.trans}</span>` : '');
-      box.appendChild(div);
-    });
-    box.scrollTop = box.scrollHeight;
-  }
-
-  function sendMessage() {
-    const input = document.getElementById('msgInput');
-    const text = input.value.trim();
-    if (!text) return;
-    const name = document.getElementById('chatName').textContent;
-
-    chatHistory[name].push({from:'me', text:text, trans:text});
-    input.value = '';
+    const r=replies[Math.floor(Math.random()*replies.length)];
+    chatHistory[name].push({from:'them',...r});
     renderMessages(name);
-
-    // Fake reply after 1s
-    setTimeout(() => {
-      const replies = [
-        {text:'Haha you’re cute 😍', trans:'Haha you’re cute 😍'},
-        {text:'I like that!', trans:'I like that!'},
-        {text:'Tell me more about yourself\~', trans:'Tell me more about yourself\~'},
-        {text:'Want to send me a gift? 🎁', trans:'Want to send me a gift? 🎁'}
-      ];
-      const reply = replies[Math.floor(Math.random()*replies.length)];
-      chatHistory[name].push({from:'them', ...reply});
-      renderMessages(name);
-    }, 900);
-  }
-
-  function toggleTranslate() {
-    translateOn = !translateOn;
-    const name = document.getElementById('chatName').textContent;
-    if (name) renderMessages(name);
-    document.querySelector('.translate-btn').textContent = translateOn ? '🌐 ON' : '🌐 Translate';
-  }
+  },800);
+}
+function toggleTranslate(){
+  translateOn=!translateOn;
+  const name=document.getElementById('chatName').textContent;
+  if(name)renderMessages(name);
+  document.querySelector('.translate-btn').textContent=translateOn?'🌐 ON':'🌐 Translate';
+}
 </script>
 </body>
 </html>
