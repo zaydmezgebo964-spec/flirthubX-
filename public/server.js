@@ -1,40 +1,19 @@
-const express = require("express");
-const http = require("http");
-const path = require("path");
-const { Server } = require("socket.io");
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
-
-const PORT = process.env.PORT || 3000;
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Serve the game
-app.use(express.static(path.join(__dirname, "public")));
-
-// --------------------------------------------------
-// TEMPORARY GAME DATABASE
-// --------------------------------------------------
-
-const users = new Map();
-const rooms = new Map();
-
-const MAX_ROOM_USERS = 10;
-
-// Create rooms
-for (let i = 1; i <= 100; i++) {
-    rooms.set(i, new Set());
-}
-
-// --------------------------------------------------
-// HELPERS
-// --------------------------------------------------
-
-function createUser(id, data = {}) {
-    return {
+{
+  "name": "flirthubx",
+  "version": "1.0.0",
+  "description": "FlirtHubX dating game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "4.21.2",
+    "socket.io": "4.8.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}    return {
         id,
         name: data.name || "Player",
         age: Number(data.age) || 18,
