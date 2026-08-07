@@ -12,558 +12,653 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Your website files are inside public
+// Serve the FlirtHubX frontend
 app.use(express.static(path.join(__dirname, "public")));
 
-const users = new Map();
+// Basic health check
+app.get("/api/status", (req, res) => {
+    res.json({
+        success: true,
+        app: "FlirtHubX",
+        status: "online"
+    });
+});
+
+// Store active rooms in memory.
+// This is the first multiplayer foundation.
+// Later we will connect a real database.
 const rooms = new Map();
 
-const MAX_ROOM_USERS = 10;
-
-// Create rooms
-for (let i = 1; i <= 100; i++) {
-  rooms.set(i, new Set());
-}
-
-// ================================
-// USER
-// ================================
-
-function createUser(id, data = {}) {
-  return {
-    id,
-    name: data.name || "Player",
-    age: Number(data.age) || 18,
-    photo: data.photo || "",
-
-    hearts: Number(data.hearts) || 50,
-    money: Number(data.money) || 10,
-
-    kissPoints: Number(data.kissPoints) || 0,
-    songPoints: Number(data.songPoints) || 0,
-
-    league: data.league || "Bronze",
-
-    online: true,
-    lastSeen: Date.now(),
-
-    streak: 0,
-    streakStatus: "black",
-
-    language: data.language || "English",
-
-    gifts: [],
-    friends: [],
-    blocked: [],
-    emotions: [],
-
-    roomId: null
-  };
-}
-
-function publicUser(user) {
-  if (!user) return null;
-
-  return {
-    id: user.id,
-    name: user.name,
-    age: user.age,
-    photo: user.photo,
-
-    hearts: user.hearts,
-    money: user.money,
-
-    kissPoints: user.kissPoints,
-    songPoints: user.songPoints,
-
-    league: user.league,
-
-    online: user.online,
-    lastSeen: user.lastSeen,
-
-    streak: user.streak,
-    streakStatus: user.streakStatus,
-
-    language: user.language,
-
-    roomId: user.roomId
-  };
-}
-
-// ================================
-// HEALTH
-// ================================
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    app: "FlirtHubX",
-    status: "online"
-  });
-});
-
-// ================================
-// CREATE USER
-// ================================
-
-app.post("/api/users", (req, res) => {
-  const id =
-    req.body.id ||
-    `user_${Date.now()}_${Math.random()
-      .toString(36)
-      .slice(2, 8)}`;
-
-  if (users.has(id)) {
-    return res.json({
-      success: true,
-      user: publicUser(users.get(id))
-    });
-  }
-
-  const user = createUser(id, req.body);
-
-  users.set(id, user);
-
-  res.json({
-    success: true,
-    user: publicUser(user)
-  });
-});
-
-// ================================
-// GET USER
-// ================================
-
-app.get("/api/users/:id", (req, res) => {
-  const user = users.get(req.params.id);
-
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      error: "User not found"
-    });
-  }
-
-  res.json({
-    success: true,
-    user: publicUser(user)
-  });
-});
-
-// ================================
-// SEND HEARTS
-// ================================
-
-app.post("/api/hearts/send", (req, res) => {
-  const { fromId, toId, amount } = req.body;
-
-  const sender = users.get(fromId);
-  const receiver = users.get(toId);
-
-  const value = Number(amount);
-
-  if (!sender || !receiver) {
-    return res.status(404).json({
-      success: false,
-      error: "User not found"
-    });
-  }
-
-  if (!Number.isFinite(value) || value <= 0) {
-    return res.status(400).json({
-      success: false,
-      error: "Invalid amount"
-    });
-  }
-
-  if (sender.hearts < value) {
-    return res.status(400).json({
-      success: false,
-      error: "Not enough hearts"
-    });
-  }
-
-  sender.hearts -= value;
-  receiver.hearts += value;
-
-  io.to(`user:${toId}`).emit("heartsReceived", {
-    from: publicUser(sender),
-    amount: value
-  });
-
-  res.json({
-    success: true,
-    sender: publicUser(sender),
-    receiver: publicUser(receiver)
-  });
-});
-
-// ================================
-// ROOMS
-// ================================
-
-app.get("/api/rooms", (req, res) => {
-  const result = [];
-
-  for (const [id, members] of rooms.entries()) {
-    result.push({
-      id,
-      people: members.size,
-      capacity: MAX_ROOM_USERS,
-      full: members.size >= MAX_ROOM_USERS
-    });
-  }
-
-  res.json({
-    success: true,
-    rooms: result
-  });
-});
-
-// ================================
-// FIND AVAILABLE ROOM
-// ================================
-
-function findAvailableRoom() {
-  for (const [id, members] of rooms.entries()) {
-    if (members.size < MAX_ROOM_USERS) {
-      return id;
-    }
-  }
-
-  return null;
-}
-
-// ================================
-// JOIN ROOM
-// ================================
-
-app.post("/api/rooms/join", (req, res) => {
-  const { userId, roomId } = req.body;
-
-  const user = users.get(userId);
-
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      error: "User not found"
-    });
-  }
-
-  const targetRoom =
-    roomId ? Number(roomId) : findAvailableRoom();
-
-  if (!targetRoom || !rooms.has(targetRoom)) {
-    return res.status(404).json({
-      success: false,
-      error: "No available room"
-    });
-  }
-
-  const room = rooms.get(targetRoom);
-
-  if (room.size >= MAX_ROOM_USERS) {
-    return res.status(409).json({
-      success: false,
-      error: "Room is full"
-    });
-  }
-
-  if (user.roomId && rooms.has(user.roomId)) {
-    rooms.get(user.roomId).delete(userId);
-  }
-
-  room.add(userId);
-  user.roomId = targetRoom;
-
-  res.json({
-    success: true,
-    roomId: targetRoom,
-    user: publicUser(user)
-  });
-});
-
-// ================================
-// LEAVE ROOM
-// ================================
-
-app.post("/api/rooms/leave", (req, res) => {
-  const { userId } = req.body;
-
-  const user = users.get(userId);
-
-  if (!user) {
-    return res.status(404).json({
-      success: false
-    });
-  }
-
-  if (user.roomId && rooms.has(user.roomId)) {
-    rooms.get(user.roomId).delete(userId);
-  }
-
-  user.roomId = null;
-
-  res.json({
-    success: true
-  });
-});
-
-// ================================
-// KISS POINTS
-// ================================
-
-function getLeague(kissPoints) {
-  if (kissPoints >= 10000) return "Diamond";
-  if (kissPoints >= 5000) return "Platinum";
-  if (kissPoints >= 2500) return "Gold";
-  if (kissPoints >= 1000) return "Silver";
-  return "Bronze";
-}
-
-app.post("/api/kiss/points", (req, res) => {
-  const { userId, points } = req.body;
-
-  const user = users.get(userId);
-
-  if (!user) {
-    return res.status(404).json({
-      success: false
-    });
-  }
-
-  const value = Math.max(0, Number(points) || 0);
-
-  user.kissPoints += value;
-  user.league = getLeague(user.kissPoints);
-
-  res.json({
-    success: true,
-    kissPoints: user.kissPoints,
-    league: user.league
-  });
-});
-
-// ================================
-// GIFTS
-// ================================
-
-app.post("/api/gifts/send", (req, res) => {
-  const { fromId, toId, gift } = req.body;
-
-  const sender = users.get(fromId);
-  const receiver = users.get(toId);
-
-  if (!sender || !receiver) {
-    return res.status(404).json({
-      success: false
-    });
-  }
-
-  receiver.gifts.push({
-    fromId,
-    gift,
-    time: Date.now()
-  });
-
-  io.to(`user:${toId}`).emit("giftReceived", {
-    from: publicUser(sender),
-    gift
-  });
-
-  res.json({
-    success: true
-  });
-});
-
-// ================================
-// SOCKET.IO
-// ================================
-
-io.on("connection", socket => {
-  console.log("Connected:", socket.id);
-
-  socket.on("register", userId => {
-    if (!userId) return;
-
-    let user = users.get(userId);
-
-    if (!user) {
-      user = createUser(userId);
-      users.set(userId, user);
+function getRoom(roomNumber) {
+    if (!rooms.has(roomNumber)) {
+        rooms.set(roomNumber, {
+            users: new Map()
+        });
     }
 
-    user.online = true;
-    user.lastSeen = Date.now();
+    return rooms.get(roomNumber);
+}
 
-    socket.userId = userId;
+function getRoomUsers(roomNumber) {
+    const room = getRoom(roomNumber);
 
-    socket.join(`user:${userId}`);
+    return Array.from(room.users.values());
+}
 
-    io.emit("userStatus", {
-      userId,
-      online: true,
-      lastSeen: user.lastSeen
+
+// ============================================================
+// SOCKET.IO — REAL-TIME ROOM SYSTEM
+// ============================================================
+
+io.on("connection", (socket) => {
+
+    console.log("Player connected:", socket.id);
+
+    let currentRoom = null;
+    let currentUser = null;
+
+
+    // --------------------------------------------------------
+    // JOIN ROOM
+    // --------------------------------------------------------
+
+    socket.on("joinRoom", (data = {}) => {
+
+        const requestedRoom =
+            Number(data.room) || 1;
+
+        const roomNumber =
+            Math.max(1, Math.min(9999, requestedRoom));
+
+        const room = getRoom(roomNumber);
+
+        // Maximum 10 players per room
+        if (room.users.size >= 10) {
+
+            socket.emit("roomFull", {
+                room: roomNumber
+            });
+
+            return;
+        }
+
+
+        // Leave previous room first
+        if (currentRoom) {
+
+            socket.leave(
+                `room-${currentRoom}`
+            );
+
+            if (rooms.has(currentRoom)) {
+
+                rooms
+                    .get(currentRoom)
+                    .users
+                    .delete(socket.id);
+
+            }
+        }
+
+
+        currentRoom = roomNumber;
+
+        currentUser = {
+            socketId: socket.id,
+
+            id:
+                String(
+                    data.id ||
+                    socket.id
+                ),
+
+            name:
+                String(
+                    data.name ||
+                    "Player"
+                ).slice(0, 20),
+
+            gender:
+                data.gender === "Female"
+                    ? "Female"
+                    : "Male",
+
+            avatar:
+                String(
+                    data.avatar ||
+                    ""
+                ).slice(0, 500),
+
+            online: true,
+
+            joinedAt: Date.now()
+        };
+
+
+        room.users.set(
+            socket.id,
+            currentUser
+        );
+
+        socket.join(
+            `room-${currentRoom}`
+        );
+
+
+        // Send room information to this player
+        socket.emit("roomJoined", {
+
+            room: currentRoom,
+
+            users:
+                getRoomUsers(
+                    currentRoom
+                )
+
+        });
+
+
+        // Tell everyone else
+        socket.to(
+            `room-${currentRoom}`
+        ).emit(
+            "playerJoined",
+            currentUser
+        );
+
+
+        // Update player count
+        io.to(
+            `room-${currentRoom}`
+        ).emit(
+            "roomUsers",
+            getRoomUsers(
+                currentRoom
+            )
+        );
+
+
+        console.log(
+            `${currentUser.name} joined room ${currentRoom}`
+        );
+
     });
-  });
 
-  socket.on("joinRoom", roomId => {
-    if (!socket.userId) return;
 
-    const user = users.get(socket.userId);
-    const id = Number(roomId);
+    // --------------------------------------------------------
+    // CHAT MESSAGE
+    // --------------------------------------------------------
 
-    if (!user || !rooms.has(id)) return;
+    socket.on("sendMessage", (data = {}) => {
 
-    const room = rooms.get(id);
+        if (!currentRoom || !currentUser) {
+            return;
+        }
 
-    if (room.size >= MAX_ROOM_USERS) {
-      socket.emit("roomFull", {
-        roomId: id
-      });
 
-      return;
-    }
+        const text =
+            String(
+                data.text || ""
+            ).trim();
 
-    if (user.roomId && rooms.has(user.roomId)) {
-      rooms.get(user.roomId).delete(socket.userId);
 
-      socket.leave(`room:${user.roomId}`);
-    }
+        if (!text) {
+            return;
+        }
 
-    room.add(socket.userId);
-    user.roomId = id;
 
-    socket.join(`room:${id}`);
+        if (text.length > 500) {
+            return;
+        }
 
-    io.to(`room:${id}`).emit("roomUsers", {
-      roomId: id,
-      users: [...room]
-        .map(id => publicUser(users.get(id)))
-        .filter(Boolean)
-    });
-  });
 
-  socket.on("message", data => {
-    if (!socket.userId) return;
+        const message = {
 
-    const user = users.get(socket.userId);
+            id:
+                `${Date.now()}-${socket.id}`,
 
-    if (!user || !user.roomId) return;
+            room:
+                currentRoom,
 
-    const message = {
-      id: Date.now(),
-      senderId: socket.userId,
-      senderName: user.name,
-      text: String(data.text || "").slice(0, 2000),
-      time: Date.now()
-    };
+            userId:
+                currentUser.id,
 
-    io.to(`room:${user.roomId}`).emit(
-      "message",
-      message
-    );
-  });
+            name:
+                currentUser.name,
 
-  socket.on("typing", () => {
-    const user = users.get(socket.userId);
+            gender:
+                currentUser.gender,
 
-    if (!user || !user.roomId) return;
+            avatar:
+                currentUser.avatar,
 
-    socket.to(`room:${user.roomId}`).emit(
-      "typing",
-      {
-        userId: socket.userId,
-        name: user.name
-      }
-    );
-  });
+            text:
+                text,
 
-  socket.on("disconnect", () => {
-    if (!socket.userId) return;
+            timestamp:
+                Date.now()
 
-    const user = users.get(socket.userId);
+        };
 
-    if (!user) return;
 
-    user.online = false;
-    user.lastSeen = Date.now();
+        // Send to everyone in the same room
+        io.to(
+            `room-${currentRoom}`
+        ).emit(
+            "newMessage",
+            message
+        );
 
-    io.emit("userStatus", {
-      userId: socket.userId,
-      online: false,
-      lastSeen: user.lastSeen
     });
 
-    console.log(
-      "Disconnected:",
-      socket.userId
-    );
-  });
+
+    // --------------------------------------------------------
+    // CHANGE ROOM
+    // --------------------------------------------------------
+
+    socket.on("changeRoom", (data = {}) => {
+
+        const newRoom =
+            Number(data.room);
+
+
+        if (
+            !Number.isInteger(newRoom) ||
+            newRoom < 1
+        ) {
+            return;
+        }
+
+
+        const targetRoom =
+            getRoom(newRoom);
+
+
+        // Don't allow entering a full room
+        if (
+            targetRoom.users.size >= 10 &&
+            currentRoom !== newRoom
+        ) {
+
+            socket.emit(
+                "roomFull",
+                {
+                    room: newRoom
+                }
+            );
+
+            return;
+        }
+
+
+        // Remove player from old room
+        if (currentRoom) {
+
+            socket.leave(
+                `room-${currentRoom}`
+            );
+
+
+            const oldRoom =
+                rooms.get(currentRoom);
+
+
+            if (oldRoom) {
+
+                oldRoom.users.delete(
+                    socket.id
+                );
+
+
+                io.to(
+                    `room-${currentRoom}`
+                ).emit(
+                    "playerLeft",
+                    {
+                        socketId:
+                            socket.id
+                    }
+                );
+
+
+                io.to(
+                    `room-${currentRoom}`
+                ).emit(
+                    "roomUsers",
+                    getRoomUsers(
+                        currentRoom
+                    )
+                );
+
+            }
+
+        }
+
+
+        currentRoom =
+            newRoom;
+
+
+        socket.join(
+            `room-${currentRoom}`
+        );
+
+
+        if (!currentUser) {
+            return;
+        }
+
+
+        currentUser.online = true;
+
+
+        getRoom(
+            currentRoom
+        ).users.set(
+            socket.id,
+            currentUser
+        );
+
+
+        socket.emit(
+            "roomJoined",
+            {
+                room:
+                    currentRoom,
+
+                users:
+                    getRoomUsers(
+                        currentRoom
+                    )
+            }
+        );
+
+
+        socket.to(
+            `room-${currentRoom}`
+        ).emit(
+            "playerJoined",
+            currentUser
+        );
+
+
+        io.to(
+            `room-${currentRoom}`
+        ).emit(
+            "roomUsers",
+            getRoomUsers(
+                currentRoom
+            )
+        );
+
+    });
+
+
+    // --------------------------------------------------------
+    // KISS REQUEST
+    // --------------------------------------------------------
+
+    socket.on("kissRequest", (data = {}) => {
+
+        if (!currentRoom) {
+            return;
+        }
+
+
+        const targetSocket =
+            String(
+                data.targetSocketId || ""
+            );
+
+
+        if (!targetSocket) {
+            return;
+        }
+
+
+        io.to(
+            targetSocket
+        ).emit(
+            "kissRequest",
+            {
+                fromSocketId:
+                    socket.id,
+
+                fromName:
+                    currentUser
+                        ? currentUser.name
+                        : "Player",
+
+                timeout:
+                    10000
+            }
+        );
+
+    });
+
+
+    // --------------------------------------------------------
+    // KISS RESPONSE
+    // --------------------------------------------------------
+
+    socket.on("kissResponse", (data = {}) => {
+
+        const target =
+            String(
+                data.targetSocketId || ""
+            );
+
+
+        if (!target) {
+            return;
+        }
+
+
+        io.to(
+            target
+        ).emit(
+            "kissResponse",
+            {
+                accepted:
+                    Boolean(
+                        data.accepted
+                    ),
+
+                fromSocketId:
+                    socket.id,
+
+                fromName:
+                    currentUser
+                        ? currentUser.name
+                        : "Player"
+            }
+        );
+
+    });
+
+
+    // --------------------------------------------------------
+    // BLOCK PLAYER
+    // --------------------------------------------------------
+
+    socket.on("blockPlayer", (data = {}) => {
+
+        const targetSocket =
+            String(
+                data.targetSocketId || ""
+            );
+
+
+        if (!targetSocket) {
+            return;
+        }
+
+
+        socket.emit(
+            "playerBlocked",
+            {
+                socketId:
+                    targetSocket
+            }
+        );
+
+
+        /*
+         * The blocked player is not removed
+         * from the entire room for everyone.
+         *
+         * The real database block list will later
+         * control exactly what each person can see.
+         */
+    });
+
+
+    // --------------------------------------------------------
+    // TYPING
+    // --------------------------------------------------------
+
+    socket.on("typing", () => {
+
+        if (!currentRoom) {
+            return;
+        }
+
+
+        socket.to(
+            `room-${currentRoom}`
+        ).emit(
+            "playerTyping",
+            {
+                socketId:
+                    socket.id,
+
+                name:
+                    currentUser
+                        ? currentUser.name
+                        : "Player"
+            }
+        );
+
+    });
+
+
+    socket.on("stopTyping", () => {
+
+        if (!currentRoom) {
+            return;
+        }
+
+
+        socket.to(
+            `room-${currentRoom}`
+        ).emit(
+            "playerStoppedTyping",
+            {
+                socketId:
+                    socket.id
+            }
+        );
+
+    });
+
+
+    // --------------------------------------------------------
+    // DISCONNECT
+    // --------------------------------------------------------
+
+    socket.on("disconnect", () => {
+
+        console.log(
+            "Player disconnected:",
+            socket.id
+        );
+
+
+        if (!currentRoom) {
+            return;
+        }
+
+
+        const room =
+            rooms.get(
+                currentRoom
+            );
+
+
+        if (room) {
+
+            room.users.delete(
+                socket.id
+            );
+
+
+            io.to(
+                `room-${currentRoom}`
+            ).emit(
+                "playerLeft",
+                {
+                    socketId:
+                        socket.id
+                }
+            );
+
+
+            io.to(
+                `room-${currentRoom}`
+            ).emit(
+                "roomUsers",
+                getRoomUsers(
+                    currentRoom
+                )
+            );
+
+
+            // Remove empty rooms from memory
+            if (
+                room.users.size === 0
+            ) {
+
+                rooms.delete(
+                    currentRoom
+                );
+
+            }
+
+        }
+
+    });
+
 });
 
-// ================================
-// STREAK CHECK
-// ================================
 
-setInterval(() => {
-  const now = Date.now();
-
-  for (const user of users.values()) {
-    if (user.streak > 0) {
-      const hours =
-        (now - user.lastSeen) /
-        (1000 * 60 * 60);
-
-      if (hours >= 24) {
-        user.streakStatus = "black";
-      }
-    }
-  }
-}, 60000);
-
-// ================================
-// TRANSLATION
-// ================================
-
-app.post("/api/translate", async (req, res) => {
-  const { text, targetLanguage } = req.body;
-
-  if (!text) {
-    return res.status(400).json({
-      success: false,
-      error: "Text required"
-    });
-  }
-
-  res.json({
-    success: true,
-    original: text,
-    translated: text,
-    targetLanguage: targetLanguage || "English"
-  });
-});
-
-// ================================
-// WEBSITE
-// ================================
+// ============================================================
+// FALLBACK — SEND INDEX.HTML
+// ============================================================
 
 app.get("*", (req, res) => {
-  res.sendFile(
-    path.join(
-      __dirname,
-      "public",
-      "index.html"
-    )
-  );
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            "public",
+            "index.html"
+        )
+    );
+
 });
 
-// ================================
-// START
-// ================================
 
-server.listen(PORT, () => {
-  console.log(
-    `FlirtHubX server running on port ${PORT}`
-  );
-});
+// ============================================================
+// START SERVER
+// ============================================================
+
+server.listen(
+    PORT,
+    () => {
+
+        console.log(
+            `FlirtHubX server running on port ${PORT}`
+        );
+
+    }
+);
