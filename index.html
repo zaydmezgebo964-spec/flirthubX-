@@ -1,498 +1,1154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>FlirtHubX</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-body{background:#111827;color:white;overflow:hidden;height:100vh;}
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-/* ========== NEW LOADING ANIMATION ========== */
-#loading{
-  position:fixed;inset:0;background:#0f0f13;display:flex;flex-direction:column;
-  justify-content:center;align-items:center;z-index:9999;transition:opacity .6s;
-}
-.heart-loader{
-  width:80px;height:80px;position:relative;margin-bottom:25px;
-}
-.heart-loader:before,
-.heart-loader:after{
-  content:"";position:absolute;top:0;width:40px;height:64px;border-radius:40px 40px 0 0;
-  background:#e11d48;animation:heartbeat 1.2s infinite ease-in-out;
-}
-.heart-loader:before{left:40px;transform:rotate(-45deg);transform-origin:0 100%;}
-.heart-loader:after{left:0;transform:rotate(45deg);transform-origin:100% 100%;animation-delay:.15s;}
-@keyframes heartbeat{
-  0%,100%{transform:rotate(45deg) scale(1);}
-  15%{transform:rotate(45deg) scale(1.25);}
-  30%{transform:rotate(45deg) scale(1);}
-}
-.loading-text{font-size:22px;font-weight:bold;letter-spacing:2px;}
-.loading-text span{color:#e11d48;}
+    <title>FlirtHubX</title>
 
-/* Screens */
-.screen{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;}
-.hidden{display:none!important;}
+    <!-- Telegram Mini App -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-/* Original Home */
-#home{
-  background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.75)),
-  url("https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800");
-  background-size:cover;background-position:center;
-}
-.logo{text-align:center;margin-bottom:auto;padding-top:80px;}
-.logo h1{font-size:52px;font-weight:bold;}
-.logo span{color:#e11d48;}
-.logo p{margin-top:10px;opacity:.85;font-size:16px;}
-.startBtn{
-  margin-bottom:70px;width:280px;height:55px;border:none;border-radius:999px;
-  background:#e11d48;color:white;font-size:18px;font-weight:bold;cursor:pointer;
-}
-
-/* Profile */
-#profile{background:#111827;padding:25px;}
-.card{width:100%;max-width:350px;background:#1f2937;padding:20px;border-radius:20px;}
-.card h2{text-align:center;margin-bottom:20px;}
-.input{
-  width:100%;padding:14px;margin-top:15px;border:none;border-radius:12px;
-  font-size:16px;background:#374151;color:white;
-}
-.nextBtn{
-  width:100%;padding:15px;margin-top:25px;border:none;border-radius:999px;
-  background:#e11d48;color:white;font-size:18px;font-weight:bold;cursor:pointer;
-}
-
-/* Avatar */
-#avatar{background:#111827;}
-#avatar .card{max-width:360px;}
-
-/* Match */
-#match{background:#111827;padding:20px;overflow:auto;justify-content:flex-start;}
-
-/* ========== AFTER MATCH - MAIN APP ========== */
-#mainApp{display:none;flex-direction:column;height:100vh;padding-bottom:70px;}
-#mainApp.active{display:flex;}
-
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;height:65px;background:#111;
-  display:flex;border-top:1px solid #222;z-index:100;
-}
-.nav-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  color:#888;font-size:11px;cursor:pointer;
-}
-.nav-item.active{color:#e11d48;}
-.nav-item svg{width:24px;height:24px;margin-bottom:3px;}
-
-/* Character Game (Home tab) */
-.game-header{padding:20px;text-align:center;}
-.character-preview{
-  width:170px;height:240px;margin:10px auto;background:#1a1a22;border-radius:18px;
-  overflow:hidden;border:3px solid #333;
-}
-.character-preview img{width:100%;height:100%;object-fit:cover;}
-.outfit-section{padding:8px 20px;}
-.section-title{font-size:14px;margin-bottom:8px;opacity:.9;}
-.options{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;}
-.option{
-  min-width:65px;height:65px;border-radius:14px;background:#1f1f28;
-  display:flex;align-items:center;justify-content:center;font-size:26px;
-  cursor:pointer;border:2px solid transparent;
-}
-.option.selected{border-color:#e11d48;background:#2a1a22;}
-.gift-btn{
-  margin:15px auto;display:block;width:90%;max-width:300px;padding:14px;
-  background:linear-gradient(135deg,#e11d48,#be123c);border:none;border-radius:50px;
-  color:white;font-size:16px;font-weight:600;cursor:pointer;
-}
-.characters-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px;}
-.char-card{background:#1a1a22;border-radius:16px;overflow:hidden;cursor:pointer;}
-.char-card img{width:100%;height:150px;object-fit:cover;}
-.char-info{padding:10px;}
-.char-info h3{font-size:15px;}
-.char-info p{font-size:12px;opacity:.7;}
-
-/* Messages */
-.chat-list{padding:10px 15px;overflow-y:auto;flex:1;}
-.chat-item{display:flex;align-items:center;gap:14px;padding:12px 8px;border-bottom:1px solid #1f1f28;cursor:pointer;}
-.chat-item img{width:50px;height:50px;border-radius:50%;object-fit:cover;}
-.chat-info h4{font-size:15px;}
-.chat-info p{font-size:13px;opacity:.6;}
-
-/* Chat Window */
-#chatWindow{position:fixed;inset:0;background:#0f0f13;z-index:200;display:none;flex-direction:column;}
-.chat-header{padding:12px 10px;display:flex;align-items:center;gap:12px;background:#111;border-bottom:1px solid #222;}
-.chat-header img{width:40px;height:40px;border-radius:50%;}
-.messages{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px;}
-.msg{max-width:78%;padding:11px 15px;border-radius:18px;font-size:15px;line-height:1.4;}
-.msg.them{background:#1f1f28;align-self:flex-start;border-bottom-left-radius:4px;}
-.msg.me{background:#e11d48;align-self:flex-end;border-bottom-right-radius:4px;}
-.msg .translated{display:block;font-size:12px;opacity:.7;margin-top:5px;border-top:1px solid rgba(255,255,255,.15);padding-top:4px;}
-.chat-input-area{padding:10px 12px;background:#111;display:flex;gap:8px;align-items:center;border-top:1px solid #222;}
-.chat-input{flex:1;background:#1f1f28;border:none;border-radius:25px;padding:11px 16px;color:white;font-size:15px;outline:none;}
-.send-btn{background:#e11d48;border:none;width:42px;height:42px;border-radius:50%;color:white;font-size:17px;cursor:pointer;}
-.translate-btn{background:#222;border:none;color:#aaa;padding:7px 11px;border-radius:20px;font-size:12px;cursor:pointer;}
-
-/* Account */
-.profile-box{text-align:center;padding:30px 20px;}
-.profile-box img{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #e11d48;}
-.stats{display:flex;justify-content:center;gap:35px;margin:20px 0;}
-.stat strong{display:block;font-size:18px;}
-.stat span{font-size:12px;opacity:.6;}
-.menu-list{padding:0 20px;}
-.menu-item{display:flex;justify-content:space-between;padding:16px 0;border-bottom:1px solid #1f1f28;font-size:15px;}
-
-/* Gift Modal */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:300;}
-.modal-content{background:#1a1a22;border-radius:20px;padding:22px;width:90%;max-width:320px;text-align:center;}
-.gift-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0;}
-.gift-item{background:#252530;border-radius:14px;padding:14px 5px;cursor:pointer;font-size:28px;}
-</style>
+    <!-- PART 2/5 will add the complete design here -->
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<!-- ========== NEW LOADING ========== -->
-<div id="loading">
-  <div class="heart-loader"></div>
-  <div class="loading-text">Flirt<span>HubX</span></div>
+<!-- =========================================================
+     FLIRTHUBX
+     PART 1/5 — MAIN HTML STRUCTURE
+     ========================================================= -->
+
+
+<!-- =========================
+     LOADING SCREEN
+     ========================= -->
+
+<section id="loadingScreen" class="screen active">
+
+    <div class="loading-logo">
+        <div class="logo-heart">♥</div>
+    </div>
+
+    <h1>FlirtHubX</h1>
+
+    <p class="loading-text">
+        Meet. Play. Connect.
+    </p>
+
+    <div class="loading-bar">
+        <div id="loadingProgress"></div>
+    </div>
+
+    <p id="loadingPercent">0%</p>
+
+</section>
+
+
+<!-- =========================
+     START SCREEN
+     ========================= -->
+
+<section id="startScreen" class="screen">
+
+    <div class="start-content">
+
+        <div class="main-logo">
+            <span>♥</span>
+        </div>
+
+        <h1>FlirtHubX</h1>
+
+        <p>
+            Meet new people.<br>
+            Play together. Find your connection.
+        </p>
+
+        <button id="startButton" class="primary-button">
+            START
+        </button>
+
+        <div class="telegram-note">
+            Powered by Telegram
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     ACCOUNT CREATION
+     ========================= -->
+
+<section id="accountScreen" class="screen">
+
+    <div class="page-header">
+        <button class="back-button" id="accountBack">
+            ‹
+        </button>
+
+        <h2>Create your profile</h2>
+    </div>
+
+    <div class="account-container">
+
+        <div class="avatar-preview" id="avatarPreview">
+            <span>?</span>
+        </div>
+
+        <button id="chooseAvatarButton" class="secondary-button">
+            Choose Photo
+        </button>
+
+        <input
+            type="file"
+            id="avatarInput"
+            accept="image/*"
+            hidden
+        >
+
+        <label>
+            Name
+        </label>
+
+        <input
+            type="text"
+            id="nameInput"
+            class="text-input"
+            placeholder="Enter your name"
+            maxlength="30"
+        >
+
+        <label>
+            Age
+        </label>
+
+        <input
+            type="number"
+            id="ageInput"
+            class="text-input"
+            placeholder="18"
+            min="18"
+            max="100"
+        >
+
+        <label>
+            Gender
+        </label>
+
+        <div class="gender-buttons">
+
+            <button
+                class="gender-button"
+                data-gender="male">
+                👨 Male
+            </button>
+
+            <button
+                class="gender-button"
+                data-gender="female">
+                👩 Female
+            </button>
+
+        </div>
+
+        <button
+            id="createAccountButton"
+            class="primary-button">
+            CREATE ACCOUNT
+        </button>
+
+        <p class="small-warning">
+            You must be 18 or older to use FlirtHubX.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     MAIN HOME / ROOM
+     ========================= -->
+
+<section id="homeScreen" class="screen">
+
+    <!-- TOP BAR -->
+
+    <header class="top-bar">
+
+        <button
+            id="profileButton"
+            class="top-icon">
+            👤
+        </button>
+
+        <div class="heart-balance">
+            ❤️
+            <span id="heartBalance">50</span>
+            <button id="buyHeartButton">+</button>
+        </div>
+
+        <button
+            id="songButton"
+            class="top-icon">
+            🎵
+        </button>
+
+        <button
+            id="settingsButton"
+            class="top-icon">
+            ⚙️
+        </button>
+
+    </header>
+
+
+    <!-- ROOM INFORMATION -->
+
+    <div class="room-header">
+
+        <div>
+            <span class="room-label">
+                ROOM
+            </span>
+
+            <strong id="roomNumber">
+                1
+            </strong>
+        </div>
+
+        <button
+            id="changeRoomButton"
+            class="change-room-button">
+            🔄 Change
+        </button>
+
+    </div>
+
+
+    <!-- LEAGUE -->
+
+    <div class="league-card">
+
+        <div class="league-icon" id="leagueIcon">
+            🥉
+        </div>
+
+        <div class="league-information">
+
+            <strong id="leagueName">
+                Bronze League
+            </strong>
+
+            <span>
+                Daily League
+            </span>
+
+        </div>
+
+        <div class="league-time">
+            <span>Ends in</span>
+            <strong id="leagueTimer">
+                23:59:59
+            </strong>
+        </div>
+
+    </div>
+
+
+    <!-- ROOM PLAYERS -->
+
+    <div class="room-area">
+
+        <div class="room-title">
+            <span>
+                Players
+            </span>
+
+            <span id="playerCount">
+                0 / 10
+            </span>
+        </div>
+
+        <div
+            id="playerGrid"
+            class="player-grid">
+
+            <!-- JavaScript PART 3/5 will create players here -->
+
+        </div>
+
+    </div>
+
+
+    <!-- BOTTLE GAME -->
+
+    <div
+        id="bottleArea"
+        class="bottle-area">
+
+        <div class="bottle-glow"></div>
+
+        <div
+            id="bottle"
+            class="bottle">
+            🍾
+        </div>
+
+        <p>
+            Spin the bottle
+        </p>
+
+    </div>
+
+
+    <!-- ROOM CHAT -->
+
+    <div class="room-chat">
+
+        <div
+            id="roomMessages"
+            class="messages">
+
+            <!-- Messages will appear here -->
+
+        </div>
+
+        <div class="message-input-area">
+
+            <input
+                type="text"
+                id="roomMessageInput"
+                placeholder="Write a message here..."
+                maxlength="500"
+            >
+
+            <button id="sendRoomMessageButton">
+                ➤
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     PLAYER CHOICE MODAL
+     ========================= -->
+
+<div
+    id="choiceModal"
+    class="modal hidden">
+
+    <div class="modal-box">
+
+        <button
+            class="modal-close"
+            data-close="choiceModal">
+            ×
+        </button>
+
+        <h2>Your choice</h2>
+
+        <div class="choice-players">
+
+            <div class="choice-player">
+
+                <div
+                    id="choiceMyAvatar"
+                    class="choice-avatar">
+                    👤
+                </div>
+
+                <span id="choiceMyName">
+                    You
+                </span>
+
+            </div>
+
+            <div class="choice-heart">
+                ❤️
+            </div>
+
+            <div class="choice-player">
+
+                <div
+                    id="choiceTargetAvatar"
+                    class="choice-avatar">
+                    👤
+                </div>
+
+                <span id="choiceTargetName">
+                    Player
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="choice-buttons">
+
+            <button
+                id="refuseButton"
+                class="refuse-button">
+                REFUSE
+            </button>
+
+            <button
+                id="kissButton"
+                class="kiss-button">
+                💋 KISS
+            </button>
+
+        </div>
+
+        <div class="kiss-countdown">
+            <span>
+                Choose within
+            </span>
+
+            <strong id="kissTimer">
+                10
+            </strong>
+
+            <span>
+                seconds
+            </span>
+        </div>
+
+    </div>
+
 </div>
 
-<!-- ========== ORIGINAL HOME ========== -->
-<div id="home" class="screen">
-  <div class="logo">
-    <h1>Flirt<span>HubX</span></h1>
-    <p>Every choice creates a new story.</p>
-  </div>
-  <button class="startBtn" onclick="showProfile()">❤️ START GAME</button>
+
+<!-- =========================
+     CHANGE ROOM MODAL
+     ========================= -->
+
+<div
+    id="roomModal"
+    class="modal hidden">
+
+    <div class="modal-box large-modal">
+
+        <button
+            class="modal-close"
+            data-close="roomModal">
+            ×
+        </button>
+
+        <h2>Change Room</h2>
+
+        <p class="modal-description">
+            Choose another available room.
+        </p>
+
+        <div
+            id="roomList"
+            class="room-list">
+
+            <!-- JavaScript will create rooms -->
+
+        </div>
+
+    </div>
+
 </div>
 
-<!-- ========== ORIGINAL PROFILE ========== -->
-<div id="profile" class="screen hidden">
-  <div class="card">
-    <div style="display:flex;align-items:center;margin-bottom:20px;">
-      <button onclick="goHome()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;margin-right:15px;">←</button>
-      <h2>Create Profile</h2>
+
+<!-- =========================
+     PROFILE MODAL
+     ========================= -->
+
+<div
+    id="profileModal"
+    class="modal hidden">
+
+    <div class="modal-box profile-modal">
+
+        <button
+            class="modal-close"
+            data-close="profileModal">
+            ×
+        </button>
+
+        <div
+            id="profileAvatar"
+            class="profile-avatar">
+            👤
+        </div>
+
+        <h2 id="profileName">
+            Your Name
+        </h2>
+
+        <p id="profileAge">
+            18
+        </p>
+
+        <div class="profile-stats">
+
+            <div>
+                <strong id="profileKisses">
+                    0
+                </strong>
+                <span>Kisses</span>
+            </div>
+
+            <div>
+                <strong id="profileHearts">
+                    50
+                </strong>
+                <span>Hearts</span>
+            </div>
+
+            <div>
+                <strong id="profileSongPoints">
+                    0
+                </strong>
+                <span>Song Points</span>
+            </div>
+
+        </div>
+
+        <div class="profile-league">
+
+            <span>League</span>
+
+            <strong id="profileLeague">
+                🥉 Bronze
+            </strong>
+
+        </div>
+
+        <button
+            id="editProfileButton"
+            class="primary-button">
+            Edit Profile
+        </button>
+
     </div>
-    <input id="username" class="input" placeholder="Username">
-    <input id="age" class="input" type="number" placeholder="Age">
-    <select id="gender" class="input">
-      <option value="">Select Gender</option>
-      <option>Male</option>
-      <option>Female</option>
-      <option>Non-binary</option>
-    </select>
-    <button class="nextBtn" onclick="continueGame()">Choose Avatar →</button>
-  </div>
+
 </div>
 
-<!-- ========== ORIGINAL AVATAR ========== -->
-<div id="avatar" class="screen hidden" style="background:#111827;">
-  <div class="card">
-    <h2>Choose Your Avatar</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:20px;">
-      <img src="https://i.pravatar.cc/200?img=1" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
-      <img src="https://i.pravatar.cc/200?img=2" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
-      <img src="https://i.pravatar.cc/200?img=3" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
-      <img src="https://i.pravatar.cc/200?img=4" onclick="selectAvatar(this)" style="width:100%;border-radius:15px;cursor:pointer;">
+
+<!-- =========================
+     MESSAGE / FRIEND PROFILE
+     ========================= -->
+
+<div
+    id="userModal"
+    class="modal hidden">
+
+    <div class="modal-box profile-modal">
+
+        <button
+            class="modal-close"
+            data-close="userModal">
+            ×
+        </button>
+
+        <div
+            id="userAvatar"
+            class="profile-avatar">
+            👤
+        </div>
+
+        <h2 id="userName">
+            Player
+        </h2>
+
+        <p id="userAge">
+            18
+        </p>
+
+        <div class="user-actions">
+
+            <button
+                id="messageUserButton"
+                class="primary-button">
+                💬 Message
+            </button>
+
+            <button
+                id="blockUserButton"
+                class="danger-button">
+                🚫 Block
+            </button>
+
+        </div>
+
+        <div class="gift-section">
+
+            <h3>
+                Send a Gift
+            </h3>
+
+            <button
+                id="giftButton"
+                class="gift-button">
+                🎁 Send Gift
+            </button>
+
+        </div>
+
     </div>
-    <button class="nextBtn" onclick="openMatch()">Continue ❤️</button>
-  </div>
+
 </div>
 
-<!-- ========== ORIGINAL MATCH ========== -->
-<div id="match" class="screen hidden" style="background:#111827;padding:20px;overflow:auto;justify-content:flex-start;">
-  <h2 style="margin-top:40px;margin-bottom:25px;font-size:28px;">Choose Your Match ❤️</h2>
-  <div onclick="chooseGirl('Sophia')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
-    <img src="https://picsum.photos/400/500?random=1" style="width:100%;border-radius:12px;">
-    <h3 style="margin-top:10px;">Sophia, 20</h3>
-    <p>📚 Loves books • ☕ Coffee addict</p>
-  </div>
-  <div onclick="chooseGirl('Luna')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;margin-bottom:20px;cursor:pointer;">
-    <img src="https://picsum.photos/400/500?random=2" style="width:100%;border-radius:12px;">
-    <h3 style="margin-top:10px;">Luna, 22</h3>
-    <p>🎮 Gamer • 😂 Funny</p>
-  </div>
-  <div onclick="chooseGirl('Emma')" style="width:100%;max-width:350px;background:#1f2937;border-radius:18px;padding:15px;cursor:pointer;">
-    <img src="https://picsum.photos/400/500?random=3" style="width:100%;border-radius:12px;">
-    <h3 style="margin-top:10px;">Emma, 21</h3>
-    <p>🎵 Music Lover • 💖 Sweet</p>
-  </div>
+
+<!-- =========================
+     PRIVATE CHAT MODAL
+     ========================= -->
+
+<div
+    id="chatModal"
+    class="modal hidden">
+
+    <div class="chat-window">
+
+        <header class="chat-header">
+
+            <button
+                class="modal-close"
+                data-close="chatModal">
+                ‹
+            </button>
+
+            <div class="chat-user">
+
+                <div
+                    id="chatAvatar"
+                    class="mini-avatar">
+                    👤
+                </div>
+
+                <div>
+
+                    <strong id="chatName">
+                        Player
+                    </strong>
+
+                    <span id="chatStatus">
+                        Offline
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div
+                id="chatStreak"
+                class="chat-streak">
+                🔥 0
+            </div>
+
+        </header>
+
+
+        <div
+            id="privateMessages"
+            class="private-messages">
+
+            <!-- Private messages appear here -->
+
+        </div>
+
+
+        <div class="chat-input-area">
+
+            <button
+                id="chatSongButton">
+                🎵
+            </button>
+
+            <input
+                type="text"
+                id="privateMessageInput"
+                placeholder="Message..."
+                maxlength="2000"
+            >
+
+            <button
+                id="sendPrivateMessageButton">
+                ➤
+            </button>
+
+        </div>
+
+    </div>
+
 </div>
 
-<!-- ========== MAIN APP (after matching) ========== -->
-<div id="mainApp">
-  <!-- HOME TAB - Character + Outfits + Gifts -->
-  <div id="tab-home" class="tab-content" style="flex:1;overflow-y:auto;">
-    <div class="game-header">
-      <h2>Create & Dress Your Girl</h2>
-      <p style="opacity:.7;font-size:14px;">Customize then send gifts</p>
-    </div>
-    <div class="character-preview">
-      <img id="baseChar" src="https://i.pravatar.cc/300?img=5">
-    </div>
-    <div class="outfit-section">
-      <div class="section-title">Hair</div>
-      <div class="options">
-        <div class="option selected" onclick="selectOption(this)">👩</div>
-        <div class="option" onclick="selectOption(this)">👧</div>
-        <div class="option" onclick="selectOption(this)">👱‍♀️</div>
-        <div class="option" onclick="selectOption(this)">👩‍🦰</div>
-      </div>
-    </div>
-    <div class="outfit-section">
-      <div class="section-title">Outfit</div>
-      <div class="options">
-        <div class="option selected" onclick="selectOption(this)">👗</div>
-        <div class="option" onclick="selectOption(this)">👚</div>
-        <div class="option" onclick="selectOption(this)">👙</div>
-        <div class="option" onclick="selectOption(this)">👘</div>
-      </div>
-    </div>
-    <div class="outfit-section">
-      <div class="section-title">Accessories</div>
-      <div class="options">
-        <div class="option" onclick="selectOption(this)">🎀</div>
-        <div class="option" onclick="selectOption(this)">👓</div>
-        <div class="option" onclick="selectOption(this)">👑</div>
-        <div class="option" onclick="selectOption(this)">💎</div>
-      </div>
-    </div>
-    <button class="gift-btn" onclick="showGirls()">Save & Meet Girls ❤️</button>
-    <div id="girlsSection" style="display:none;">
-      <h3 style="text-align:center;margin:15px 0 10px;">Tap a girl to send gift</h3>
-      <div class="characters-grid" id="girlsGrid"></div>
-    </div>
-  </div>
 
-  <!-- MESSAGES TAB -->
-  <div id="tab-messages" class="tab-content" style="display:none;flex:1;overflow-y:auto;">
-    <div style="padding:20px 15px 10px;"><h2>Messages</h2></div>
-    <div class="chat-list" id="chatList"></div>
-  </div>
+<!-- =========================
+     MESSAGE OPTIONS
+     ========================= -->
 
-  <!-- ACCOUNT TAB -->
-  <div id="tab-account" class="tab-content" style="display:none;flex:1;overflow-y:auto;">
-    <div class="profile-box">
-      <img id="myAvatar" src="https://i.pravatar.cc/150?img=12">
-      <h2 style="margin-top:12px;" id="myName">Player</h2>
-      <p style="opacity:.6;">Level 1</p>
-    </div>
-    <div class="stats">
-      <div class="stat"><strong>3</strong><span>Matches</span></div>
-      <div class="stat"><strong>8</strong><span>Gifts</span></div>
-      <div class="stat"><strong>5</strong><span>Chats</span></div>
-    </div>
-    <div class="menu-list">
-      <div class="menu-item">Edit Profile <span>›</span></div>
-      <div class="menu-item">Translation Settings <span>›</span></div>
-      <div class="menu-item">Privacy <span>›</span></div>
-      <div class="menu-item" style="color:#e11d48;">Log Out</div>
-    </div>
-  </div>
+<div
+    id="messageOptions"
+    class="message-options hidden">
 
-  <!-- Bottom Nav -->
-  <div class="bottom-nav">
-    <div class="nav-item active" onclick="showTab('home')">
-      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-      Home
-    </div>
-    <div class="nav-item" onclick="showTab('messages')">
-      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-      Messages
-    </div>
-    <div class="nav-item" onclick="showTab('account')">
-      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-      Account
-    </div>
-  </div>
+    <button id="translateMessageButton">
+        🌐 Translate
+    </button>
+
+    <button id="copyMessageButton">
+        📋 Copy
+    </button>
+
+    <button id="replyMessageButton">
+        ↩️ Reply
+    </button>
+
+    <button
+        id="blockFromMessageButton"
+        class="danger-text">
+        🚫 Block
+    </button>
+
 </div>
 
-<!-- Chat Window -->
-<div id="chatWindow">
-  <div class="chat-header">
-    <button onclick="closeChat()" style="background:none;border:none;color:white;font-size:24px;padding:0 8px;">←</button>
-    <img id="chatAvatar" src="">
-    <div><h3 id="chatName" style="font-size:16px;"></h3><p style="font-size:12px;opacity:.6;">Online</p></div>
-  </div>
-  <div class="messages" id="messagesBox"></div>
-  <div class="chat-input-area">
-    <button class="translate-btn" onclick="toggleTranslate()">🌐 Translate</button>
-    <input class="chat-input" id="msgInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendMessage()">
-    <button class="send-btn" onclick="sendMessage()">➤</button>
-  </div>
-</div>
 
-<!-- Gift Modal -->
-<div class="modal" id="giftModal">
-  <div class="modal-content">
-    <h3>Send Gift to <span id="giftTarget"></span></h3>
-    <div class="gift-grid">
-      <div class="gift-item" onclick="sendGift('🌹')">🌹</div>
-      <div class="gift-item" onclick="sendGift('🍫')">🍫</div>
-      <div class="gift-item" onclick="sendGift('🧸')">🧸</div>
-      <div class="gift-item" onclick="sendGift('💎')">💎</div>
-      <div class="gift-item" onclick="sendGift('🎁')">🎁</div>
-      <div class="gift-item" onclick="sendGift('💍')">💍</div>
+<!-- =========================
+     TRANSLATION MODAL
+     ========================= -->
+
+<div
+    id="translationModal"
+    class="modal hidden">
+
+    <div class="modal-box">
+
+        <button
+            class="modal-close"
+            data-close="translationModal">
+            ×
+        </button>
+
+        <h2>Translation</h2>
+
+        <div
+            id="originalMessage"
+            class="translation-original">
+        </div>
+
+        <div class="translation-arrow">
+            ↓
+        </div>
+
+        <div
+            id="translatedMessage"
+            class="translation-result">
+            Translation will appear here.
+        </div>
+
     </div>
-    <button onclick="closeGift()" style="background:#333;border:none;color:white;padding:9px 28px;border-radius:20px;">Cancel</button>
-  </div>
+
 </div>
 
-<script>
-// ===== LOADING =====
-setTimeout(()=>{
-  document.getElementById('loading').style.opacity='0';
-  setTimeout(()=>document.getElementById('loading').style.display='none',600);
-},2000);
 
-// ===== ORIGINAL FLOW =====
-function showProfile(){
-  document.getElementById("home").classList.add("hidden");
-  document.getElementById("profile").classList.remove("hidden");
-}
-function goHome(){
-  document.getElementById("profile").classList.add("hidden");
-  document.getElementById("home").classList.remove("hidden");
-}
-function continueGame(){
-  const username=document.getElementById("username").value.trim();
-  const age=document.getElementById("age").value.trim();
-  if(username===""){alert("Please enter your username.");return;}
-  if(age===""||age<18){alert("Please enter a valid age (18+).");return;}
-  document.getElementById("myName").textContent=username;
-  document.getElementById("profile").classList.add("hidden");
-  document.getElementById("avatar").classList.remove("hidden");
-}
-let selectedAvatar="";
-function selectAvatar(img){
-  selectedAvatar=img.src;
-  document.querySelectorAll("#avatar img").forEach(i=>i.style.border="none");
-  img.style.border="4px solid #e11d48";
-  document.getElementById("myAvatar").src=img.src;
-}
-function openMatch(){
-  if(selectedAvatar===""){alert("Please choose an avatar.");return;}
-  document.getElementById("avatar").classList.add("hidden");
-  document.getElementById("match").classList.remove("hidden");
-}
-function chooseGirl(name){
-  alert("You matched with "+name+" ❤️");
-  // Go to main app
-  document.getElementById("match").classList.add("hidden");
-  document.getElementById("mainApp").classList.add("active");
-  document.getElementById("mainApp").style.display="flex";
-}
+<!-- =========================
+     LANGUAGE MODAL
+     ========================= -->
 
-// ===== MAIN APP TABS =====
-function showTab(tab){
-  document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
-  document.getElementById('tab-'+tab).style.display='block';
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-}
+<div
+    id="languageModal"
+    class="modal hidden">
 
-// ===== CHARACTER CUSTOMIZER =====
-function selectOption(el){
-  el.parentElement.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
-  el.classList.add('selected');
-}
-function showGirls(){
-  document.getElementById('girlsSection').style.display='block';
-  const girls=[
-    {name:'Sophia',age:20,img:'https://i.pravatar.cc/300?img=5',bio:'📚 Books & Coffee'},
-    {name:'Luna',age:22,img:'https://i.pravatar.cc/300?img=9',bio:'🎮 Gamer Girl'},
-    {name:'Emma',age:21,img:'https://i.pravatar.cc/300?img=10',bio:'🎵 Music Lover'},
-    {name:'Mia',age:19,img:'https://i.pravatar.cc/300?img=20',bio:'✈️ Travel'},
-    {name:'Ava',age:23,img:'https://i.pravatar.cc/300?img=25',bio:'🎨 Artist'},
-    {name:'Chloe',age:20,img:'https://i.pravatar.cc/300?img=32',bio:'☕ Cafe'}
-  ];
-  const grid=document.getElementById('girlsGrid');
-  grid.innerHTML='';
-  girls.forEach(g=>{
-    const card=document.createElement('div');
-    card.className='char-card';
-    card.innerHTML=`<img src="\( {g.img}"><div class="char-info"><h3> \){g.name}, \( {g.age}</h3><p> \){g.bio}</p></div>`;
-    card.onclick=()=>openGiftModal(g.name);
-    grid.appendChild(card);
-  });
-  updateChatList(girls);
-}
+    <div class="modal-box">
 
-// ===== GIFTS =====
-let currentGiftTarget='';
-function openGiftModal(name){
-  currentGiftTarget=name;
-  document.getElementById('giftTarget').textContent=name;
-  document.getElementById('giftModal').style.display='flex';
-}
-function closeGift(){document.getElementById('giftModal').style.display='none';}
-function sendGift(emoji){
-  alert(`You sent ${emoji} to ${currentGiftTarget}! She loved it ❤️`);
-  closeGift();
-}
+        <button
+            class="modal-close"
+            data-close="languageModal">
+            ×
+        </button>
 
-// ===== CHAT + TRANSLATION =====
-let translateOn=false;
-const chatHistory={};
-function updateChatList(girls){
-  const list=document.getElementById('chatList');
-  list.innerHTML='';
-  girls.forEach(g=>{
-    const item=document.createElement('div');
-    item.className='chat-item';
-    item.innerHTML=`<img src="\( {g.img}"><div class="chat-info"><h4> \){g.name}</h4><p>Tap to chat...</p></div>`;
-    item.onclick=()=>openChat(g);
-    list.appendChild(item);
-  });
-}
-function openChat(girl){
-  document.getElementById('chatWindow').style.display='flex';
-  document.getElementById('chatAvatar').src=girl.img;
-  document.getElementById('chatName').textContent=girl.name;
-  if(!chatHistory[girl.name]){
-    chatHistory[girl.name]=[{from:'them',text:'Hey! Nice to match with you 😊',trans:'Hey! Nice to match with you 😊'}];
-  }
-  renderMessages(girl.name);
-}
-function closeChat(){document.getElementById('chatWindow').style.display='none';}
-function renderMessages(name){
-  const box=document.getElementById('messagesBox');
-  box.innerHTML='';
-  chatHistory[name].forEach(m=>{
-    const div=document.createElement('div');
-    div.className=`msg ${m.from}`;
-    div.innerHTML=m.text+(translateOn&&m.trans!==m.text?`<span class="translated">${m.trans}</span>`:'');
-    box.appendChild(div);
-  });
-  box.scrollTop=box.scrollHeight;
-}
-function sendMessage(){
-  const input=document.getElementById('msgInput');
-  const text=input.value.trim();
-  if(!text)return;
-  const name=document.getElementById('chatName').textContent;
-  chatHistory[name].push({from:'me',text:text,trans:text});
-  input.value='';
-  renderMessages(name);
-  setTimeout(()=>{
-    const replies=[
-      {text:'Haha you’re sweet 😍',trans:'Haha you’re sweet 😍'},
-      {text:'I like talking with you!',trans:'I like talking with you!'},
-      {text:'Want to send me a gift? 🎁',trans:'Want to send me a gift? 🎁'},
-      {text:'Tell me more\~',trans:'Tell me more\~'}
-    ];
-    const r=replies[Math.floor(Math.random()*replies.length)];
-    chatHistory[name].push({from:'them',...r});
-    renderMessages(name);
-  },800);
-}
-function toggleTranslate(){
-  translateOn=!translateOn;
-  const name=document.getElementById('chatName').textContent;
-  if(name)renderMessages(name);
-  document.querySelector('.translate-btn').textContent=translateOn?'🌐 ON':'🌐 Translate';
-}
-</script>
+        <h2>Language</h2>
+
+        <p class="modal-description">
+            Choose the language you want to use.
+        </p>
+
+        <div class="language-list">
+
+            <button data-language="en">
+                🇬🇧 English
+            </button>
+
+            <button data-language="ar">
+                🇸🇦 العربية
+            </button>
+
+            <button data-language="ru">
+                🇷🇺 Русский
+            </button>
+
+            <button data-language="tr">
+                🇹🇷 Türkçe
+            </button>
+
+            <button data-language="uz">
+                🇺🇿 O'zbek
+            </button>
+
+            <button data-language="ko">
+                🇰🇷 한국어
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     SONG MODAL
+     ========================= -->
+
+<div
+    id="songModal"
+    class="modal hidden">
+
+    <div class="modal-box large-modal">
+
+        <button
+            class="modal-close"
+            data-close="songModal">
+            ×
+        </button>
+
+        <h2>🎵 Music</h2>
+
+        <div class="song-tabs">
+
+            <button class="song-tab active">
+                YouTube
+            </button>
+
+            <button class="song-tab">
+                Favorites
+            </button>
+
+            <button class="song-tab">
+                History
+            </button>
+
+        </div>
+
+        <div class="song-search">
+
+            <input
+                type="text"
+                id="songSearchInput"
+                placeholder="Search a song..."
+            >
+
+            <button id="songSearchButton">
+                🔍
+            </button>
+
+        </div>
+
+        <div
+            id="songResults"
+            class="song-results">
+
+            <div class="empty-state">
+                Search for a song to play in the room.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     GIFT MODAL
+     ========================= -->
+
+<div
+    id="giftModal"
+    class="modal hidden">
+
+    <div class="modal-box large-modal">
+
+        <button
+            class="modal-close"
+            data-close="giftModal">
+            ×
+        </button>
+
+        <h2>🎁 Gifts</h2>
+
+        <p class="modal-description">
+            Send a premium gift using ❤️ Hearts.
+        </p>
+
+        <div
+            id="giftGrid"
+            class="gift-grid">
+
+            <!-- PART 3/4 will add gifts -->
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     EMOTION / AVATAR MODAL
+     ========================= -->
+
+<div
+    id="emotionModal"
+    class="modal hidden">
+
+    <div class="modal-box large-modal">
+
+        <button
+            class="modal-close"
+            data-close="emotionModal">
+            ×
+        </button>
+
+        <h2>😊 Your Feelings</h2>
+
+        <p class="modal-description">
+            Choose an avatar emotion to show how you feel.
+        </p>
+
+        <div
+            id="emotionGrid"
+            class="emotion-grid">
+
+            <button>😀</button>
+            <button>😂</button>
+            <button>😊</button>
+            <button>😍</button>
+            <button>🥰</button>
+            <button>😎</button>
+            <button>😢</button>
+            <button>😭</button>
+            <button>😡</button>
+            <button>🤔</button>
+            <button>😴</button>
+            <button>😜</button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     SETTINGS MODAL
+     ========================= -->
+
+<div
+    id="settingsModal"
+    class="modal hidden">
+
+    <div class="modal-box large-modal">
+
+        <button
+            class="modal-close"
+            data-close="settingsModal">
+            ×
+        </button>
+
+        <h2>⚙️ Settings</h2>
+
+        <div class="settings-list">
+
+            <button id="languageSettingButton">
+                <span>🌐 Language</span>
+                <span id="currentLanguage">
+                    English
+                </span>
+            </button>
+
+            <button id="privacySettingButton">
+                <span>🔒 Privacy</span>
+                <span>›</span>
+            </button>
+
+            <button id="notificationsSettingButton">
+                <span>🔔 Notifications</span>
+                <span>›</span>
+            </button>
+
+            <button id="accountSettingButton">
+                <span>👤 Account</span>
+                <span>›</span>
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     DAILY REWARD MODAL
+     ========================= -->
+
+<div
+    id="rewardModal"
+    class="modal hidden">
+
+    <div class="modal-box reward-box">
+
+        <button
+            class="modal-close"
+            data-close="rewardModal">
+            ×
+        </button>
+
+        <div class="reward-icon">
+            🎁
+        </div>
+
+        <h2>
+            Daily League Reward
+        </h2>
+
+        <p>
+            Your league rewards are ready!
+        </p>
+
+        <div
+            id="rewardContent"
+            class="reward-content">
+
+            ❤️ +50 Hearts
+
+        </div>
+
+        <button
+            id="claimRewardButton"
+            class="primary-button">
+            CLAIM REWARD
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     PREMIUM FRAME MODAL
+     ========================= -->
+
+<div
+    id="frameModal"
+    class="modal hidden">
+
+    <div class="modal-box large-modal">
+
+        <button
+            class="modal-close"
+            data-close="frameModal">
+            ×
+        </button>
+
+        <h2>✨ Premium Frames</h2>
+
+        <p class="modal-description">
+            Customize your profile picture and name.
+        </p>
+
+        <div
+            id="frameGrid"
+            class="frame-grid">
+
+            <!-- Premium frames will be added in PART 3/4 -->
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     KICK MODAL
+     ========================= -->
+
+<div
+    id="kickModal"
+    class="modal hidden">
+
+    <div class="modal-box">
+
+        <div class="kick-icon">
+            🚪
+        </div>
+
+        <h2>
+            You've been kicked
+        </h2>
+
+        <p>
+            You will move to another room shortly.
+        </p>
+
+        <div class="kick-countdown">
+            <strong id="kickTimer">
+                30
+            </strong>
+            seconds
+        </div>
+
+        <button
+            id="saveRoomButton"
+            class="primary-button">
+            SAVE THIS ROOM
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     NOTIFICATION
+     ========================= -->
+
+<div
+    id="notification"
+    class="notification">
+
+    <span id="notificationIcon">
+        ✓
+    </span>
+
+    <span id="notificationText">
+        Done
+    </span>
+
+</div>
+
+
+<!-- =========================
+     JAVASCRIPT
+     PART 3/5 WILL CONNECT HERE
+     ========================= -->
+
+<script src="app.js"></script>
+
 </body>
 </html>
