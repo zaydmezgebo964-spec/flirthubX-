@@ -1564,3 +1564,974 @@ button {
             );
     }
 }
+/* =========================================================
+   FLIRTHUBX — ROOM & GAME DESIGN
+   Added without changing the existing onboarding design
+========================================================= */
+
+
+/* =========================
+   MAIN GAME BACKGROUND
+========================= */
+
+#homeScreen {
+    position: relative;
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(10, 8, 22, 0.72),
+            rgba(20, 10, 35, 0.88)
+        ),
+        url("https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=85");
+
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+
+/* Soft glow over the room */
+
+#homeScreen::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            circle at 20% 15%,
+            rgba(255, 80, 150, 0.20),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 85% 25%,
+            rgba(100, 70, 255, 0.18),
+            transparent 32%
+        );
+
+    z-index: 0;
+}
+
+
+/* Keep room content above background */
+
+#homeScreen > * {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* =========================
+   TOP ROOM HEADER
+========================= */
+
+#homeScreen .top-header {
+    background: rgba(12, 10, 25, 0.78);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,0.10);
+
+    box-shadow:
+        0 8px 30px
+        rgba(0,0,0,0.25);
+}
+
+
+#homeScreen .room-number {
+    color: #ffffff;
+
+    font-weight: 800;
+
+    letter-spacing: 0.2px;
+}
+
+
+#homeScreen .room-people {
+    color: rgba(255,255,255,0.65);
+
+    font-size: 12px;
+}
+
+
+/* =========================
+   HEADER BUTTONS
+========================= */
+
+#homeScreen .icon-button {
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 14px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.12);
+
+    background:
+        rgba(255,255,255,0.08);
+
+    color: white;
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease;
+}
+
+
+#homeScreen .icon-button:active {
+    transform: scale(0.90);
+
+    background:
+        rgba(255,255,255,0.16);
+}
+
+
+#homeScreen .icon-button svg {
+    width: 21px;
+    height: 21px;
+
+    fill: none;
+
+    stroke: currentColor;
+
+    stroke-width: 1.8;
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
+}
+
+
+/* =========================
+   ROOM MEMBERS
+========================= */
+
+#homeScreen .room-members {
+
+    display: flex;
+
+    gap: 12px;
+
+    overflow-x: auto;
+
+    padding:
+        14px
+        15px
+        12px;
+
+    scrollbar-width: none;
+
+    background:
+        rgba(8,7,18,0.38);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+
+#homeScreen .room-members::-webkit-scrollbar {
+    display: none;
+}
+
+
+#homeScreen .room-member {
+
+    flex:
+        0 0 auto;
+
+    width: 64px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 6px;
+
+    cursor: pointer;
+}
+
+
+#homeScreen .room-member-avatar {
+
+    position: relative;
+
+    width: 52px;
+    height: 52px;
+
+    border-radius: 50%;
+
+    padding: 2px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ff4f9a,
+            #8d6cff
+        );
+
+    box-shadow:
+        0 5px 20px
+        rgba(0,0,0,0.35);
+}
+
+
+#homeScreen .room-member-avatar img {
+
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    border:
+        2px solid
+        rgba(15,12,25,0.95);
+}
+
+
+#homeScreen .room-member-name {
+
+    max-width: 64px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+    color:
+        rgba(255,255,255,0.88);
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+#homeScreen .online-dot {
+
+    position: absolute;
+
+    right: 0;
+    bottom: 2px;
+
+    width: 12px;
+    height: 12px;
+
+    border-radius: 50%;
+
+    background: #35e88b;
+
+    border:
+        2px solid
+        #171329;
+
+    box-shadow:
+        0 0 8px
+        rgba(53,232,139,0.75);
+}
+
+
+/* =========================
+   ROOM MESSAGE AREA
+========================= */
+
+#homeScreen .room-messages {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding:
+        16px
+        14px
+        120px;
+
+    scrollbar-width: thin;
+}
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+#homeScreen .message {
+
+    display: flex;
+
+    flex-direction: column;
+
+    max-width: 82%;
+
+    margin-bottom: 14px;
+
+    animation:
+        messageAppear
+        0.22s
+        ease-out;
+}
+
+
+#homeScreen .message.mine {
+
+    margin-left: auto;
+
+    align-items: flex-end;
+}
+
+
+#homeScreen .message.other {
+
+    margin-right: auto;
+
+    align-items: flex-start;
+}
+
+
+#homeScreen .message-name {
+
+    margin:
+        0
+        0
+        4px
+        9px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    color:
+        rgba(255,255,255,0.62);
+}
+
+
+#homeScreen .message-name.girl {
+    color: #ff82b9;
+}
+
+
+#homeScreen .message-name.boy {
+    color: #80b7ff;
+}
+
+
+/* =========================
+   CHAT BUBBLE
+========================= */
+
+#homeScreen .message-bubble {
+
+    padding:
+        10px
+        14px;
+
+    border-radius: 17px;
+
+    color: white;
+
+    font-size: 14px;
+
+    line-height: 1.45;
+
+    background:
+        rgba(255,255,255,0.10);
+
+    border:
+        1px solid
+        rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    box-shadow:
+        0 5px 18px
+        rgba(0,0,0,0.18);
+}
+
+
+#homeScreen .message.mine .message-bubble {
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,67,143,0.88),
+            rgba(132,82,255,0.88)
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,0.16);
+
+    border-bottom-right-radius: 5px;
+}
+
+
+#homeScreen .message.other .message-bubble {
+
+    border-bottom-left-radius: 5px;
+}
+
+
+/* =========================
+   TRANSLATION
+========================= */
+
+#homeScreen .message-translation {
+
+    display: block;
+
+    margin-top: 7px;
+
+    padding-top: 6px;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,0.12);
+
+    color:
+        rgba(255,255,255,0.58);
+
+    font-size: 11px;
+}
+
+
+#homeScreen .message-time {
+
+    margin-top: 4px;
+
+    color:
+        rgba(255,255,255,0.38);
+
+    font-size: 9px;
+}
+
+
+/* =========================
+   MESSAGE ANIMATION
+========================= */
+
+@keyframes messageAppear {
+
+    from {
+        opacity: 0;
+        transform:
+            translateY(8px)
+            scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+}
+
+
+/* =========================
+   ROOM INPUT
+========================= */
+
+#homeScreen .room-input-area {
+
+    position: absolute;
+
+    left: 12px;
+    right: 12px;
+    bottom: 70px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 8px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(13,11,27,0.84);
+
+    border:
+        1px solid
+        rgba(255,255,255,0.10);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    box-shadow:
+        0 10px 35px
+        rgba(0,0,0,0.35);
+}
+
+
+#homeScreen .room-input-area input {
+
+    flex: 1;
+
+    min-width: 0;
+
+    height: 42px;
+
+    border: none;
+
+    outline: none;
+
+    border-radius: 14px;
+
+    padding:
+        0
+        12px;
+
+    color: white;
+
+    background:
+        rgba(255,255,255,0.07);
+
+    font-size: 14px;
+}
+
+
+#homeScreen .room-input-area input::placeholder {
+    color:
+        rgba(255,255,255,0.40);
+}
+
+
+#homeScreen .room-icon-button,
+#homeScreen .send-room-button {
+
+    flex:
+        0 0 auto;
+
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 14px;
+
+    color: white;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease;
+}
+
+
+#homeScreen .room-icon-button {
+
+    background:
+        rgba(255,255,255,0.08);
+}
+
+
+#homeScreen .send-room-button {
+
+    background:
+        linear-gradient(
+            135deg,
+            #ff4d91,
+            #795cff
+        );
+
+    box-shadow:
+        0 5px 18px
+        rgba(255,75,145,0.30);
+}
+
+
+#homeScreen .room-icon-button:active,
+#homeScreen .send-room-button:active {
+    transform: scale(0.90);
+}
+
+
+#homeScreen .room-icon-button svg,
+#homeScreen .send-room-button svg {
+
+    width: 20px;
+    height: 20px;
+
+    fill: none;
+
+    stroke: currentColor;
+
+    stroke-width: 1.8;
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
+}
+
+
+/* =========================
+   MUSIC PLAYER
+========================= */
+
+#homeScreen .music-player {
+
+    position: absolute;
+
+    left: 14px;
+    right: 14px;
+    bottom: 126px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 12px;
+
+    border-radius: 17px;
+
+    background:
+        rgba(14,12,28,0.90);
+
+    border:
+        1px solid
+        rgba(255,255,255,0.10);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    box-shadow:
+        0 8px 28px
+        rgba(0,0,0,0.35);
+}
+
+
+#homeScreen .music-player .music-cover {
+
+    width: 42px;
+    height: 42px;
+
+    flex:
+        0 0 auto;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ff4d91,
+            #735cff
+        );
+
+    color: white;
+
+    font-size: 19px;
+}
+
+
+#homeScreen .music-info {
+
+    min-width: 0;
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+#homeScreen .music-info strong {
+
+    color: white;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    font-size: 13px;
+}
+
+
+#homeScreen .music-info small {
+
+    color:
+        rgba(255,255,255,0.48);
+
+    font-size: 10px;
+}
+
+
+#homeScreen .music-close {
+
+    width: 30px;
+    height: 30px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,0.08);
+
+    color: white;
+
+    font-size: 20px;
+}
+
+
+/* =========================
+   BOTTOM NAVIGATION
+========================= */
+
+#homeScreen .bottom-navigation {
+
+    background:
+        rgba(10,8,22,0.90);
+
+    border-top:
+        1px solid
+        rgba(255,255,255,0.09);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+
+#homeScreen .bottom-nav-item {
+
+    color:
+        rgba(255,255,255,0.48);
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+#homeScreen .bottom-nav-item.active {
+
+    color: #ff5b9e;
+}
+
+
+#homeScreen .bottom-nav-item:active {
+    transform: scale(0.92);
+}
+
+
+#homeScreen .bottom-nav-item svg {
+
+    fill: none;
+
+    stroke: currentColor;
+
+    stroke-width: 1.8;
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
+}
+
+
+/* =========================
+   PREMIUM FRAME
+========================= */
+
+.profile-frame {
+
+    position: relative;
+
+    padding: 4px;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffd36a,
+            #ff5caa,
+            #7c62ff
+        );
+
+    box-shadow:
+        0 0 0 2px
+        rgba(255,255,255,0.08),
+        0 0 28px
+        rgba(255,91,158,0.28);
+}
+
+
+.profile-frame::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: -5px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.18);
+
+    pointer-events: none;
+}
+
+
+/* =========================
+   LEAGUE BADGE
+========================= */
+
+.league-badge {
+
+    padding:
+        7px
+        12px;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #b87942,
+            #e0a66a
+        );
+
+    color: white;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.5px;
+
+    box-shadow:
+        0 5px 18px
+        rgba(184,121,66,0.25);
+}
+
+
+/* =========================
+   STREAK
+========================= */
+
+.streak-card {
+
+    transition:
+        transform 0.2s ease;
+}
+
+
+.streak-fire {
+
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(255,75,30,0.55)
+        );
+}
+
+
+/* =========================
+   MODALS
+========================= */
+
+.modal {
+
+    background:
+        rgba(3,2,10,0.72);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+
+.modal-card {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(29,24,52,0.98),
+            rgba(15,12,29,0.98)
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,0.10);
+
+    box-shadow:
+        0 20px 70px
+        rgba(0,0,0,0.55);
+}
+
+
+/* =========================
+   SMALL PHONE SCREENS
+========================= */
+
+@media (max-width: 380px) {
+
+    #homeScreen .room-member {
+        width: 58px;
+    }
+
+    #homeScreen .room-member-avatar {
+        width: 47px;
+        height: 47px;
+    }
+
+    #homeScreen .message {
+        max-width: 88%;
+    }
+
+}
+
+
+/* =========================
+   REDUCE MOTION
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    #homeScreen .message {
+        animation: none;
+    }
+
+   }
