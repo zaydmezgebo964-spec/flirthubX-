@@ -1508,3 +1508,649 @@ function initializeTelegram() {
 ========================================================= */
 
 initializeTelegram();
+/* =========================================================
+   FLIRTHUBX — REAL-TIME ROOM CONNECTION
+========================================================= */
+
+let flirthubSocket = null;
+
+
+/* ---------------------------------------------------------
+   CONNECT TO SERVER
+--------------------------------------------------------- */
+
+function connectFlirtHubServer() {
+
+    // Socket.IO is loaded by the server.
+    if (typeof io === "undefined") {
+
+        console.warn(
+            "Socket.IO has not loaded yet."
+        );
+
+        return;
+    }
+
+
+    flirthubSocket = io();
+
+
+    flirthubSocket.on(
+        "connect",
+        () => {
+
+            console.log(
+                "FlirtHubX connected:",
+                flirthubSocket.id
+            );
+
+
+            joinCurrentRoom();
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       ROOM JOINED
+    ----------------------------------------------------- */
+
+    flirthubSocket.on(
+        "roomJoined",
+        data => {
+
+            state.room =
+                Number(data.room) || 1;
+
+
+            state.roomMembers =
+                Array.isArray(data.users)
+                    ? data.users
+                    : [];
+
+
+            saveState();
+
+            renderRoom();
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       ROOM FULL
+    ----------------------------------------------------- */
+
+    flirthubSocket.on(
+        "roomFull",
+        data => {
+
+            alert(
+                `Room ${data.room} is full (10/10).\n\n` +
+                `Please choose another room.`
+            );
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       PLAYER JOINED
+    ----------------------------------------------------- */
+
+    flirthubSocket.on(
+        "playerJoined",
+        player => {
+
+            const exists =
+                state.roomMembers.some(
+                    user =>
+                        user.socketId ===
+                        player.socketId
+                );
+
+
+            if (!exists) {
+
+                state.roomMembers.push(
+                    player
+                );
+
+            }
+
+
+            renderRoom();
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       PLAYER LEFT
+    ----------------------------------------------------- */
+
+    flirthubSocket.on(
+        "playerLeft",
+        data => {
+
+            state.roomMembers =
+                state.roomMembers.filter(
+                    user =>
+                        user.socketId !==
+                        data.socketId
+                );
+
+
+            renderRoom();
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       ROOM USER LIST
+    ----------------------------------------------------- */
+
+    flirthubSocket.on(
+        "roomUsers",
+        users => {
+
+            state.roomMembers =
+                Array.isArray(users)
+                    ? users
+                    : [];
+
+
+            renderRoom();
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       NEW MESSAGE
+    ----------------------------------------------------- */
+
+    flirthubSocket.on(
+        "newMessage",
+        message => {
+
+            /*
+             * Avoid adding our own message twice.
+             */
+
+            const exists =
+                state.messages.some(
+                    existing =>
+                        existing.id ===
+                        message.id
+                );
+
+
+            if (!exists) {
+
+                state.messages.push({
+
+                    id:
+                        message.id,
+
+                    name:
+                        message.name,
+
+                    gender:
+                        message.gender,
+
+                    text:
+                        message.text,
+
+                    translation:
+                        "",
+
+                    mine:
+                        message.userId ===
+                        getCurrentUserId(),
+
+                    time:
+                        new Date(
+                            message.timestamp
+                        ).toLocaleTimeString(
+                            [],
+                            {
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            }
+                        )
+
+                });
+
+            }
+
+
+            saveState();
+
+            renderMessages();
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       TYPING
+    ----------------------------------------------------- */
+
+    flirthubSocket.on(
+        "playerTyping",
+        data => {
+
+            console.log(
+                `${data.name} is typing...`
+            );
+
+        }
+    );
+
+
+    flirthubSocket.on(
+        "playerStoppedTyping",
+        data => {
+
+            console.log(
+                "Player stopped typing:",
+                data.socketId
+            );
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       KISS REQUEST
+    ----------------------------------------------------- */
+
+    flirthubSocket.on(
+        "kissRequest",
+        data => {
+
+            const accepted =
+                confirm(
+                    `${data.fromName} wants to kiss you 💋\n\n` +
+                    `You have 10 seconds to respond.`
+                );
+
+
+            if (
+                flirthubSocket &&
+                flirthubSocket.connected
+            ) {
+
+                flirthubSocket.emit(
+                    "kissResponse",
+                    {
+                        targetSocketId:
+                            data.fromSocketId,
+
+                        accepted:
+                            accepted
+                    }
+                );
+
+            }
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       KISS RESPONSE
+    ----------------------------------------------------- */
+
+    flirthubSocket.on(
+        "kissResponse",
+        data => {
+
+            if (data.accepted) {
+
+                alert(
+                    `${data.fromName} accepted the kiss! 💋`
+                );
+
+            } else {
+
+                alert(
+                    `${data.fromName} rejected the kiss.`
+                );
+
+            }
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       BLOCK CONFIRMATION
+    ----------------------------------------------------- */
+
+    flirthubSocket.on(
+        "playerBlocked",
+        () => {
+
+            alert(
+                "Player blocked."
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   USER ID
+========================================================= */
+
+function getCurrentUserId() {
+
+    if (
+        window.Telegram &&
+        Telegram.WebApp &&
+        Telegram.WebApp.initDataUnsafe &&
+        Telegram.WebApp.initDataUnsafe.user
+    ) {
+
+        return String(
+            Telegram.WebApp
+                .initDataUnsafe
+                .user
+                .id
+        );
+
+    }
+
+
+    /*
+     * Local browser ID for testing.
+     */
+
+    let localId =
+        localStorage.getItem(
+            "flirthubx_local_id"
+        );
+
+
+    if (!localId) {
+
+        localId =
+            "local-" +
+            Date.now() +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 8);
+
+
+        localStorage.setItem(
+            "flirthubx_local_id",
+            localId
+        );
+
+    }
+
+
+    return localId;
+
+}
+
+
+/* =========================================================
+   JOIN CURRENT ROOM
+========================================================= */
+
+function joinCurrentRoom() {
+
+    if (
+        !flirthubSocket ||
+        !flirthubSocket.connected
+    ) {
+
+        return;
+    }
+
+
+    flirthubSocket.emit(
+        "joinRoom",
+        {
+
+            room:
+                state.room || 1,
+
+            id:
+                getCurrentUserId(),
+
+            name:
+                state.name || "Player",
+
+            gender:
+                state.gender || "Male",
+
+            avatar:
+                state.avatar || ""
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   REAL MESSAGE SENDING
+========================================================= */
+
+const oldSendRoomMessage =
+    sendRoomMessage;
+
+
+sendRoomMessage =
+    function () {
+
+        const input =
+            document.getElementById(
+                "roomInput"
+            );
+
+
+        if (!input) {
+            return;
+        }
+
+
+        const text =
+            input.value.trim();
+
+
+        if (!text) {
+            return;
+        }
+
+
+        /*
+         * If the server isn't connected,
+         * use the existing local demo behavior.
+         */
+
+        if (
+            !flirthubSocket ||
+            !flirthubSocket.connected
+        ) {
+
+            oldSendRoomMessage();
+
+            return;
+        }
+
+
+        flirthubSocket.emit(
+            "sendMessage",
+            {
+                text:
+                    text
+            }
+        );
+
+
+        input.value = "";
+
+    };
+
+
+/* =========================================================
+   REAL ROOM CHANGING
+========================================================= */
+
+const oldChangeRoom =
+    changeRoom;
+
+
+changeRoom =
+    function () {
+
+        /*
+         * If multiplayer is not connected,
+         * keep the existing demo behavior.
+         */
+
+        if (
+            !flirthubSocket ||
+            !flirthubSocket.connected
+        ) {
+
+            oldChangeRoom();
+
+            return;
+        }
+
+
+        let nextRoom =
+            Number(state.room) + 1;
+
+
+        /*
+         * For now we allow rooms 1–9999.
+         * The server will prevent a full room.
+         */
+
+        if (nextRoom > 9999) {
+            nextRoom = 1;
+        }
+
+
+        flirthubSocket.emit(
+            "changeRoom",
+            {
+                room:
+                    nextRoom
+            }
+        );
+
+    };
+
+
+/* =========================================================
+   KISS
+========================================================= */
+
+function requestKiss(socketId) {
+
+    if (
+        !flirthubSocket ||
+        !flirthubSocket.connected
+    ) {
+
+        alert(
+            "You are not connected to the room yet."
+        );
+
+        return;
+    }
+
+
+    if (!socketId) {
+        return;
+    }
+
+
+    flirthubSocket.emit(
+        "kissRequest",
+        {
+            targetSocketId:
+                socketId
+        }
+    );
+
+}
+
+
+/* =========================================================
+   BLOCK
+========================================================= */
+
+function blockPlayer(socketId) {
+
+    if (
+        !flirthubSocket ||
+        !flirthubSocket.connected
+    ) {
+
+        alert(
+            "You are not connected to the room yet."
+        );
+
+        return;
+    }
+
+
+    if (!socketId) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "Block this player?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    flirthubSocket.emit(
+        "blockPlayer",
+        {
+            targetSocketId:
+                socketId
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CONNECT WHEN PAGE IS READY
+========================================================= */
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        connectFlirtHubServer
+    );
+
+} else {
+
+    connectFlirtHubServer();
+
+               }
