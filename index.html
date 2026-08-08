@@ -2,20 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+          content="width=device-width,
+                   initial-scale=1.0,
+                   maximum-scale=1.0,
+                   user-scalable=no">
 
     <title>FlirthubX</title>
 
-    <!-- FONT -->
+    <!-- Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
           rel="stylesheet">
 
-    <!-- ICONS -->
+    <!-- Icons -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
@@ -26,18 +30,22 @@
 <body>
 
 <!-- =====================================================
-     LOADING SCREEN
+     LOADING
 ===================================================== -->
 
-<div id="loading-screen" class="screen loading-screen">
-
-    <div class="loading-image"></div>
+<div id="loadingScreen" class="screen loading-screen">
 
     <div class="loading-content">
 
-        <div class="loading-spinner"></div>
+        <div class="loading-logo">
+            <i class="fa-solid fa-heart"></i>
+        </div>
+
+        <h1>FlirthubX</h1>
 
         <p>Loading...</p>
+
+        <div class="loading-spinner"></div>
 
     </div>
 
@@ -45,32 +53,29 @@
 
 
 <!-- =====================================================
-     ACCOUNT SCREEN
+     ACCOUNT SETUP
 ===================================================== -->
 
-<div id="account-screen"
-     class="screen account-screen"
-     style="display:none;">
+<div id="setupScreen"
+     class="screen setup-screen hidden">
 
-    <div class="setup-container">
+    <!-- STEP 1 -->
 
-        <button id="back-account"
-                class="back-button">
+    <section id="setupStep1"
+             class="setup-step">
+
+        <button class="back-button"
+                onclick="goBackToLoading()">
 
             <i class="fa-solid fa-arrow-left"></i>
 
         </button>
 
-
         <div class="step-number">
             1 / 3
         </div>
 
-
-        <h1>
-            Create your account
-        </h1>
-
+        <h1>Create your account</h1>
 
         <p class="setup-description">
             Tell us a little about yourself
@@ -81,15 +86,15 @@
 
         <div class="input-group">
 
-            <label for="name">
+            <label for="userName">
                 Your name
             </label>
 
             <input
-                id="name"
+                id="userName"
                 type="text"
-                placeholder="Enter your name"
                 maxlength="25"
+                placeholder="Enter your name"
                 autocomplete="off"
             >
 
@@ -100,25 +105,42 @@
 
         <div class="input-group">
 
-            <label for="gender">
+            <label>
                 Your gender
             </label>
 
-            <select id="gender">
+            <div class="gender-buttons">
 
-                <option value="">
-                    Choose gender
-                </option>
+                <button
+                    type="button"
+                    class="gender-option"
+                    data-gender="male"
+                    onclick="selectGender('male')">
 
-                <option value="male">
-                    Boy
-                </option>
+                    <div class="gender-icon">
+                        <i class="fa-solid fa-mars"></i>
+                    </div>
 
-                <option value="female">
-                    Girl
-                </option>
+                    <span>Boy</span>
 
-            </select>
+                </button>
+
+
+                <button
+                    type="button"
+                    class="gender-option"
+                    data-gender="female"
+                    onclick="selectGender('female')">
+
+                    <div class="gender-icon">
+                        <i class="fa-solid fa-venus"></i>
+                    </div>
+
+                    <span>Girl</span>
+
+                </button>
+
+            </div>
 
         </div>
 
@@ -127,12 +149,12 @@
 
         <div class="input-group">
 
-            <label for="age">
+            <label for="userAge">
                 Age
             </label>
 
             <input
-                id="age"
+                id="userAge"
                 type="number"
                 min="18"
                 max="100"
@@ -142,34 +164,27 @@
         </div>
 
 
-        <!-- CONTINUE -->
-
         <button
-            id="account-continue"
-            class="primary-button">
+            class="primary-button"
+            onclick="nextSetupStep()">
 
             Continue
 
         </button>
 
-    </div>
-
-</div>
+    </section>
 
 
-<!-- =====================================================
-     AVATAR SCREEN
-===================================================== -->
+    <!-- =================================================
+         STEP 2
+    ================================================== -->
 
-<div id="avatar-screen"
-     class="screen avatar-screen"
-     style="display:none;">
-
-    <div class="setup-container">
+    <section id="setupStep2"
+             class="setup-step hidden">
 
         <button
-            id="back-avatar"
-            class="back-button">
+            class="back-button"
+            onclick="previousSetupStep()">
 
             <i class="fa-solid fa-arrow-left"></i>
 
@@ -181,63 +196,68 @@
         </div>
 
 
-        <h1>
-            Choose your avatar
-        </h1>
-
+        <h1>Choose your avatar</h1>
 
         <p class="setup-description">
-            Choose a picture from your gallery
+            Add a profile picture
         </p>
 
 
         <!-- AVATAR -->
 
-        <div
-            id="avatar-square"
-            class="avatar-square">
+        <div class="avatar-selection">
 
-            <img
-                id="avatar-preview"
-                src=""
-                alt="Avatar"
-            >
+            <div
+                id="avatarSquare"
+                class="avatar-square"
+                onclick="openGallery()">
 
-            <div class="avatar-plus">
+                <div
+                    id="defaultAvatarIcon"
+                    class="default-avatar-icon">
 
-                <i class="fa-solid fa-plus"></i>
+                    <i class="fa-solid fa-user"></i>
+
+                </div>
+
+
+                <img
+                    id="avatarPreview"
+                    class="avatar-preview hidden"
+                    alt="Avatar"
+                >
+
+
+                <div class="avatar-plus">
+
+                    <i class="fa-solid fa-plus"></i>
+
+                </div>
 
             </div>
+
+
+            <input
+                id="avatarInput"
+                class="hidden-input"
+                type="file"
+                accept="image/*"
+                onchange="previewAvatar(event)"
+            >
 
         </div>
 
 
-        <!-- FILE INPUT -->
-
-        <input
-            id="avatar-input"
-            type="file"
-            accept="image/*"
-            class="hidden-input"
-        >
-
-
         <p class="avatar-help">
-
-            Tap the
-            <strong>+</strong>
-            to choose a picture
-
+            Tap <strong>+</strong> to choose a picture
         </p>
 
-
-        <!-- ACTIONS -->
 
         <div class="avatar-actions">
 
             <button
-                id="avatar-skip"
-                class="secondary-button">
+                class="secondary-button"
+                onclick="skipAvatar()">
 
                 Skip
 
@@ -245,8 +265,8 @@
 
 
             <button
-                id="avatar-continue"
-                class="primary-button">
+                class="primary-button"
+                onclick="nextSetupStep()">
 
                 Continue
 
@@ -254,393 +274,370 @@
 
         </div>
 
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     GAME SCREEN
-===================================================== -->
-
-<div id="game-screen"
-     class="screen game-screen"
-     style="display:none;">
-
-
-    <!-- TOP BAR -->
-
-    <header class="game-header">
-
-        <div class="currency-button">
-
-            <div class="currency-icon heart-icon">
-                <i class="fa-solid fa-heart"></i>
-            </div>
-
-            <span id="heart-count">
-                12
-            </span>
-
-        </div>
-
-
-        <div class="currency-button">
-
-            <div class="currency-icon coin-icon">
-                <i class="fa-solid fa-coins"></i>
-            </div>
-
-            <span id="coin-count">
-                250
-            </span>
-
-        </div>
-
-
-        <div class="room-title">
-
-            <strong>
-                Room 4
-            </strong>
-
-            <span>
-                4/10
-            </span>
-
-        </div>
-
-
-        <button
-            class="game-icon-button"
-            id="store-button">
-
-            <i class="fa-solid fa-bag-shopping"></i>
-
-        </button>
-
-
-        <button
-            class="game-icon-button"
-            id="refresh-button">
-
-            <i class="fa-solid fa-arrows-rotate"></i>
-
-        </button>
-
-    </header>
+    </section>
 
 
     <!-- =================================================
-         ROOM
+         STEP 3
     ================================================== -->
 
-    <section class="room-area">
-
-
-        <!-- ALEX -->
+    <section id="setupStep3"
+             class="setup-step hidden">
 
         <button
-            class="player-card"
-            data-player-card="Alex">
+            class="back-button"
+            onclick="previousSetupStep()">
 
-            <div class="player-photo">
-
-                <img
-                    src="https://i.pravatar.cc/300?img=12"
-                    alt="Alex"
-                >
-
-                <span class="online-dot"></span>
-
-            </div>
-
-            <span class="player-name">
-                Alex
-            </span>
+            <i class="fa-solid fa-arrow-left"></i>
 
         </button>
 
 
-        <!-- MIA -->
-
-        <button
-            class="player-card"
-            data-player-card="Mia">
-
-            <div class="player-photo">
-
-                <img
-                    src="https://i.pravatar.cc/300?img=47"
-                    alt="Mia"
-                >
-
-                <span class="online-dot"></span>
-
-            </div>
-
-            <span class="player-name">
-                Mia
-            </span>
-
-        </button>
-
-
-        <!-- SPIN BOTTLE -->
-
-        <div class="spin-area">
-
-            <button
-                id="spin-bottle"
-                class="spin-bottle-button">
-
-                <div class="bottle-glow"></div>
-
-                <div class="bottle">
-                    🍾
-                </div>
-
-            </button>
-
-
-            <h2>
-                Spin Bottle
-            </h2>
-
-
-            <p>
-                Tap the bottle to spin
-            </p>
-
+        <div class="step-number">
+            3 / 3
         </div>
 
 
-        <!-- LINA -->
+        <h1>Ready?</h1>
 
-        <button
-            class="player-card"
-            data-player-card="Lina">
+        <p class="setup-description">
+            Your FlirthubX adventure is about to begin.
+        </p>
 
-            <div class="player-photo">
+
+        <div class="profile-preview-card">
+
+            <div class="profile-preview-avatar">
+
+                <div
+                    id="finalDefaultAvatar"
+                    class="default-avatar-icon">
+
+                    <i class="fa-solid fa-user"></i>
+
+                </div>
+
 
                 <img
-                    src="https://i.pravatar.cc/300?img=44"
-                    alt="Lina"
-                >
-
-                <span class="online-dot"></span>
-
-            </div>
-
-            <span class="player-name">
-                Lina
-            </span>
-
-        </button>
-
-
-        <!-- YOU -->
-
-        <button
-            class="player-card your-card"
-            data-player-card="You">
-
-            <div class="player-photo your-avatar">
-
-                <img
-                    data-player-avatar
-                    id="game-avatar"
-                    src=""
+                    id="finalAvatar"
+                    class="avatar-preview hidden"
                     alt="Your avatar"
                 >
 
             </div>
 
 
-            <span
-                data-player-name
-                class="player-name">
+            <h2 id="finalName">
+                Your Name
+            </h2>
 
-                You
 
-            </span>
+            <p id="finalInfo">
+                18
+            </p>
+
+        </div>
+
+
+        <button
+            class="primary-button"
+            onclick="finishSetup()">
+
+            Enter FlirthubX
 
         </button>
 
     </section>
 
-
-    <!-- =================================================
-         GAME ACTIONS
-    ================================================== -->
-
-    <section class="game-actions">
+</div>
 
 
-        <!-- GIFT -->
+<!-- =====================================================
+     MAIN APP
+===================================================== -->
 
-        <button
-            id="gift-button"
-            class="action-button gift-action">
-
-            <i class="fa-solid fa-gift"></i>
-
-            <span>
-                Gift
-            </span>
-
-        </button>
-
-
-        <!-- ADMIRE -->
-
-        <button
-            class="action-button admire-action">
-
-            <i class="fa-solid fa-star"></i>
-
-            <span>
-                Admire
-            </span>
-
-        </button>
-
-
-        <!-- LOVE -->
-
-        <button
-            class="action-button love-action">
-
-            <i class="fa-solid fa-heart"></i>
-
-            <span>
-                Love
-            </span>
-
-        </button>
-
-    </section>
+<div id="appScreen"
+     class="app-screen hidden">
 
 
     <!-- =================================================
-         GAME MESSAGES
+         GAME
     ================================================== -->
 
-    <div
-        id="game-messages"
-        class="game-messages">
+    <main id="gameSection"
+          class="app-section active-section">
 
-    </div>
+        <header class="game-header">
+
+
+            <!-- HEART -->
+
+            <div class="currency-button">
+
+                <div class="currency-icon heart-icon">
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+
+                <span id="heartCount">
+                    12
+                </span>
+
+            </div>
+
+
+            <!-- COINS -->
+
+            <div class="currency-button">
+
+                <div class="currency-icon coin-icon">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+
+                <span id="coinCount">
+                    250
+                </span>
+
+            </div>
+
+
+            <!-- ROOM -->
+
+            <div class="room-title">
+
+                <strong>
+                    Room 4
+                </strong>
+
+                <span id="roomPlayers">
+                    4/10
+                </span>
+
+            </div>
+
+
+            <!-- STORE -->
+
+            <button
+                class="game-icon-button"
+                onclick="openStore()">
+
+                <i class="fa-solid fa-bag-shopping"></i>
+
+            </button>
+
+
+            <!-- REFRESH -->
+
+            <button
+                class="game-icon-button"
+                onclick="refreshRoom()">
+
+                <i class="fa-solid fa-arrows-rotate"></i>
+
+            </button>
+
+        </header>
+
+
+        <!-- ROOM -->
+
+        <section class="room-area">
+
+
+            <!-- ALEX -->
+
+            <button
+                class="player-card"
+                onclick="openPlayerProfile('Alex')">
+
+                <div class="player-photo">
+
+                    <img
+                        src="https://i.pravatar.cc/300?img=12"
+                        alt="Alex"
+                    >
+
+                    <span class="online-dot"></span>
+
+                </div>
+
+                <span class="player-name">
+                    Alex
+                </span>
+
+            </button>
+
+
+            <!-- MIA -->
+
+            <button
+                class="player-card"
+                onclick="openPlayerProfile('Mia')">
+
+                <div class="player-photo">
+
+                    <img
+                        src="https://i.pravatar.cc/300?img=47"
+                        alt="Mia"
+                    >
+
+                    <span class="online-dot"></span>
+
+                </div>
+
+                <span class="player-name">
+                    Mia
+                </span>
+
+            </button>
+
+
+            <!-- BOTTLE -->
+
+            <div class="spin-area">
+
+                <button
+                    id="spinBottleButton"
+                    class="spin-bottle-button"
+                    onclick="spinBottle()">
+
+                    <div class="bottle-glow"></div>
+
+                    <div class="bottle">
+                        🍾
+                    </div>
+
+                </button>
+
+
+                <h2>
+                    Spin Bottle
+                </h2>
+
+                <p id="spinStatus">
+                    Tap the bottle to spin
+                </p>
+
+            </div>
+
+
+            <!-- LINA -->
+
+            <button
+                class="player-card"
+                onclick="openPlayerProfile('Lina')">
+
+                <div class="player-photo">
+
+                    <img
+                        src="https://i.pravatar.cc/300?img=44"
+                        alt="Lina"
+                    >
+
+                    <span class="online-dot"></span>
+
+                </div>
+
+                <span class="player-name">
+                    Lina
+                </span>
+
+            </button>
+
+
+            <!-- YOU -->
+
+            <button
+                class="player-card your-card"
+                onclick="openOwnProfile()">
+
+                <div class="player-photo your-avatar">
+
+                    <div
+                        id="gameDefaultAvatar"
+                        class="default-avatar-icon">
+
+                        <i class="fa-solid fa-user"></i>
+
+                    </div>
+
+
+                    <img
+                        id="gameAvatar"
+                        class="hidden"
+                        alt="You"
+                    >
+
+                </div>
+
+
+                <span
+                    id="gamePlayerName"
+                    class="player-name">
+
+                    You
+
+                </span>
+
+            </button>
+
+        </section>
+
+
+        <!-- ACTIONS -->
+
+        <section class="game-actions">
+
+            <button
+                class="action-button"
+                onclick="openGiftPanel()">
+
+                <i class="fa-solid fa-gift"></i>
+
+                <span>
+                    Gift
+                </span>
+
+            </button>
+
+
+            <button
+                class="action-button"
+                onclick="admireCurrentPlayer()">
+
+                <i class="fa-solid fa-star"></i>
+
+                <span>
+                    Admire
+                </span>
+
+            </button>
+
+
+            <button
+                class="action-button"
+                onclick="sendLove()">
+
+                <i class="fa-solid fa-heart"></i>
+
+                <span>
+                    Love
+                </span>
+
+            </button>
+
+        </section>
+
+    </main>
 
 
     <!-- =================================================
-         CHAT INPUT
+         MESSAGES
     ================================================== -->
 
-    <div class="chat-input-area">
-
-        <input
-            id="message-input"
-            type="text"
-            placeholder="Message..."
-            autocomplete="off"
-        >
-
-
-        <button
-            id="send-message"
-            class="send-message-button">
-
-            <i class="fa-solid fa-paper-plane"></i>
-
-        </button>
-
-    </div>
-
-
-    <!-- =================================================
-         BOTTOM NAVIGATION
-    ================================================== -->
-
-    <nav class="bottom-navigation">
-
-
-        <!-- GAME -->
-
-        <button
-            class="nav-button active"
-            data-tab="game">
-
-            <i class="fa-solid fa-gamepad"></i>
-
-            <span>
-                Game
-            </span>
-
-        </button>
-
-
-        <!-- MESSAGE -->
-
-        <button
-            class="nav-button"
-            data-tab="message">
-
-            <i class="fa-regular fa-comment-dots"></i>
-
-            <span>
-                Messages
-            </span>
-
-            <span
-                id="message-badge"
-                class="nav-badge hidden">
-
-                1
-
-            </span>
-
-        </button>
-
-
-        <!-- ACCOUNT -->
-
-        <button
-            class="nav-button"
-            data-tab="account">
-
-            <i class="fa-regular fa-user"></i>
-
-            <span>
-                Account
-            </span>
-
-        </button>
-
-    </nav>
-
-
-    <!-- =================================================
-         GAME TAB
-    ================================================== -->
-
-    <section
-        id="game-tab"
-        class="app-tab active">
-
-        <!-- Game content is already above -->
-
-    </section>
-
-
-    <!-- =================================================
-         MESSAGE TAB
-    ================================================== -->
-
-    <section
-        id="message-tab"
-        class="app-tab"
-        style="display:none;">
+    <main
+        id="messagesSection"
+        class="app-section hidden">
 
         <header class="messages-header">
 
@@ -659,12 +656,13 @@
         </header>
 
 
-        <div
-            id="messages-list"
-            class="chat-list">
+        <!-- CHAT LIST -->
 
+        <section class="chat-list">
 
-            <button class="chat-item">
+            <button
+                class="chat-item"
+                onclick="openChat('Alex')">
 
                 <div class="chat-avatar">
 
@@ -690,10 +688,16 @@
 
                 </div>
 
+                <span class="chat-time">
+                    10:34
+                </span>
+
             </button>
 
 
-            <button class="chat-item">
+            <button
+                class="chat-item"
+                onclick="openChat('Mia')">
 
                 <div class="chat-avatar">
 
@@ -714,15 +718,21 @@
                     </strong>
 
                     <p>
-                        Hey! Are you playing tonight?
+                        Are you playing tonight?
                     </p>
 
                 </div>
 
+                <span class="chat-time">
+                    09:52
+                </span>
+
             </button>
 
 
-            <button class="chat-item">
+            <button
+                class="chat-item"
+                onclick="openChat('Lina')">
 
                 <div class="chat-avatar">
 
@@ -746,21 +756,125 @@
 
                 </div>
 
+                <span class="chat-time">
+                    Yesterday
+                </span>
+
             </button>
 
-        </div>
+        </section>
 
-    </section>
+
+        <!-- CHAT WINDOW -->
+
+        <section
+            id="chatWindow"
+            class="chat-window hidden">
+
+            <header class="chat-header">
+
+                <button
+                    class="chat-back"
+                    onclick="closeChat()">
+
+                    <i class="fa-solid fa-arrow-left"></i>
+
+                </button>
+
+
+                <div class="chat-header-person">
+
+                    <div class="chat-avatar small">
+
+                        <img
+                            id="activeChatAvatar"
+                            src=""
+                            alt=""
+                        >
+
+                    </div>
+
+
+                    <div>
+
+                        <strong id="activeChatName">
+                            Alex
+                        </strong>
+
+                        <span>
+                            Online
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </header>
+
+
+            <div
+                id="chatMessages"
+                class="chat-messages">
+
+                <div class="message received">
+
+                    <div class="message-bubble">
+                        Nice to meet you! 😊
+                    </div>
+
+                    <small>
+                        10:34
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- INPUT -->
+
+            <div class="chat-input-area">
+
+                <button
+                    class="emoji-button"
+                    onclick="addEmoji()">
+
+                    <i class="fa-regular fa-face-smile"></i>
+
+                </button>
+
+
+                <input
+                    id="messageInput"
+                    type="text"
+                    placeholder="Message..."
+                    autocomplete="off"
+                    onkeydown="handleMessageKey(event)"
+                >
+
+
+                <button
+                    class="send-message-button"
+                    onclick="sendChatMessage()">
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
 
 
     <!-- =================================================
-         ACCOUNT TAB
+         ACCOUNT
     ================================================== -->
 
-    <section
-        id="account-tab"
-        class="app-tab"
-        style="display:none;">
+    <main
+        id="accountSection"
+        class="app-section hidden">
 
         <header class="account-header">
 
@@ -776,69 +890,72 @@
 
             </div>
 
+            <button
+                class="header-circle-button"
+                onclick="openSettings()">
+
+                <i class="fa-solid fa-gear"></i>
+
+            </button>
+
         </header>
 
 
         <section class="account-profile-card">
 
-
             <div class="large-account-avatar">
 
+                <div
+                    id="accountDefaultAvatar"
+                    class="default-avatar-icon">
+
+                    <i class="fa-solid fa-user"></i>
+
+                </div>
+
+
                 <img
-                    data-player-avatar
-                    src=""
+                    id="accountAvatar"
+                    class="hidden"
                     alt="Your avatar"
                 >
 
             </div>
 
 
-            <input
-                id="account-name"
-                type="text"
-                placeholder="Your name"
-            >
+            <h2 id="accountName">
+                Your Name
+            </h2>
 
 
-            <input
-                id="account-age"
-                type="number"
-                min="18"
-                max="100"
-                placeholder="Age"
-            >
-
-
-            <p
-                id="account-gender">
-                Gender
+            <p id="accountAge">
+                18
             </p>
 
 
-            <button
-                id="save-account"
-                class="primary-button">
+            <div class="account-level">
 
-                Save Profile
+                <span>
+                    Level 1
+                </span>
 
-            </button>
+                <span>
+                    0 XP
+                </span>
+
+            </div>
 
         </section>
 
 
         <section class="account-menu">
 
-
-            <button class="account-menu-item">
-
-                <div class="menu-icon blue">
-
-                    <i class="fa-solid fa-bag-shopping"></i>
-
-                </div>
+            <button
+                class="account-menu-item"
+                onclick="openInventory()">
 
                 <span>
-                    Inventory
+                    👜 Inventory
                 </span>
 
                 <i class="fa-solid fa-chevron-right"></i>
@@ -846,16 +963,12 @@
             </button>
 
 
-            <button class="account-menu-item">
-
-                <div class="menu-icon pink">
-
-                    <i class="fa-solid fa-heart"></i>
-
-                </div>
+            <button
+                class="account-menu-item"
+                onclick="openRelationships()">
 
                 <span>
-                    My Relationships
+                    ❤️ My Relationships
                 </span>
 
                 <i class="fa-solid fa-chevron-right"></i>
@@ -863,16 +976,12 @@
             </button>
 
 
-            <button class="account-menu-item">
-
-                <div class="menu-icon purple">
-
-                    <i class="fa-solid fa-eye"></i>
-
-                </div>
+            <button
+                class="account-menu-item"
+                onclick="openGuests()">
 
                 <span>
-                    Guests
+                    👀 Guests
                 </span>
 
                 <i class="fa-solid fa-chevron-right"></i>
@@ -880,16 +989,25 @@
             </button>
 
 
-            <button class="account-menu-item">
-
-                <div class="menu-icon telegram">
-
-                    <i class="fa-brands fa-telegram"></i>
-
-                </div>
+            <button
+                class="account-menu-item"
+                onclick="openClub()">
 
                 <span>
-                    Invite Friends
+                    🛡️ Club
+                </span>
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </button>
+
+
+            <button
+                class="account-menu-item"
+                onclick="inviteFriends()">
+
+                <span>
+                    ✈️ Invite Friends
                 </span>
 
                 <strong>
@@ -900,164 +1018,363 @@
 
         </section>
 
-    </section>
+
+        <section class="account-menu">
+
+            <button
+                class="account-menu-item"
+                onclick="editProfile()">
+
+                <span>
+                    👤 Profile settings
+                </span>
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </button>
+
+
+            <button
+                class="account-menu-item"
+                onclick="openSettings()">
+
+                <span>
+                    ⚙️ System settings
+                </span>
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <!-- =================================================
+         BOTTOM NAV
+    ================================================== -->
+
+    <nav class="bottom-navigation">
+
+        <button
+            id="gameNav"
+            class="nav-button active"
+            onclick="switchSection('game')">
+
+            <i class="fa-solid fa-gamepad"></i>
+
+            <span>
+                Game
+            </span>
+
+        </button>
+
+
+        <button
+            id="messagesNav"
+            class="nav-button"
+            onclick="switchSection('messages')">
+
+            <i class="fa-regular fa-comment-dots"></i>
+
+            <span>
+                Messages
+            </span>
+
+            <span
+                id="messageBadge"
+                class="nav-badge hidden">
+
+                1
+
+            </span>
+
+        </button>
+
+
+        <button
+            id="accountNav"
+            class="nav-button"
+            onclick="switchSection('account')">
+
+            <i class="fa-regular fa-user"></i>
+
+            <span>
+                Account
+            </span>
+
+        </button>
+
+    </nav>
 
 </div>
 
 
 <!-- =====================================================
-     GIFT PANEL
+     GIFT MODAL
 ===================================================== -->
 
 <div
-    id="gift-panel"
-    class="gift-panel">
+    id="giftPanel"
+    class="modal hidden">
 
-    <div class="gift-panel-header">
-
-        <h2>
-            Send a Gift 🎁
-        </h2>
-
-        <button
-            id="close-gift">
-
-            <i class="fa-solid fa-xmark"></i>
-
-        </button>
-
+    <div
+        class="modal-overlay"
+        onclick="closeGiftPanel()">
     </div>
 
 
-    <div class="gift-grid">
+    <div class="gift-modal">
+
+        <div class="modal-header">
+
+            <h2>
+                Send a Gift 🎁
+            </h2>
+
+            <button
+                onclick="closeGiftPanel()">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
 
 
-        <button
-            class="gift-item"
-            data-gift="Phone"
-            data-target="Alex">
+        <div class="gift-grid">
 
-            <span class="gift-image">
-                📱
+            <button
+                class="gift-item"
+                onclick="sendGift('Coffee', 5)">
+
+                <span>
+                    ☕
+                </span>
+
+                <strong>
+                    Coffee
+                </strong>
+
+                <small>
+                    ❤️ 5
+                </small>
+
+            </button>
+
+
+            <button
+                class="gift-item"
+                onclick="sendGift('Rose', 10)">
+
+                <span>
+                    🌹
+                </span>
+
+                <strong>
+                    Rose
+                </strong>
+
+                <small>
+                    ❤️ 10
+                </small>
+
+            </button>
+
+
+            <button
+                class="gift-item"
+                onclick="sendGift('Cake', 15)">
+
+                <span>
+                    🎂
+                </span>
+
+                <strong>
+                    Cake
+                </strong>
+
+                <small>
+                    ❤️ 15
+                </small>
+
+            </button>
+
+
+            <button
+                class="gift-item"
+                onclick="sendGift('Teddy', 20)">
+
+                <span>
+                    🧸
+                </span>
+
+                <strong>
+                    Teddy
+                </strong>
+
+                <small>
+                    ❤️ 20
+                </small>
+
+            </button>
+
+
+            <button
+                class="gift-item"
+                onclick="sendGift('Diamond', 50)">
+
+                <span>
+                    💎
+                </span>
+
+                <strong>
+                    Diamond
+                </strong>
+
+                <small>
+                    ❤️ 50
+                </small>
+
+            </button>
+
+
+            <button
+                class="gift-item"
+                onclick="sendGift('Kiss', 30)">
+
+                <span>
+                    💋
+                </span>
+
+                <strong>
+                    Kiss
+                </strong>
+
+                <small>
+                    ❤️ 30
+                </small>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     STORE
+===================================================== -->
+
+<div
+    id="storeModal"
+    class="modal hidden">
+
+    <div
+        class="modal-overlay"
+        onclick="closeStore()">
+    </div>
+
+
+    <div class="store-modal">
+
+        <div class="modal-header">
+
+            <h2>
+                Store 🛍️
+            </h2>
+
+            <button
+                onclick="closeStore()">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        <div class="store-balance">
+
+            <span>
+                Your coins
             </span>
 
             <strong>
-                Phone
+                🪙 <span id="storeCoinCount">250</span>
             </strong>
 
-        </button>
+        </div>
 
 
-        <button
-            class="gift-item"
-            data-gift="Coffee"
-            data-target="Alex">
+        <div class="store-items">
 
-            <span class="gift-image">
-                ☕
-            </span>
+            <button
+                class="store-item"
+                onclick="buyHearts(5, 20)">
 
-            <strong>
-                Coffee
-            </strong>
+                ❤️
 
-        </button>
+                <div>
 
+                    <strong>
+                        5 Hearts
+                    </strong>
 
-        <button
-            class="gift-item"
-            data-gift="Rose"
-            data-target="Mia">
+                    <small>
+                        🪙 20
+                    </small>
 
-            <span class="gift-image">
-                🌹
-            </span>
+                </div>
 
-            <strong>
-                Rose
-            </strong>
-
-        </button>
+            </button>
 
 
-        <button
-            class="gift-item"
-            data-gift="Cake"
-            data-target="Lina">
+            <button
+                class="store-item"
+                onclick="buyHearts(15, 50)">
 
-            <span class="gift-image">
-                🎂
-            </span>
+                💖
 
-            <strong>
-                Cake
-            </strong>
+                <div>
 
-        </button>
+                    <strong>
+                        15 Hearts
+                    </strong>
 
+                    <small>
+                        🪙 50
+                    </small>
 
-        <button
-            class="gift-item"
-            data-gift="Teddy"
-            data-target="Alex">
+                </div>
 
-            <span class="gift-image">
-                🧸
-            </span>
-
-            <strong>
-                Teddy
-            </strong>
-
-        </button>
+            </button>
 
 
-        <button
-            class="gift-item"
-            data-gift="Diamond"
-            data-target="Mia">
+            <button
+                class="store-item"
+                onclick="buyHearts(40, 100)">
 
-            <span class="gift-image">
-                💎
-            </span>
+                💝
 
-            <strong>
-                Diamond
-            </strong>
+                <div>
 
-        </button>
+                    <strong>
+                        40 Hearts
+                    </strong>
 
+                    <small>
+                        🪙 100
+                    </small>
 
-        <button
-            class="gift-item"
-            data-gift="Headphones"
-            data-target="Lina">
+                </div>
 
-            <span class="gift-image">
-                🎧
-            </span>
+            </button>
 
-            <strong>
-                Headphones
-            </strong>
-
-        </button>
-
-
-        <button
-            class="gift-item"
-            data-gift="Kiss"
-            data-target="Alex">
-
-            <span class="gift-image">
-                💋
-            </span>
-
-            <strong>
-                Kiss
-            </strong>
-
-        </button>
+        </div>
 
     </div>
 
@@ -1069,14 +1386,20 @@
 ===================================================== -->
 
 <div
-    id="player-profile"
-    class="player-profile">
+    id="playerProfileModal"
+    class="modal hidden">
 
-    <div class="profile-modal">
+    <div
+        class="modal-overlay"
+        onclick="closePlayerProfile()">
+    </div>
+
+
+    <div class="player-profile-modal">
 
         <button
-            id="close-player-profile"
-            class="profile-close">
+            class="profile-close"
+            onclick="closePlayerProfile()">
 
             <i class="fa-solid fa-xmark"></i>
 
@@ -1086,6 +1409,7 @@
         <div class="profile-cover">
 
             <img
+                id="profilePlayerImage"
                 src=""
                 alt="Player"
             >
@@ -1095,67 +1419,56 @@
 
         <div class="profile-content">
 
-            <h2 data-profile-name>
+            <h2 id="profilePlayerName">
                 Alex
             </h2>
 
-
-            <p>
+            <p id="profilePlayerAge">
                 20
             </p>
 
 
             <div class="profile-stat">
-
+                🏆
                 <span>
-                    🏆
-                </span>
-
-                <strong>
                     Rank #24
-                </strong>
-
+                </span>
             </div>
 
 
             <div class="profile-stat">
-
+                ❤️
                 <span>
-                    ❤️
-                </span>
-
-                <strong>
                     Admire 55
-                </strong>
-
+                </span>
             </div>
 
 
             <div class="profile-stat">
-
+                👑
                 <span>
-                    👑
+                    Diamond League
                 </span>
-
-                <strong>
-                    Diamond
-                </strong>
-
             </div>
 
 
             <div class="profile-actions">
 
-                <button class="profile-action">
+                <button
+                    class="profile-action"
+                    onclick="admirePlayerFromProfile()">
+
                     ❤️ Admire
+
                 </button>
 
-                <button class="profile-action">
+
+                <button
+                    class="profile-action"
+                    onclick="giftPlayerFromProfile()">
+
                     🎁 Gift
-                </button>
 
-                <button class="profile-action">
-                    Kick
                 </button>
 
             </div>
@@ -1168,10 +1481,76 @@
 
 
 <!-- =====================================================
+     SPIN RESULT
+===================================================== -->
+
+<div
+    id="spinModal"
+    class="modal hidden">
+
+    <div
+        class="modal-overlay"
+        onclick="closeSpinModal()">
+    </div>
+
+
+    <div class="spin-result-modal">
+
+        <div class="spin-result-bottle">
+            🍾
+        </div>
+
+
+        <h2>
+            Bottle stopped! 🎉
+        </h2>
+
+
+        <p>
+            The bottle chose:
+        </p>
+
+
+        <strong id="selectedPlayer">
+            Alex
+        </strong>
+
+
+        <button
+            class="primary-button"
+            onclick="closeSpinModal()">
+
+            Continue
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div
+    id="toast"
+    class="toast hidden">
+
+    <i class="fa-solid fa-circle-check"></i>
+
+    <span id="toastMessage">
+        Done!
+    </span>
+
+</div>
+
+
+<!-- =====================================================
      JAVASCRIPT
 ===================================================== -->
 
-<script src="game.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
