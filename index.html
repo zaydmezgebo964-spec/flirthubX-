@@ -2,15 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta
+        name="theme-color"
+        content="#111111"
+    >
 
     <title>FlirtHubX</title>
 
     <!-- Telegram Mini App -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- PART 2/5 will add the complete design here -->
+    <!-- Main stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -18,13 +26,13 @@
 
 <!-- =========================================================
      FLIRTHUBX
-     PART 1/5 — MAIN HTML STRUCTURE
-     ========================================================= -->
+     MAIN HTML
+========================================================= -->
 
 
-<!-- =========================
+<!-- =========================================================
      LOADING SCREEN
-     ========================= -->
+========================================================= -->
 
 <section id="loadingScreen" class="screen active">
 
@@ -47,11 +55,11 @@
 </section>
 
 
-<!-- =========================
+<!-- =========================================================
      START SCREEN
-     ========================= -->
+========================================================= -->
 
-<section id="startScreen" class="screen">
+<section id="startScreen" class="screen hidden">
 
     <div class="start-content">
 
@@ -66,7 +74,11 @@
             Play together. Find your connection.
         </p>
 
-        <button id="startButton" class="primary-button">
+        <button
+            id="startButton"
+            class="primary-button"
+            type="button"
+        >
             START
         </button>
 
@@ -79,29 +91,49 @@
 </section>
 
 
-<!-- =========================
-     ACCOUNT CREATION
-     ========================= -->
+<!-- =========================================================
+     PROFILE / ACCOUNT CREATION
+========================================================= -->
 
-<section id="accountScreen" class="screen">
+<section id="profileScreen" class="screen hidden">
 
     <div class="page-header">
-        <button class="back-button" id="accountBack">
+
+        <button
+            id="profileBackButton"
+            class="back-button"
+            type="button"
+        >
             ‹
         </button>
 
         <h2>Create your profile</h2>
+
     </div>
+
 
     <div class="account-container">
 
-        <div class="avatar-preview" id="avatarPreview">
+        <!-- Avatar preview -->
+
+        <div
+            id="avatarPreview"
+            class="avatar-preview"
+        >
             <span>?</span>
         </div>
 
-        <button id="chooseAvatarButton" class="secondary-button">
+
+        <!-- Avatar button -->
+
+        <button
+            id="chooseAvatarButton"
+            class="secondary-button"
+            type="button"
+        >
             Choose Photo
         </button>
+
 
         <input
             type="file"
@@ -110,30 +142,40 @@
             hidden
         >
 
-        <label>
+
+        <!-- Name -->
+
+        <label for="playerName">
             Name
         </label>
 
         <input
             type="text"
-            id="nameInput"
+            id="playerName"
             class="text-input"
             placeholder="Enter your name"
             maxlength="30"
+            autocomplete="name"
         >
 
-        <label>
+
+        <!-- Age -->
+
+        <label for="playerAge">
             Age
         </label>
 
         <input
             type="number"
-            id="ageInput"
+            id="playerAge"
             class="text-input"
             placeholder="18"
             min="18"
             max="100"
         >
+
+
+        <!-- Gender -->
 
         <label>
             Gender
@@ -142,24 +184,42 @@
         <div class="gender-buttons">
 
             <button
-                class="gender-button"
-                data-gender="male">
+                class="gender-option gender-button"
+                data-gender="Male"
+                type="button"
+            >
                 👨 Male
             </button>
 
             <button
-                class="gender-button"
-                data-gender="female">
+                class="gender-option gender-button"
+                data-gender="Female"
+                type="button"
+            >
                 👩 Female
+            </button>
+
+            <button
+                class="gender-option gender-button"
+                data-gender="Non-Binary"
+                type="button"
+            >
+                🧑 Non-Binary
             </button>
 
         </div>
 
+
+        <!-- Continue -->
+
         <button
-            id="createAccountButton"
-            class="primary-button">
-            CREATE ACCOUNT
+            id="continueProfileButton"
+            class="primary-button"
+            type="button"
+        >
+            CONTINUE
         </button>
+
 
         <p class="small-warning">
             You must be 18 or older to use FlirtHubX.
@@ -170,11 +230,129 @@
 </section>
 
 
-<!-- =========================
-     MAIN HOME / ROOM
-     ========================= -->
+<!-- =========================================================
+     AVATAR SELECTION
+========================================================= -->
 
-<section id="homeScreen" class="screen">
+<section id="avatarScreen" class="screen hidden">
+
+    <div class="page-header">
+
+        <button
+            id="avatarBackButton"
+            class="back-button"
+            type="button"
+        >
+            ‹
+        </button>
+
+        <h2>Choose your avatar</h2>
+
+    </div>
+
+
+    <div class="avatar-selection">
+
+        <p class="modal-description">
+            Choose the avatar you want to use.
+        </p>
+
+
+        <div class="avatar-grid">
+
+            <button
+                class="avatar-option"
+                data-avatar="https://i.pravatar.cc/300?img=12"
+                type="button"
+            >
+                <img
+                    src="https://i.pravatar.cc/300?img=12"
+                    alt="Avatar"
+                >
+            </button>
+
+
+            <button
+                class="avatar-option"
+                data-avatar="https://i.pravatar.cc/300?img=47"
+                type="button"
+            >
+                <img
+                    src="https://i.pravatar.cc/300?img=47"
+                    alt="Avatar"
+                >
+            </button>
+
+
+            <button
+                class="avatar-option"
+                data-avatar="https://i.pravatar.cc/300?img=11"
+                type="button"
+            >
+                <img
+                    src="https://i.pravatar.cc/300?img=11"
+                    alt="Avatar"
+                >
+            </button>
+
+
+            <button
+                class="avatar-option"
+                data-avatar="https://i.pravatar.cc/300?img=44"
+                type="button"
+            >
+                <img
+                    src="https://i.pravatar.cc/300?img=44"
+                    alt="Avatar"
+                >
+            </button>
+
+
+            <button
+                class="avatar-option"
+                data-avatar="https://i.pravatar.cc/300?img=32"
+                type="button"
+            >
+                <img
+                    src="https://i.pravatar.cc/300?img=32"
+                    alt="Avatar"
+                >
+            </button>
+
+
+            <button
+                class="avatar-option"
+                data-avatar="https://i.pravatar.cc/300?img=25"
+                type="button"
+            >
+                <img
+                    src="https://i.pravatar.cc/300?img=25"
+                    alt="Avatar"
+                >
+            </button>
+
+        </div>
+
+
+        <button
+            id="finishProfileButton"
+            class="primary-button"
+            type="button"
+        >
+            ENTER FLIRTHUBX
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     HOME / ROOM
+========================================================= -->
+
+<section id="homeScreen" class="screen hidden">
+
 
     <!-- TOP BAR -->
 
@@ -182,36 +360,57 @@
 
         <button
             id="profileButton"
-            class="top-icon">
+            class="top-icon"
+            type="button"
+        >
             👤
         </button>
 
+
         <div class="heart-balance">
+
             ❤️
-            <span id="heartBalance">50</span>
-            <button id="buyHeartButton">+</button>
+
+            <span id="heartBalance">
+                50
+            </span>
+
+            <button
+                id="buyHeartButton"
+                type="button"
+            >
+                +
+            </button>
+
         </div>
+
 
         <button
             id="songButton"
-            class="top-icon">
+            class="top-icon"
+            type="button"
+        >
             🎵
         </button>
 
+
         <button
             id="settingsButton"
-            class="top-icon">
+            class="top-icon"
+            type="button"
+        >
             ⚙️
         </button>
 
     </header>
 
 
-    <!-- ROOM INFORMATION -->
+    <!-- ROOM HEADER -->
 
     <div class="room-header">
 
         <div>
+
             <span class="room-label">
                 ROOM
             </span>
@@ -219,11 +418,15 @@
             <strong id="roomNumber">
                 1
             </strong>
+
         </div>
+
 
         <button
             id="changeRoomButton"
-            class="change-room-button">
+            class="change-room-button"
+            type="button"
+        >
             🔄 Change
         </button>
 
@@ -234,9 +437,13 @@
 
     <div class="league-card">
 
-        <div class="league-icon" id="leagueIcon">
+        <div
+            class="league-icon"
+            id="leagueIcon"
+        >
             🥉
         </div>
+
 
         <div class="league-information">
 
@@ -250,21 +457,28 @@
 
         </div>
 
+
         <div class="league-time">
-            <span>Ends in</span>
+
+            <span>
+                Ends in
+            </span>
+
             <strong id="leagueTimer">
                 23:59:59
             </strong>
+
         </div>
 
     </div>
 
 
-    <!-- ROOM PLAYERS -->
+    <!-- PLAYERS -->
 
     <div class="room-area">
 
         <div class="room-title">
+
             <span>
                 Players
             </span>
@@ -272,30 +486,33 @@
             <span id="playerCount">
                 0 / 10
             </span>
+
         </div>
 
+
         <div
-            id="playerGrid"
-            class="player-grid">
-
-            <!-- JavaScript PART 3/5 will create players here -->
-
+            id="roomMembers"
+            class="player-grid"
+        >
+            <!-- Players generated by app.js -->
         </div>
 
     </div>
 
 
-    <!-- BOTTLE GAME -->
+    <!-- BOTTLE -->
 
     <div
         id="bottleArea"
-        class="bottle-area">
+        class="bottle-area"
+    >
 
         <div class="bottle-glow"></div>
 
         <div
             id="bottle"
-            class="bottle">
+            class="bottle"
+        >
             🍾
         </div>
 
@@ -312,22 +529,27 @@
 
         <div
             id="roomMessages"
-            class="messages">
-
-            <!-- Messages will appear here -->
-
+            class="messages"
+        >
+            <!-- Messages generated by app.js -->
         </div>
+
 
         <div class="message-input-area">
 
             <input
                 type="text"
-                id="roomMessageInput"
+                id="roomInput"
                 placeholder="Write a message here..."
                 maxlength="500"
+                autocomplete="off"
             >
 
-            <button id="sendRoomMessageButton">
+
+            <button
+                id="sendRoomMessageButton"
+                type="button"
+            >
                 ➤
             </button>
 
@@ -338,23 +560,149 @@
 </section>
 
 
-<!-- =========================
-     PLAYER CHOICE MODAL
-     ========================= -->
+<!-- =========================================================
+     ACCOUNT SCREEN
+========================================================= -->
+
+<section id="accountScreen" class="screen hidden">
+
+    <div class="page-header">
+
+        <button
+            id="accountBack"
+            class="back-button"
+            type="button"
+        >
+            ‹
+        </button>
+
+        <h2>
+            My Account
+        </h2>
+
+    </div>
+
+
+    <div class="account-container">
+
+        <img
+            id="accountAvatar"
+            class="profile-avatar"
+            src="https://i.pravatar.cc/300?img=12"
+            alt="Your avatar"
+        >
+
+
+        <h2 id="accountName">
+            Player
+        </h2>
+
+
+        <p>
+            Age:
+            <strong id="accountAge">
+                18
+            </strong>
+        </p>
+
+
+        <p>
+            Gender:
+            <strong id="accountGender">
+                Male
+            </strong>
+        </p>
+
+
+        <div class="profile-stats">
+
+            <div>
+                <strong id="heartBalanceAccount">
+                    50
+                </strong>
+
+                <span>
+                    Hearts
+                </span>
+            </div>
+
+
+            <div>
+                <strong id="moneyBalance">
+                    10
+                </strong>
+
+                <span>
+                    Money
+                </span>
+            </div>
+
+
+            <div>
+                <strong id="kissBalance">
+                    0
+                </strong>
+
+                <span>
+                    Kisses
+                </span>
+            </div>
+
+
+            <div>
+                <strong id="songPoints">
+                    0
+                </strong>
+
+                <span>
+                    Song Points
+                </span>
+            </div>
+
+        </div>
+
+
+        <p id="streakCount">
+            0 day streak
+        </p>
+
+
+        <span
+            id="premiumTag"
+            class="premium-tag hidden"
+        >
+            ✨ PREMIUM
+        </span>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     CHOICE MODAL
+========================================================= -->
 
 <div
     id="choiceModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box">
 
         <button
             class="modal-close"
-            data-close="choiceModal">
+            data-close="choiceModal"
+            type="button"
+        >
             ×
         </button>
 
-        <h2>Your choice</h2>
+
+        <h2>
+            Your choice
+        </h2>
+
 
         <div class="choice-players">
 
@@ -362,7 +710,8 @@
 
                 <div
                     id="choiceMyAvatar"
-                    class="choice-avatar">
+                    class="choice-avatar"
+                >
                     👤
                 </div>
 
@@ -372,15 +721,18 @@
 
             </div>
 
+
             <div class="choice-heart">
                 ❤️
             </div>
+
 
             <div class="choice-player">
 
                 <div
                     id="choiceTargetAvatar"
-                    class="choice-avatar">
+                    class="choice-avatar"
+                >
                     👤
                 </div>
 
@@ -392,23 +744,31 @@
 
         </div>
 
+
         <div class="choice-buttons">
 
             <button
                 id="refuseButton"
-                class="refuse-button">
+                class="refuse-button"
+                type="button"
+            >
                 REFUSE
             </button>
 
+
             <button
                 id="kissButton"
-                class="kiss-button">
+                class="kiss-button"
+                type="button"
+            >
                 💋 KISS
             </button>
 
         </div>
 
+
         <div class="kiss-countdown">
+
             <span>
                 Choose within
             </span>
@@ -420,6 +780,7 @@
             <span>
                 seconds
             </span>
+
         </div>
 
     </div>
@@ -427,34 +788,40 @@
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
      CHANGE ROOM MODAL
-     ========================= -->
+========================================================= -->
 
 <div
     id="roomModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box large-modal">
 
         <button
             class="modal-close"
-            data-close="roomModal">
+            data-close="roomModal"
+            type="button"
+        >
             ×
         </button>
 
-        <h2>Change Room</h2>
+
+        <h2>
+            Change Room
+        </h2>
+
 
         <p class="modal-description">
             Choose another available room.
         </p>
 
+
         <div
             id="roomList"
-            class="room-list">
-
-            <!-- JavaScript will create rooms -->
-
+            class="room-list"
+        >
         </div>
 
     </div>
@@ -462,64 +829,92 @@
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
      PROFILE MODAL
-     ========================= -->
+========================================================= -->
 
 <div
     id="profileModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box profile-modal">
 
         <button
             class="modal-close"
-            data-close="profileModal">
+            data-close="profileModal"
+            type="button"
+        >
             ×
         </button>
 
-        <div
+
+        <img
             id="profileAvatar"
-            class="profile-avatar">
-            👤
-        </div>
+            class="profile-avatar"
+            src="https://i.pravatar.cc/300?img=12"
+            alt="Profile"
+        >
+
 
         <h2 id="profileName">
             Your Name
         </h2>
 
+
         <p id="profileAge">
             18
         </p>
 
+
         <div class="profile-stats">
 
             <div>
+
                 <strong id="profileKisses">
                     0
                 </strong>
-                <span>Kisses</span>
+
+                <span>
+                    Kisses
+                </span>
+
             </div>
 
+
             <div>
+
                 <strong id="profileHearts">
                     50
                 </strong>
-                <span>Hearts</span>
+
+                <span>
+                    Hearts
+                </span>
+
             </div>
 
+
             <div>
+
                 <strong id="profileSongPoints">
                     0
                 </strong>
-                <span>Song Points</span>
+
+                <span>
+                    Song Points
+                </span>
+
             </div>
 
         </div>
 
+
         <div class="profile-league">
 
-            <span>League</span>
+            <span>
+                League
+            </span>
 
             <strong id="profileLeague">
                 🥉 Bronze
@@ -527,9 +922,12 @@
 
         </div>
 
+
         <button
             id="editProfileButton"
-            class="primary-button">
+            class="primary-button"
+            type="button"
+        >
             Edit Profile
         </button>
 
@@ -538,51 +936,65 @@
 </div>
 
 
-<!-- =========================
-     MESSAGE / FRIEND PROFILE
-     ========================= -->
+<!-- =========================================================
+     USER PROFILE MODAL
+========================================================= -->
 
 <div
     id="userModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box profile-modal">
 
         <button
             class="modal-close"
-            data-close="userModal">
+            data-close="userModal"
+            type="button"
+        >
             ×
         </button>
 
+
         <div
             id="userAvatar"
-            class="profile-avatar">
+            class="profile-avatar"
+        >
             👤
         </div>
+
 
         <h2 id="userName">
             Player
         </h2>
 
+
         <p id="userAge">
             18
         </p>
+
 
         <div class="user-actions">
 
             <button
                 id="messageUserButton"
-                class="primary-button">
+                class="primary-button"
+                type="button"
+            >
                 💬 Message
             </button>
 
+
             <button
                 id="blockUserButton"
-                class="danger-button">
+                class="danger-button"
+                type="button"
+            >
                 🚫 Block
             </button>
 
         </div>
+
 
         <div class="gift-section">
 
@@ -590,9 +1002,12 @@
                 Send a Gift
             </h3>
 
+
             <button
                 id="giftButton"
-                class="gift-button">
+                class="gift-button"
+                type="button"
+            >
                 🎁 Send Gift
             </button>
 
@@ -603,13 +1018,14 @@
 </div>
 
 
-<!-- =========================
-     PRIVATE CHAT MODAL
-     ========================= -->
+<!-- =========================================================
+     PRIVATE CHAT
+========================================================= -->
 
 <div
     id="chatModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="chat-window">
 
@@ -617,17 +1033,22 @@
 
             <button
                 class="modal-close"
-                data-close="chatModal">
+                data-close="chatModal"
+                type="button"
+            >
                 ‹
             </button>
+
 
             <div class="chat-user">
 
                 <div
                     id="chatAvatar"
-                    class="mini-avatar">
+                    class="mini-avatar"
+                >
                     👤
                 </div>
+
 
                 <div>
 
@@ -643,9 +1064,11 @@
 
             </div>
 
+
             <div
                 id="chatStreak"
-                class="chat-streak">
+                class="chat-streak"
+            >
                 🔥 0
             </div>
 
@@ -654,29 +1077,34 @@
 
         <div
             id="privateMessages"
-            class="private-messages">
-
-            <!-- Private messages appear here -->
-
+            class="private-messages"
+        >
         </div>
 
 
         <div class="chat-input-area">
 
             <button
-                id="chatSongButton">
+                id="chatSongButton"
+                type="button"
+            >
                 🎵
             </button>
+
 
             <input
                 type="text"
                 id="privateMessageInput"
                 placeholder="Message..."
                 maxlength="2000"
+                autocomplete="off"
             >
 
+
             <button
-                id="sendPrivateMessageButton">
+                id="sendPrivateMessageButton"
+                type="button"
+            >
                 ➤
             </button>
 
@@ -687,65 +1115,91 @@
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
      MESSAGE OPTIONS
-     ========================= -->
+========================================================= -->
 
 <div
     id="messageOptions"
-    class="message-options hidden">
+    class="message-options hidden"
+>
 
-    <button id="translateMessageButton">
+    <button
+        id="translateMessageButton"
+        type="button"
+    >
         🌐 Translate
     </button>
 
-    <button id="copyMessageButton">
+
+    <button
+        id="copyMessageButton"
+        type="button"
+    >
         📋 Copy
     </button>
 
-    <button id="replyMessageButton">
+
+    <button
+        id="replyMessageButton"
+        type="button"
+    >
         ↩️ Reply
     </button>
 
+
     <button
         id="blockFromMessageButton"
-        class="danger-text">
+        class="danger-text"
+        type="button"
+    >
         🚫 Block
     </button>
 
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
      TRANSLATION MODAL
-     ========================= -->
+========================================================= -->
 
 <div
     id="translationModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box">
 
         <button
             class="modal-close"
-            data-close="translationModal">
+            data-close="translationModal"
+            type="button"
+        >
             ×
         </button>
 
-        <h2>Translation</h2>
+
+        <h2>
+            Translation
+        </h2>
+
 
         <div
             id="originalMessage"
-            class="translation-original">
+            class="translation-original"
+        >
         </div>
+
 
         <div class="translation-arrow">
             ↓
         </div>
 
+
         <div
             id="translatedMessage"
-            class="translation-result">
+            class="translation-result"
+        >
             Translation will appear here.
         </div>
 
@@ -754,51 +1208,82 @@
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
      LANGUAGE MODAL
-     ========================= -->
+========================================================= -->
 
 <div
     id="languageModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box">
 
         <button
             class="modal-close"
-            data-close="languageModal">
+            data-close="languageModal"
+            type="button"
+        >
             ×
         </button>
 
-        <h2>Language</h2>
+
+        <h2>
+            Language
+        </h2>
+
 
         <p class="modal-description">
             Choose the language you want to use.
         </p>
 
+
         <div class="language-list">
 
-            <button data-language="en">
+            <button
+                data-language="en"
+                type="button"
+            >
                 🇬🇧 English
             </button>
 
-            <button data-language="ar">
+
+            <button
+                data-language="ar"
+                type="button"
+            >
                 🇸🇦 العربية
             </button>
 
-            <button data-language="ru">
+
+            <button
+                data-language="ru"
+                type="button"
+            >
                 🇷🇺 Русский
             </button>
 
-            <button data-language="tr">
+
+            <button
+                data-language="tr"
+                type="button"
+            >
                 🇹🇷 Türkçe
             </button>
 
-            <button data-language="uz">
+
+            <button
+                data-language="uz"
+                type="button"
+            >
                 🇺🇿 O'zbek
             </button>
 
-            <button data-language="ko">
+
+            <button
+                data-language="ko"
+                type="button"
+            >
                 🇰🇷 한국어
             </button>
 
@@ -809,57 +1294,83 @@
 </div>
 
 
-<!-- =========================
-     SONG MODAL
-     ========================= -->
+<!-- =========================================================
+     MUSIC MODAL
+========================================================= -->
 
 <div
-    id="songModal"
-    class="modal hidden">
+    id="musicModal"
+    class="modal hidden"
+>
 
     <div class="modal-box large-modal">
 
         <button
             class="modal-close"
-            data-close="songModal">
+            data-close="musicModal"
+            type="button"
+        >
             ×
         </button>
 
-        <h2>🎵 Music</h2>
+
+        <h2>
+            🎵 Music
+        </h2>
+
 
         <div class="song-tabs">
 
-            <button class="song-tab active">
+            <button
+                class="song-tab active"
+                type="button"
+            >
                 YouTube
             </button>
 
-            <button class="song-tab">
+
+            <button
+                class="song-tab"
+                type="button"
+            >
                 Favorites
             </button>
 
-            <button class="song-tab">
+
+            <button
+                class="song-tab"
+                type="button"
+            >
                 History
             </button>
 
         </div>
 
+
         <div class="song-search">
 
             <input
                 type="text"
-                id="songSearchInput"
+                id="musicSearch"
                 placeholder="Search a song..."
+                autocomplete="off"
             >
 
-            <button id="songSearchButton">
+
+            <button
+                id="musicSearchButton"
+                type="button"
+            >
                 🔍
             </button>
 
         </div>
 
+
         <div
-            id="songResults"
-            class="song-results">
+            id="musicResults"
+            class="song-results"
+        >
 
             <div class="empty-state">
                 Search for a song to play in the room.
@@ -867,38 +1378,206 @@
 
         </div>
 
+
+        <div
+            id="musicPlayer"
+            class="music-player hidden"
+        >
+
+            <strong id="musicTitle">
+                No song
+            </strong>
+
+
+            <button
+                id="closeMusicPlayerButton"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
     </div>
 
 </div>
 
 
-<!-- =========================
-     GIFT MODAL
-     ========================= -->
+<!-- =========================================================
+     STORE MODAL
+========================================================= -->
 
 <div
-    id="giftModal"
-    class="modal hidden">
+    id="storeModal"
+    class="modal hidden"
+>
 
     <div class="modal-box large-modal">
 
         <button
             class="modal-close"
-            data-close="giftModal">
+            data-close="storeModal"
+            type="button"
+        >
             ×
         </button>
 
-        <h2>🎁 Gifts</h2>
+
+        <h2>
+            ❤️ Heart Store
+        </h2>
+
+
+        <p class="modal-description">
+            Get Hearts and use them for gifts and special actions.
+        </p>
+
+
+        <button
+            class="store-item"
+            data-hearts="100"
+            data-stars="10"
+            type="button"
+        >
+            ❤️ 100 Hearts
+            <span>
+                ⭐ 10
+            </span>
+        </button>
+
+
+        <button
+            class="store-item"
+            data-hearts="500"
+            data-stars="40"
+            type="button"
+        >
+            ❤️ 500 Hearts
+            <span>
+                ⭐ 40
+            </span>
+        </button>
+
+
+        <button
+            class="store-item"
+            data-hearts="1000"
+            data-stars="70"
+            type="button"
+        >
+            ❤️ 1,000 Hearts
+            <span>
+                ⭐ 70
+            </span>
+        </button>
+
+
+        <button
+            id="dailyHeartsButton"
+            class="primary-button"
+            type="button"
+        >
+            🎁 CLAIM DAILY 50 HEARTS
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     GIFT MODAL
+========================================================= -->
+
+<div
+    id="giftModal"
+    class="modal hidden"
+>
+
+    <div class="modal-box large-modal">
+
+        <button
+            class="modal-close"
+            data-close="giftModal"
+            type="button"
+        >
+            ×
+        </button>
+
+
+        <h2>
+            🎁 Gifts
+        </h2>
+
 
         <p class="modal-description">
             Send a premium gift using ❤️ Hearts.
         </p>
 
+
         <div
             id="giftGrid"
-            class="gift-grid">
+            class="gift-grid"
+        >
 
-            <!-- PART 3/4 will add gifts -->
+            <button
+                class="gift-item"
+                data-cost="20"
+                type="button"
+            >
+                ☕
+                <strong>
+                    Hot Coffee
+                </strong>
+                <span>
+                    ❤️ 20
+                </span>
+            </button>
+
+
+            <button
+                class="gift-item"
+                data-cost="50"
+                type="button"
+            >
+                🌹
+                <strong>
+                    Red Roses
+                </strong>
+                <span>
+                    ❤️ 50
+                </span>
+            </button>
+
+
+            <button
+                class="gift-item"
+                data-cost="100"
+                type="button"
+            >
+                💎
+                <strong>
+                    Diamond
+                </strong>
+                <span>
+                    ❤️ 100
+                </span>
+            </button>
+
+
+            <button
+                class="gift-item"
+                data-cost="250"
+                type="button"
+            >
+                👑
+                <strong>
+                    Crown
+                </strong>
+                <span>
+                    ❤️ 250
+                </span>
+            </button>
 
         </div>
 
@@ -907,44 +1586,53 @@
 </div>
 
 
-<!-- =========================
-     EMOTION / AVATAR MODAL
-     ========================= -->
+<!-- =========================================================
+     EMOTION MODAL
+========================================================= -->
 
 <div
     id="emotionModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box large-modal">
 
         <button
             class="modal-close"
-            data-close="emotionModal">
+            data-close="emotionModal"
+            type="button"
+        >
             ×
         </button>
 
-        <h2>😊 Your Feelings</h2>
+
+        <h2>
+            😊 Your Feelings
+        </h2>
+
 
         <p class="modal-description">
-            Choose an avatar emotion to show how you feel.
+            Choose an emotion to send.
         </p>
+
 
         <div
             id="emotionGrid"
-            class="emotion-grid">
+            class="emotion-grid"
+        >
 
-            <button>😀</button>
-            <button>😂</button>
-            <button>😊</button>
-            <button>😍</button>
-            <button>🥰</button>
-            <button>😎</button>
-            <button>😢</button>
-            <button>😭</button>
-            <button>😡</button>
-            <button>🤔</button>
-            <button>😴</button>
-            <button>😜</button>
+            <button type="button">😀</button>
+            <button type="button">😂</button>
+            <button type="button">😊</button>
+            <button type="button">😍</button>
+            <button type="button">🥰</button>
+            <button type="button">😎</button>
+            <button type="button">😢</button>
+            <button type="button">😭</button>
+            <button type="button">😡</button>
+            <button type="button">🤔</button>
+            <button type="button">😴</button>
+            <button type="button">😜</button>
 
         </div>
 
@@ -953,46 +1641,86 @@
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
      SETTINGS MODAL
-     ========================= -->
+========================================================= -->
 
 <div
     id="settingsModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box large-modal">
 
         <button
             class="modal-close"
-            data-close="settingsModal">
+            data-close="settingsModal"
+            type="button"
+        >
             ×
         </button>
 
-        <h2>⚙️ Settings</h2>
+
+        <h2>
+            ⚙️ Settings
+        </h2>
+
 
         <div class="settings-list">
 
-            <button id="languageSettingButton">
-                <span>🌐 Language</span>
+            <button
+                id="languageSettingButton"
+                type="button"
+            >
+                <span>
+                    🌐 Language
+                </span>
+
                 <span id="currentLanguage">
                     English
                 </span>
             </button>
 
-            <button id="privacySettingButton">
-                <span>🔒 Privacy</span>
-                <span>›</span>
+
+            <button
+                id="privacySettingButton"
+                type="button"
+            >
+                <span>
+                    🔒 Privacy
+                </span>
+
+                <span>
+                    ›
+                </span>
             </button>
 
-            <button id="notificationsSettingButton">
-                <span>🔔 Notifications</span>
-                <span>›</span>
+
+            <button
+                id="notificationsSettingButton"
+                type="button"
+            >
+                <span>
+                    🔔 Notifications
+                </span>
+
+                <span>
+                    ›
+                </span>
             </button>
 
-            <button id="accountSettingButton">
-                <span>👤 Account</span>
-                <span>›</span>
+
+            <button
+                id="accountSettingButton"
+                type="button"
+            >
+                <span>
+                    👤 Account
+                </span>
+
+                <span>
+                    ›
+                </span>
             </button>
 
         </div>
@@ -1002,45 +1730,54 @@
 </div>
 
 
-<!-- =========================
-     DAILY REWARD MODAL
-     ========================= -->
+<!-- =========================================================
+     DAILY REWARD
+========================================================= -->
 
 <div
     id="rewardModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box reward-box">
 
         <button
             class="modal-close"
-            data-close="rewardModal">
+            data-close="rewardModal"
+            type="button"
+        >
             ×
         </button>
+
 
         <div class="reward-icon">
             🎁
         </div>
 
+
         <h2>
             Daily League Reward
         </h2>
+
 
         <p>
             Your league rewards are ready!
         </p>
 
+
         <div
             id="rewardContent"
-            class="reward-content">
-
+            class="reward-content"
+        >
             ❤️ +50 Hearts
-
         </div>
+
 
         <button
             id="claimRewardButton"
-            class="primary-button">
+            class="primary-button"
+            type="button"
+        >
             CLAIM REWARD
         </button>
 
@@ -1049,33 +1786,72 @@
 </div>
 
 
-<!-- =========================
-     PREMIUM FRAME MODAL
-     ========================= -->
+<!-- =========================================================
+     PREMIUM FRAME
+========================================================= -->
 
 <div
     id="frameModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box large-modal">
 
         <button
             class="modal-close"
-            data-close="frameModal">
+            data-close="frameModal"
+            type="button"
+        >
             ×
         </button>
 
-        <h2>✨ Premium Frames</h2>
+
+        <h2>
+            ✨ Premium Frames
+        </h2>
+
 
         <p class="modal-description">
-            Customize your profile picture and name.
+            Customize your profile picture.
         </p>
+
 
         <div
             id="frameGrid"
-            class="frame-grid">
+            class="frame-grid"
+        >
 
-            <!-- Premium frames will be added in PART 3/4 -->
+            <button
+                class="frame-item"
+                type="button"
+            >
+                ✨
+                <span>
+                    Sparkle
+                </span>
+            </button>
+
+
+            <button
+                class="frame-item"
+                type="button"
+            >
+                💖
+                <span>
+                    Love
+                </span>
+            </button>
+
+
+            <button
+                class="frame-item"
+                type="button"
+            >
+                👑
+                <span>
+                    Royal
+                </span>
+            </button>
 
         </div>
 
@@ -1084,13 +1860,14 @@
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
      KICK MODAL
-     ========================= -->
+========================================================= -->
 
 <div
     id="kickModal"
-    class="modal hidden">
+    class="modal hidden"
+>
 
     <div class="modal-box">
 
@@ -1098,24 +1875,33 @@
             🚪
         </div>
 
+
         <h2>
             You've been kicked
         </h2>
+
 
         <p>
             You will move to another room shortly.
         </p>
 
+
         <div class="kick-countdown">
+
             <strong id="kickTimer">
                 30
             </strong>
+
             seconds
+
         </div>
+
 
         <button
             id="saveRoomButton"
-            class="primary-button">
+            class="primary-button"
+            type="button"
+        >
             SAVE THIS ROOM
         </button>
 
@@ -1124,17 +1910,19 @@
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
      NOTIFICATION
-     ========================= -->
+========================================================= -->
 
 <div
     id="notification"
-    class="notification">
+    class="notification"
+>
 
     <span id="notificationIcon">
         ✓
     </span>
+
 
     <span id="notificationText">
         Done
@@ -1143,13 +1931,16 @@
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
      JAVASCRIPT
-     PART 3/5 WILL CONNECT HERE
-     ========================= -->
+========================================================= -->
 
-<script src="app.js"></script>
+<!-- Socket.IO client MUST load before app.js -->
 <script src="/socket.io/socket.io.js"></script>
+
+<!-- Main FlirtHubX JavaScript -->
+<script src="app.js"></script>
+
 
 </body>
 </html>
