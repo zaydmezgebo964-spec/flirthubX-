@@ -25,36 +25,7 @@ const state = {
 
     messages: [],
 
-    roomMembers: [
-        {
-            id: 1,
-            name: "Alex",
-            gender: "Male",
-            avatar: "https://i.pravatar.cc/150?img=12",
-            online: true
-        },
-        {
-            id: 2,
-            name: "Mia",
-            gender: "Female",
-            avatar: "https://i.pravatar.cc/150?img=47",
-            online: true
-        },
-        {
-            id: 3,
-            name: "Daniel",
-            gender: "Male",
-            avatar: "https://i.pravatar.cc/150?img=11",
-            online: true
-        },
-        {
-            id: 4,
-            name: "Lina",
-            gender: "Female",
-            avatar: "https://i.pravatar.cc/150?img=44",
-            online: false
-        }
-    ]
+    roomMembers: []
 };
 
 
@@ -85,6 +56,14 @@ function loadState() {
         const data = JSON.parse(saved);
 
         Object.assign(state, data);
+
+        if (!Array.isArray(state.messages)) {
+            state.messages = [];
+        }
+
+        if (!Array.isArray(state.roomMembers)) {
+            state.roomMembers = [];
+        }
 
         return true;
 
@@ -117,7 +96,8 @@ function hideAllScreens() {
 
     screens.forEach(id => {
 
-        const element = document.getElementById(id);
+        const element =
+            document.getElementById(id);
 
         if (element) {
             element.classList.add("hidden");
@@ -131,7 +111,8 @@ function showScreen(id) {
 
     hideAllScreens();
 
-    const element = document.getElementById(id);
+    const element =
+        document.getElementById(id);
 
     if (element) {
         element.classList.remove("hidden");
@@ -147,13 +128,8 @@ document.addEventListener(
     "DOMContentLoaded",
     () => {
 
-        const existingAccount = loadState();
-
-        /*
-         * If the player already created an account,
-         * the next time they open the game they go
-         * through loading and then directly to Home.
-         */
+        const existingAccount =
+            loadState();
 
         setTimeout(() => {
 
@@ -221,7 +197,8 @@ function backToProfile() {
 
 function selectGender(button, gender) {
 
-    state.selectedGender = gender;
+    state.selectedGender =
+        gender;
 
     document
         .querySelectorAll(".gender-option")
@@ -233,7 +210,9 @@ function selectGender(button, gender) {
 
         });
 
-    button.classList.add("selected");
+    button.classList.add(
+        "selected"
+    );
 
 }
 
@@ -241,10 +220,14 @@ function selectGender(button, gender) {
 function continueToAvatar() {
 
     const nameInput =
-        document.getElementById("playerName");
+        document.getElementById(
+            "playerName"
+        );
 
     const ageInput =
-        document.getElementById("playerAge");
+        document.getElementById(
+            "playerAge"
+        );
 
     const name =
         nameInput
@@ -259,7 +242,9 @@ function continueToAvatar() {
 
     if (!name) {
 
-        alert("Please enter your name.");
+        alert(
+            "Please enter your name."
+        );
 
         return;
     }
@@ -277,19 +262,27 @@ function continueToAvatar() {
 
     if (!state.selectedGender) {
 
-        alert("Please select your gender.");
+        alert(
+            "Please select your gender."
+        );
 
         return;
     }
 
 
-    state.name = name;
-    state.age = age;
+    state.name =
+        name;
+
+    state.age =
+        age;
+
     state.gender =
         state.selectedGender;
 
 
-    showScreen("avatarScreen");
+    showScreen(
+        "avatarScreen"
+    );
 
 }
 
@@ -298,9 +291,13 @@ function continueToAvatar() {
    AVATAR
 ========================================================= */
 
-function selectAvatar(button, avatar) {
+function selectAvatar(
+    button,
+    avatar
+) {
 
-    state.selectedAvatar = avatar;
+    state.selectedAvatar =
+        avatar;
 
     document
         .querySelectorAll(".avatar-option")
@@ -312,7 +309,9 @@ function selectAvatar(button, avatar) {
 
         });
 
-    button.classList.add("selected");
+    button.classList.add(
+        "selected"
+    );
 
 }
 
@@ -321,7 +320,9 @@ function finishProfile() {
 
     if (!state.selectedAvatar) {
 
-        alert("Please choose an avatar.");
+        alert(
+            "Please choose an avatar."
+        );
 
         return;
     }
@@ -330,7 +331,8 @@ function finishProfile() {
     state.avatar =
         state.selectedAvatar;
 
-    state.profileCreated = true;
+    state.profileCreated =
+        true;
 
     saveState();
 
@@ -338,7 +340,23 @@ function finishProfile() {
 
     renderRoom();
 
-    showScreen("homeScreen");
+    showScreen(
+        "homeScreen"
+    );
+
+    /*
+     * Connect to multiplayer
+     * after profile creation.
+     */
+
+    if (
+        flirthubSocket &&
+        flirthubSocket.connected
+    ) {
+
+        joinCurrentRoom();
+
+    }
 
 }
 
@@ -468,7 +486,9 @@ function openRoomTab() {
 
     renderRoom();
 
-    showScreen("homeScreen");
+    showScreen(
+        "homeScreen"
+    );
 
 }
 
@@ -477,7 +497,9 @@ function openAccount() {
 
     updateAccountUI();
 
-    showScreen("accountScreen");
+    showScreen(
+        "accountScreen"
+    );
 
 }
 
@@ -498,10 +520,14 @@ function renderRoom() {
             "roomPeople"
         );
 
+
     if (roomNumber) {
+
         roomNumber.textContent =
             state.room;
+
     }
+
 
     if (roomPeople) {
 
@@ -520,6 +546,10 @@ function renderRoom() {
 
 }
 
+
+/* =========================================================
+   ROOM MEMBERS
+========================================================= */
 
 function renderRoomMembers() {
 
@@ -564,13 +594,17 @@ function renderRoomMembers() {
                 );
 
             image.src =
-                member.avatar;
+                member.avatar ||
+                "https://i.pravatar.cc/150?img=12";
 
             image.alt =
-                member.name;
+                member.name ||
+                "Player";
 
 
-            avatar.appendChild(image);
+            avatar.appendChild(
+                image
+            );
 
 
             if (member.online) {
@@ -583,7 +617,9 @@ function renderRoomMembers() {
                 dot.className =
                     "online-dot";
 
-                avatar.appendChild(dot);
+                avatar.appendChild(
+                    dot
+                );
 
             }
 
@@ -597,7 +633,8 @@ function renderRoomMembers() {
                 "room-member-name";
 
             name.textContent =
-                member.name;
+                member.name ||
+                "Player";
 
 
             wrapper.appendChild(
@@ -696,7 +733,9 @@ function renderMessages() {
                 message.text;
 
 
-            bubble.appendChild(text);
+            bubble.appendChild(
+                text
+            );
 
 
             if (message.translation) {
@@ -732,19 +771,21 @@ function renderMessages() {
                 getTime();
 
 
-            wrapper.appendChild(name);
+            wrapper.appendChild(
+                name
+            );
 
-            wrapper.appendChild(bubble);
+            wrapper.appendChild(
+                bubble
+            );
 
-            wrapper.appendChild(time);
+            wrapper.appendChild(
+                time
+            );
 
-
-            /*
-             * Hold a message to show
-             * translation.
-             */
 
             let holdTimer;
+
 
             wrapper.addEventListener(
                 "touchstart",
@@ -831,6 +872,32 @@ function sendRoomMessage() {
     }
 
 
+    /*
+     * REAL MULTIPLAYER
+     */
+
+    if (
+        flirthubSocket &&
+        flirthubSocket.connected
+    ) {
+
+        flirthubSocket.emit(
+            "sendMessage",
+            {
+                text: text
+            }
+        );
+
+        input.value = "";
+
+        return;
+    }
+
+
+    /*
+     * LOCAL DEMO
+     */
+
     const message = {
 
         id:
@@ -861,19 +928,12 @@ function sendRoomMessage() {
         message
     );
 
-
     input.value = "";
 
     saveState();
 
     renderMessages();
 
-
-    /*
-     * Demo automatic reply.
-     * Later this will be replaced by
-     * the real multiplayer server.
-     */
 
     setTimeout(
         () => {
@@ -884,13 +944,9 @@ function sendRoomMessage() {
                     Date.now(),
 
                 name:
-                    state.roomMembers[0]
-                        ?.name ||
                     "Alex",
 
                 gender:
-                    state.roomMembers[0]
-                        ?.gender ||
                     "Male",
 
                 text:
@@ -942,14 +998,9 @@ function handleRoomEnter(event) {
    TRANSLATION
 ========================================================= */
 
-function translateMessage(message) {
-
-    /*
-     * This is the UI foundation.
-     *
-     * Real automatic translation will be
-     * connected later to a translation service.
-     */
+function translateMessage(
+    message
+) {
 
     if (
         message.translation
@@ -965,12 +1016,6 @@ function translateMessage(message) {
             original;
 
     } else {
-
-        /*
-         * Demo translation.
-         * Later replaced with real detection
-         * + translation.
-         */
 
         message.translation =
             "Translation will appear here";
@@ -1009,19 +1054,35 @@ function getTime() {
 
 function changeRoom() {
 
-    /*
-     * Demo room switching.
-     * Real room availability will be controlled
-     * by the server when multiplayer is connected.
-     */
+    if (
+        flirthubSocket &&
+        flirthubSocket.connected
+    ) {
+
+        let nextRoom =
+            Number(state.room) + 1;
+
+        if (nextRoom > 9999) {
+            nextRoom = 1;
+        }
+
+        flirthubSocket.emit(
+            "changeRoom",
+            {
+                room:
+                    nextRoom
+            }
+        );
+
+        return;
+    }
+
 
     state.room += 1;
-
 
     if (state.room > 20) {
         state.room = 1;
     }
-
 
     saveState();
 
@@ -1034,12 +1095,16 @@ function changeRoom() {
    MEMBER ACCOUNT
 ========================================================= */
 
-function openMemberAccount(member) {
+function openMemberAccount(
+    member
+) {
 
     alert(
         `${member.name}\n\n` +
-        `Gender: ${member.gender}\n\n` +
-        `Online: ${
+        `Gender: ${
+            member.gender || "Unknown"
+        }\n\n` +
+        `Status: ${
             member.online
                 ? "Online"
                 : "Offline"
@@ -1061,9 +1126,11 @@ function openMusic() {
         );
 
     if (modal) {
+
         modal.classList.remove(
             "hidden"
         );
+
     }
 
 }
@@ -1077,9 +1144,11 @@ function closeMusic() {
         );
 
     if (modal) {
+
         modal.classList.add(
             "hidden"
         );
+
     }
 
 }
@@ -1151,13 +1220,19 @@ function searchMusic() {
 
 function playSong(song) {
 
+    if (state.money < 10) {
+
+        alert(
+            "You need 10 Money to play a song."
+        );
+
+        return;
+    }
+
+
     state.songPoints += 10;
 
-    state.money =
-        Math.max(
-            0,
-            state.money - 10
-        );
+    state.money -= 10;
 
 
     const title =
@@ -1177,9 +1252,11 @@ function playSong(song) {
         );
 
     if (player) {
+
         player.classList.remove(
             "hidden"
         );
+
     }
 
 
@@ -1198,9 +1275,11 @@ function closeMusicPlayer() {
         );
 
     if (player) {
+
         player.classList.add(
             "hidden"
         );
+
     }
 
 }
@@ -1218,9 +1297,11 @@ function openEmotions() {
         );
 
     if (modal) {
+
         modal.classList.remove(
             "hidden"
         );
+
     }
 
 }
@@ -1234,9 +1315,11 @@ function closeEmotions() {
         );
 
     if (modal) {
+
         modal.classList.add(
             "hidden"
         );
+
     }
 
 }
@@ -1246,17 +1329,13 @@ function sendEmotion(type) {
 
     const emotions = {
 
-        happy:
-            "😊",
+        happy: "😊",
 
-        love:
-            "❤️",
+        love: "❤️",
 
-        sad:
-            "😔",
+        sad: "😔",
 
-        cool:
-            "😎"
+        cool: "😎"
 
     };
 
@@ -1270,7 +1349,8 @@ function sendEmotion(type) {
     if (input) {
 
         input.value =
-            emotions[type] || "😊";
+            emotions[type] ||
+            "😊";
 
     }
 
@@ -1281,7 +1361,7 @@ function sendEmotion(type) {
 
 
 /* =========================================================
-   STORE
+   STORE — NOW BELONGS TO ROOM
 ========================================================= */
 
 function openStore() {
@@ -1322,11 +1402,46 @@ function closeStore() {
 
 function claimDailyHearts() {
 
+    /*
+     * Prevent claiming repeatedly
+     * during the same day.
+     */
+
+    const today =
+        new Date()
+            .toISOString()
+            .slice(0, 10);
+
+
+    const lastClaim =
+        localStorage.getItem(
+            "flirthubx_daily_hearts"
+        );
+
+
+    if (lastClaim === today) {
+
+        alert(
+            "You already claimed today's 50 Hearts. ❤️"
+        );
+
+        return;
+    }
+
+
     state.hearts += 50;
+
+
+    localStorage.setItem(
+        "flirthubx_daily_hearts",
+        today
+    );
+
 
     saveState();
 
     updateAccountUI();
+
 
     alert(
         "You claimed 50 free Hearts! ❤️"
@@ -1335,23 +1450,46 @@ function claimDailyHearts() {
 }
 
 
-/*
- * IMPORTANT:
- * These buttons currently only demonstrate
- * the purchase flow.
- *
- * Real Telegram Stars payments must be handled
- * through Telegram's payment system on the
- * server. We will connect that later.
- */
+/* =========================================================
+   TELEGRAM STARS PURCHASE
+========================================================= */
 
-function buyHearts(amount, stars) {
+function buyHearts(
+    amount,
+    stars
+) {
 
-    alert(
-        `${amount.toLocaleString()} Hearts\n\n` +
-        `Price: ${stars} Telegram Stars\n\n` +
-        `Payment system will be connected here.`
-    );
+    /*
+     * IMPORTANT:
+     *
+     * This is still a placeholder.
+     *
+     * Telegram Stars payments must be
+     * processed through the Telegram
+     * Bot API/server before adding
+     * paid Hearts.
+     */
+
+
+    if (
+        window.Telegram &&
+        Telegram.WebApp
+    ) {
+
+        alert(
+            `${amount.toLocaleString()} Hearts\n\n` +
+            `Price: ${stars} Telegram Stars\n\n` +
+            `Telegram Stars payment will be connected next.`
+        );
+
+    } else {
+
+        alert(
+            `${amount.toLocaleString()} Hearts\n\n` +
+            `Price: ${stars} Telegram Stars`
+        );
+
+    }
 
 }
 
@@ -1438,7 +1576,8 @@ function privacyMessage() {
 
 function activatePremium() {
 
-    state.premium = true;
+    state.premium =
+        true;
 
     saveState();
 
@@ -1454,11 +1593,26 @@ function activatePremium() {
 function escapeHTML(text) {
 
     return String(text)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
 
@@ -1466,9 +1620,18 @@ function escapeHTML(text) {
 function escapeAttribute(text) {
 
     return String(text)
-        .replaceAll("\\", "\\\\")
-        .replaceAll("'", "\\'")
-        .replaceAll('"', "&quot;");
+        .replaceAll(
+            "\\",
+            "\\\\"
+        )
+        .replaceAll(
+            "'",
+            "\\'"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        );
 
 }
 
@@ -1504,25 +1667,21 @@ function initializeTelegram() {
 
 
 /* =========================================================
-   START TELEGRAM
-========================================================= */
-
-initializeTelegram();
-/* =========================================================
-   FLIRTHUBX — REAL-TIME ROOM CONNECTION
+   REAL-TIME SOCKET.IO
 ========================================================= */
 
 let flirthubSocket = null;
 
 
-/* ---------------------------------------------------------
-   CONNECT TO SERVER
---------------------------------------------------------- */
+/* =========================================================
+   CONNECT SERVER
+========================================================= */
 
 function connectFlirtHubServer() {
 
-    // Socket.IO is loaded by the server.
-    if (typeof io === "undefined") {
+    if (
+        typeof io === "undefined"
+    ) {
 
         console.warn(
             "Socket.IO has not loaded yet."
@@ -1532,8 +1691,18 @@ function connectFlirtHubServer() {
     }
 
 
-    flirthubSocket = io();
+    if (flirthubSocket) {
+        return;
+    }
 
+
+    flirthubSocket =
+        io();
+
+
+    /* =====================================================
+       CONNECT
+    ===================================================== */
 
     flirthubSocket.on(
         "connect",
@@ -1545,15 +1714,22 @@ function connectFlirtHubServer() {
             );
 
 
-            joinCurrentRoom();
+            if (
+                state.profileCreated &&
+                state.name
+            ) {
+
+                joinCurrentRoom();
+
+            }
 
         }
     );
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        ROOM JOINED
-    ----------------------------------------------------- */
+    ===================================================== */
 
     flirthubSocket.on(
         "roomJoined",
@@ -1577,9 +1753,9 @@ function connectFlirtHubServer() {
     );
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        ROOM FULL
-    ----------------------------------------------------- */
+    ===================================================== */
 
     flirthubSocket.on(
         "roomFull",
@@ -1594,9 +1770,9 @@ function connectFlirtHubServer() {
     );
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        PLAYER JOINED
-    ----------------------------------------------------- */
+    ===================================================== */
 
     flirthubSocket.on(
         "playerJoined",
@@ -1625,9 +1801,9 @@ function connectFlirtHubServer() {
     );
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        PLAYER LEFT
-    ----------------------------------------------------- */
+    ===================================================== */
 
     flirthubSocket.on(
         "playerLeft",
@@ -1647,9 +1823,9 @@ function connectFlirtHubServer() {
     );
 
 
-    /* -----------------------------------------------------
-       ROOM USER LIST
-    ----------------------------------------------------- */
+    /* =====================================================
+       ROOM USERS
+    ===================================================== */
 
     flirthubSocket.on(
         "roomUsers",
@@ -1667,17 +1843,13 @@ function connectFlirtHubServer() {
     );
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        NEW MESSAGE
-    ----------------------------------------------------- */
+    ===================================================== */
 
     flirthubSocket.on(
         "newMessage",
         message => {
-
-            /*
-             * Avoid adding our own message twice.
-             */
 
             const exists =
                 state.messages.some(
@@ -1707,8 +1879,12 @@ function connectFlirtHubServer() {
                         "",
 
                     mine:
-                        message.userId ===
-                        getCurrentUserId(),
+                        String(
+                            message.userId
+                        ) ===
+                        String(
+                            getCurrentUserId()
+                        ),
 
                     time:
                         new Date(
@@ -1716,8 +1892,11 @@ function connectFlirtHubServer() {
                         ).toLocaleTimeString(
                             [],
                             {
-                                hour: "2-digit",
-                                minute: "2-digit"
+                                hour:
+                                    "2-digit",
+
+                                minute:
+                                    "2-digit"
                             }
                         )
 
@@ -1734,9 +1913,9 @@ function connectFlirtHubServer() {
     );
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        TYPING
-    ----------------------------------------------------- */
+    ===================================================== */
 
     flirthubSocket.on(
         "playerTyping",
@@ -1763,9 +1942,9 @@ function connectFlirtHubServer() {
     );
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        KISS REQUEST
-    ----------------------------------------------------- */
+    ===================================================== */
 
     flirthubSocket.on(
         "kissRequest",
@@ -1786,11 +1965,13 @@ function connectFlirtHubServer() {
                 flirthubSocket.emit(
                     "kissResponse",
                     {
+
                         targetSocketId:
                             data.fromSocketId,
 
                         accepted:
                             accepted
+
                     }
                 );
 
@@ -1800,15 +1981,21 @@ function connectFlirtHubServer() {
     );
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        KISS RESPONSE
-    ----------------------------------------------------- */
+    ===================================================== */
 
     flirthubSocket.on(
         "kissResponse",
         data => {
 
             if (data.accepted) {
+
+                state.kissPoints += 1;
+
+                saveState();
+
+                updateAccountUI();
 
                 alert(
                     `${data.fromName} accepted the kiss! 💋`
@@ -1826,9 +2013,9 @@ function connectFlirtHubServer() {
     );
 
 
-    /* -----------------------------------------------------
-       BLOCK CONFIRMATION
-    ----------------------------------------------------- */
+    /* =====================================================
+       PLAYER BLOCKED
+    ===================================================== */
 
     flirthubSocket.on(
         "playerBlocked",
@@ -1867,10 +2054,6 @@ function getCurrentUserId() {
     }
 
 
-    /*
-     * Local browser ID for testing.
-     */
-
     let localId =
         localStorage.getItem(
             "flirthubx_local_id"
@@ -1902,7 +2085,7 @@ function getCurrentUserId() {
 
 
 /* =========================================================
-   JOIN CURRENT ROOM
+   JOIN ROOM
 ========================================================= */
 
 function joinCurrentRoom() {
@@ -1910,6 +2093,15 @@ function joinCurrentRoom() {
     if (
         !flirthubSocket ||
         !flirthubSocket.connected
+    ) {
+
+        return;
+    }
+
+
+    if (
+        !state.profileCreated ||
+        !state.name
     ) {
 
         return;
@@ -1942,123 +2134,12 @@ function joinCurrentRoom() {
 
 
 /* =========================================================
-   REAL MESSAGE SENDING
-========================================================= */
-
-const oldSendRoomMessage =
-    sendRoomMessage;
-
-
-sendRoomMessage =
-    function () {
-
-        const input =
-            document.getElementById(
-                "roomInput"
-            );
-
-
-        if (!input) {
-            return;
-        }
-
-
-        const text =
-            input.value.trim();
-
-
-        if (!text) {
-            return;
-        }
-
-
-        /*
-         * If the server isn't connected,
-         * use the existing local demo behavior.
-         */
-
-        if (
-            !flirthubSocket ||
-            !flirthubSocket.connected
-        ) {
-
-            oldSendRoomMessage();
-
-            return;
-        }
-
-
-        flirthubSocket.emit(
-            "sendMessage",
-            {
-                text:
-                    text
-            }
-        );
-
-
-        input.value = "";
-
-    };
-
-
-/* =========================================================
-   REAL ROOM CHANGING
-========================================================= */
-
-const oldChangeRoom =
-    changeRoom;
-
-
-changeRoom =
-    function () {
-
-        /*
-         * If multiplayer is not connected,
-         * keep the existing demo behavior.
-         */
-
-        if (
-            !flirthubSocket ||
-            !flirthubSocket.connected
-        ) {
-
-            oldChangeRoom();
-
-            return;
-        }
-
-
-        let nextRoom =
-            Number(state.room) + 1;
-
-
-        /*
-         * For now we allow rooms 1–9999.
-         * The server will prevent a full room.
-         */
-
-        if (nextRoom > 9999) {
-            nextRoom = 1;
-        }
-
-
-        flirthubSocket.emit(
-            "changeRoom",
-            {
-                room:
-                    nextRoom
-            }
-        );
-
-    };
-
-
-/* =========================================================
    KISS
 ========================================================= */
 
-function requestKiss(socketId) {
+function requestKiss(
+    socketId
+) {
 
     if (
         !flirthubSocket ||
@@ -2093,7 +2174,9 @@ function requestKiss(socketId) {
    BLOCK
 ========================================================= */
 
-function blockPlayer(socketId) {
+function blockPlayer(
+    socketId
+) {
 
     if (
         !flirthubSocket ||
@@ -2136,8 +2219,61 @@ function blockPlayer(socketId) {
 
 
 /* =========================================================
-   CONNECT WHEN PAGE IS READY
+   TYPING
 ========================================================= */
+
+let typingTimer = null;
+
+
+function sendTypingStatus() {
+
+    if (
+        !flirthubSocket ||
+        !flirthubSocket.connected
+    ) {
+
+        return;
+    }
+
+
+    flirthubSocket.emit(
+        "typing"
+    );
+
+
+    clearTimeout(
+        typingTimer
+    );
+
+
+    typingTimer =
+        setTimeout(
+            () => {
+
+                if (
+                    flirthubSocket &&
+                    flirthubSocket.connected
+                ) {
+
+                    flirthubSocket.emit(
+                        "stopTyping"
+                    );
+
+                }
+
+            },
+            1000
+        );
+
+}
+
+
+/* =========================================================
+   CONNECT WHEN READY
+========================================================= */
+
+initializeTelegram();
+
 
 if (
     document.readyState ===
@@ -2146,11 +2282,29 @@ if (
 
     document.addEventListener(
         "DOMContentLoaded",
-        connectFlirtHubServer
+        () => {
+
+            connectFlirtHubServer();
+
+            const input =
+                document.getElementById(
+                    "roomInput"
+                );
+
+            if (input) {
+
+                input.addEventListener(
+                    "input",
+                    sendTypingStatus
+                );
+
+            }
+
+        }
     );
 
 } else {
 
     connectFlirtHubServer();
 
-               }
+}
