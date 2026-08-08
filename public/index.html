@@ -1,57 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
+<title>FlirtHubX</title>
 
-    <title>FlirtHubX</title>
+<link rel="stylesheet" href="style.css">
 
-    <link rel="stylesheet" href="style.css">
+<script src="/socket.io/socket.io.js"></script>
 </head>
-
 
 <body>
 
-
-<!-- =========================================================
+<!-- =====================================================
      LOADING
-========================================================= -->
+===================================================== -->
 
-<div id="loadingScreen">
+<div id="loadingScreen" class="screen loading-screen">
 
     <div class="loading-logo">
-        ❤️
+        <div class="loading-heart">♥</div>
+        <div class="loading-ring"></div>
     </div>
 
-    <div class="loading-ring"></div>
+    <h1>FlirtHubX</h1>
+    <p>Meet. Play. Connect.</p>
 
 </div>
 
 
-<!-- =========================================================
+<!-- =====================================================
      START
-========================================================= -->
+===================================================== -->
 
-<div id="startScreen" class="screen hidden">
+<div id="startScreen" class="screen hidden start-screen">
 
-    <button
-        class="start-button"
-        onclick="startGame()"
-    >
-        START
-    </button>
+    <div class="start-content">
+
+        <div class="game-logo">
+            <span>♥</span>
+        </div>
+
+        <h1>FlirtHubX</h1>
+
+        <p>
+            Meet new people and play together.
+        </p>
+
+        <button
+            class="start-button"
+            onclick="startGame()"
+        >
+            START
+        </button>
+
+    </div>
 
 </div>
 
 
-<!-- =========================================================
-     PROFILE CREATION — STEP 1
-========================================================= -->
+<!-- =====================================================
+     PROFILE
+===================================================== -->
 
 <div id="profileScreen" class="screen hidden">
 
@@ -68,18 +79,13 @@
             1 / 3
         </div>
 
-        <h1>
-            Create your profile
-        </h1>
+        <h1>Create your profile</h1>
 
         <p class="setup-subtitle">
             Tell us a little about yourself
         </p>
 
-
-        <label>
-            Name
-        </label>
+        <label>Name</label>
 
         <input
             id="playerName"
@@ -88,10 +94,7 @@
             placeholder="Your name"
         >
 
-
-        <label>
-            Age
-        </label>
+        <label>Age</label>
 
         <input
             id="playerAge"
@@ -101,44 +104,27 @@
             placeholder="18+"
         >
 
-
-        <label>
-            Gender
-        </label>
+        <label>Gender</label>
 
         <div class="gender-selector">
 
             <button
-                type="button"
                 class="gender-option"
                 onclick="selectGender(this,'Male')"
             >
-                <span class="gender-icon">
-                    ♂
-                </span>
-
-                <span>
-                    Male
-                </span>
+                <span>♂</span>
+                Male
             </button>
 
-
             <button
-                type="button"
                 class="gender-option"
                 onclick="selectGender(this,'Female')"
             >
-                <span class="gender-icon">
-                    ♀
-                </span>
-
-                <span>
-                    Female
-                </span>
+                <span>♀</span>
+                Female
             </button>
 
         </div>
-
 
         <button
             class="continue-button"
@@ -152,9 +138,9 @@
 </div>
 
 
-<!-- =========================================================
-     AVATAR — STEP 2
-========================================================= -->
+<!-- =====================================================
+     AVATAR
+===================================================== -->
 
 <div id="avatarScreen" class="screen hidden">
 
@@ -171,14 +157,11 @@
             2 / 3
         </div>
 
-        <h1>
-            Choose your avatar
-        </h1>
+        <h1>Choose your avatar</h1>
 
         <p class="setup-subtitle">
             Choose your picture
         </p>
-
 
         <div class="avatar-grid">
 
@@ -189,7 +172,6 @@
                 <img src="https://i.pravatar.cc/300?img=12">
             </button>
 
-
             <button
                 class="avatar-option"
                 onclick="selectAvatar(this,'https://i.pravatar.cc/300?img=13')"
@@ -197,14 +179,12 @@
                 <img src="https://i.pravatar.cc/300?img=13">
             </button>
 
-
             <button
                 class="avatar-option"
                 onclick="selectAvatar(this,'https://i.pravatar.cc/300?img=14')"
             >
                 <img src="https://i.pravatar.cc/300?img=14">
             </button>
-
 
             <button
                 class="avatar-option"
@@ -215,12 +195,11 @@
 
         </div>
 
-
         <button
             class="continue-button"
             onclick="finishProfile()"
         >
-            Continue
+            Enter Game
         </button>
 
     </div>
@@ -228,374 +207,246 @@
 </div>
 
 
-<!-- =========================================================
+<!-- =====================================================
      MAIN APPLICATION
-========================================================= -->
+===================================================== -->
 
-<div id="mainApp" class="main-app hidden">
+<div id="app">
 
+<!-- =====================================================
+     GAME SCREEN
+     ROOM IS HERE
+===================================================== -->
 
-<!-- =========================================================
-     GAME / ROOM
-========================================================= -->
-
-<section
+<div
     id="gameScreen"
-    class="app-screen"
+    class="app-screen hidden"
 >
 
-
-    <!-- GAME HEADER -->
+    <!-- TOP GAME HEADER -->
 
     <header class="game-header">
 
+        <div class="game-currency-group">
 
-        <!-- HEARTS -->
-
-        <button
-            class="game-currency-button hearts-button"
-            onclick="openStore()"
-        >
-
-            <span class="game-currency-icon">
-                ❤️
-            </span>
-
-            <span
-                id="gameHeartBalance"
-                class="game-currency-value"
+            <button
+                class="game-currency heart-currency"
+                onclick="openStore()"
             >
-                50
-            </span>
 
-            <span class="currency-plus">
-                +
-            </span>
-
-        </button>
-
-
-        <!-- ROOM -->
-
-        <div class="room-title">
-
-            <small>
-                ROOM
-            </small>
-
-            <strong>
-                <span id="roomNumber">
-                    1
+                <span class="currency-game-icon">
+                    ♥
                 </span>
-            </strong>
 
-            <span
-                id="roomPeople"
-                class="room-count"
+                <strong id="gameHeartBalance">
+                    50
+                </strong>
+
+            </button>
+
+
+            <button
+                class="game-currency money-currency"
+                onclick="openStore()"
             >
-                1/10
-            </span>
+
+                <span class="currency-game-icon">
+                    $
+                </span>
+
+                <strong id="gameMoneyBalance">
+                    10
+                </strong>
+
+            </button>
 
         </div>
 
 
-        <!-- MONEY -->
+        <div class="game-room-title">
 
-        <button
-            class="game-currency-button money-button"
-            onclick="openStore()"
-        >
-
-            <span class="game-currency-icon">
-                💰
+            <span>
+                Room
             </span>
 
-            <span
-                id="gameMoneyBalance"
-                class="game-currency-value"
+            <strong id="roomNumber">
+                1
+            </strong>
+
+            <small id="roomPeople">
+                0/10
+            </small>
+
+        </div>
+
+
+        <div class="game-header-actions">
+
+            <!-- STORE -->
+
+            <button
+                class="game-header-icon store-icon-button"
+                onclick="openStore()"
+                aria-label="Store"
             >
-                10
-            </span>
-
-            <span class="currency-plus">
-                +
-            </span>
-
-        </button>
+                <span>🛍️</span>
+            </button>
 
 
-        <!-- STORE -->
+            <!-- CHANGE ROOM -->
 
-        <button
-            class="game-icon-button"
-            onclick="openStore()"
-            aria-label="Store"
-        >
-            🛍️
-        </button>
+            <button
+                class="game-header-icon"
+                onclick="changeRoom()"
+                aria-label="Change room"
+            >
+                <span>↻</span>
+            </button>
 
-
-        <!-- CHANGE ROOM -->
-
-        <button
-            class="game-icon-button"
-            onclick="changeRoom()"
-            aria-label="Change room"
-        >
-            🔄
-        </button>
+        </div>
 
     </header>
 
 
-    <!-- =====================================================
-         ROOM BOARD
-    ====================================================== -->
+    <!-- =================================================
+         ROOM GAME AREA
+    ================================================= -->
 
-    <main class="room-board">
+    <main class="room-game">
 
-
-        <!-- TOP PLAYERS -->
+        <!-- ROOM MEMBERS -->
 
         <div
-            id="roomPlayersTop"
-            class="room-player-row"
+            id="roomMembers"
+            class="room-card-grid"
         >
+
+            <!-- JavaScript creates players here -->
+
         </div>
 
 
-        <!-- MIDDLE PLAYERS -->
+        <!-- SPIN BOTTLE -->
 
-        <div class="room-middle-row">
+        <div class="spin-bottle-area">
 
-
-            <div
-                id="roomPlayersLeft"
-                class="room-side-column"
+            <button
+                class="spin-bottle-button"
+                onclick="spinBottle()"
             >
-            </div>
 
-
-            <!-- SPIN BOTTLE -->
-
-            <div class="spin-bottle-area">
-
-                <div
-                    id="spinBottle"
-                    class="spin-bottle"
-                    onclick="spinBottle()"
-                >
-
-                    <div class="bottle-glow"></div>
-
-                    <div class="bottle">
-                        🍾
-                    </div>
-
+                <div class="bottle">
+                    🍾
                 </div>
 
-
-                <strong id="spinBottleText">
+                <span>
                     SPIN BOTTLE
-                </strong>
+                </span>
 
-
-                <small id="spinBottleStatus">
-                    Tap to spin
-                </small>
-
-            </div>
-
-
-            <div
-                id="roomPlayersRight"
-                class="room-side-column"
-            >
-            </div>
+            </button>
 
         </div>
 
 
-        <!-- BOTTOM PLAYERS -->
+        <!-- ROOM STATUS -->
 
-        <div
-            id="roomPlayersBottom"
-            class="room-player-row"
-        >
+        <div class="room-status">
+
+            <span class="room-status-dot"></span>
+
+            <span>
+                Room <strong id="roomStatusNumber">1</strong>
+            </span>
+
         </div>
-
 
     </main>
 
-
-    <!-- =====================================================
-         GAME ACTION BAR
-    ====================================================== -->
-
-    <div class="game-action-bar">
+</div>
 
 
-        <button
-            class="game-action-button"
-            onclick="openStore()"
-        >
+<!-- =====================================================
+     MESSAGE SCREEN
+     COMPLETELY SEPARATE FROM ROOM
+===================================================== -->
 
-            <span>
-                ❤️
-            </span>
-
-            <small>
-                Hearts
-            </small>
-
-        </button>
-
-
-        <button
-            class="game-action-button"
-            onclick="openGiftStore()"
-        >
-
-            <span>
-                🎁
-            </span>
-
-            <small>
-                Gifts
-            </small>
-
-        </button>
-
-
-        <button
-            class="game-action-button"
-            onclick="openMusic()"
-        >
-
-            <span>
-                🎵
-            </span>
-
-            <small>
-                Music
-            </small>
-
-        </button>
-
-    </div>
-
-
-</section>
-
-
-<!-- =========================================================
-     MESSAGES
-========================================================= -->
-
-<section
+<div
     id="messageScreen"
     class="app-screen hidden"
 >
-
 
     <header class="message-header">
 
         <div>
 
-            <small>
-                ROOM CHAT
-            </small>
-
             <h2>
                 Messages
             </h2>
 
-        </div>
-
-
-        <div class="message-header-room">
-
-            Room
-            <span id="messageRoomNumber">
-                1
+            <span id="messageStreak">
+                🔥 0 day streak
             </span>
 
         </div>
 
+        <button
+            class="message-search-button"
+            onclick="openMessageSearch()"
+        >
+            🔍
+        </button>
+
     </header>
 
 
-    <!-- TIKTOK STYLE CHAT -->
+    <!-- TIKTOK STYLE CHAT LIST -->
 
     <main
-        id="roomMessages"
-        class="tiktok-chat"
+        id="messageList"
+        class="message-list"
     >
+
+        <!-- Example empty state -->
+
+        <div
+            id="emptyMessages"
+            class="empty-message-state"
+        >
+
+            <div class="empty-message-icon">
+                💬
+            </div>
+
+            <h3>
+                No messages yet
+            </h3>
+
+            <p>
+                Meet someone in the game
+                and start chatting.
+            </p>
+
+        </div>
+
     </main>
 
-
-    <!-- TYPING -->
-
-    <div
-        id="typingIndicator"
-        class="typing-indicator hidden"
-    >
-        Someone is typing...
-    </div>
+</div>
 
 
-    <!-- MESSAGE INPUT -->
+<!-- =====================================================
+     ACCOUNT SCREEN
+===================================================== -->
 
-    <div class="message-input-area">
-
-
-        <button
-            class="message-emotion-button"
-            onclick="openEmotions()"
-        >
-            😊
-        </button>
-
-
-        <input
-            id="roomInput"
-            type="text"
-            maxlength="500"
-            placeholder="Message..."
-            oninput="handleTyping()"
-            onkeydown="handleRoomEnter(event)"
-        >
-
-
-        <button
-            class="message-send-button"
-            onclick="sendRoomMessage()"
-        >
-            ➤
-        </button>
-
-    </div>
-
-
-</section>
-
-
-<!-- =========================================================
-     ACCOUNT
-========================================================= -->
-
-<section
+<div
     id="accountScreen"
     class="app-screen hidden"
 >
-
 
     <header class="account-header">
 
         <h2>
             Account
         </h2>
-
 
         <button
             class="account-settings-button"
@@ -609,12 +460,11 @@
 
     <main class="account-content">
 
-
         <!-- PROFILE -->
 
-        <div class="account-profile">
+        <section class="account-profile">
 
-            <div class="account-avatar-frame">
+            <div class="profile-frame">
 
                 <img
                     id="accountAvatar"
@@ -624,11 +474,9 @@
 
             </div>
 
-
             <h1 id="accountName">
                 Player
             </h1>
-
 
             <div class="account-meta">
 
@@ -636,9 +484,7 @@
                     18
                 </span>
 
-                <span>
-                    •
-                </span>
+                <span>•</span>
 
                 <span id="accountGender">
                     Male
@@ -654,369 +500,21 @@
                 PREMIUM
             </div>
 
-        </div>
+        </section>
 
 
-        <!-- PERSONAL STATS -->
+        <!-- ACCOUNT CURRENCIES -->
 
-        <div class="account-stat-grid">
+        <section class="account-currency-grid">
 
+            <div class="account-currency-card">
 
-            <div class="account-stat">
-
-                <span>
-                    🔥
+                <span class="account-currency-icon">
+                    ♥
                 </span>
 
-                <strong id="streakCount">
-                    0
-                </strong>
-
-                <small>
-                    Day Streak
-                </small>
-
-            </div>
-
-
-            <div class="account-stat">
-
-                <span>
-                    💋
-                </span>
-
-                <strong id="kissBalance">
-                    0
-                </strong>
-
-                <small>
-                    Kiss Points
-                </small>
-
-            </div>
-
-
-            <div class="account-stat">
-
-                <span>
-                    🎵
-                </span>
-
-                <strong id="songPoints">
-                    0
-                </strong>
-
-                <small>
-                    Song Points
-                </small>
-
-            </div>
-
-
-            <div class="account-stat">
-
-                <span>
-                    🏆
-                </span>
-
-                <strong id="leagueName">
-                    Bronze
-                </strong>
-
-                <small>
-                    League
-                </small>
-
-            </div>
-
-
-        </div>
-
-
-        <!-- ACCOUNT OPTIONS -->
-
-        <div class="account-menu">
-
-
-            <button onclick="openFriends()">
-
-                <span class="menu-icon">
-                    👥
-                </span>
-
-                <span>
-                    Friends
-                </span>
-
-                <b>
-                    ›
-                </b>
-
-            </button>
-
-
-            <button onclick="openSettings()">
-
-                <span class="menu-icon">
-                    ⚙️
-                </span>
-
-                <span>
-                    Settings
-                </span>
-
-                <b>
-                    ›
-                </b>
-
-            </button>
-
-
-            <button onclick="privacyMessage()">
-
-                <span class="menu-icon">
-                    🔒
-                </span>
-
-                <span>
-                    Privacy
-                </span>
-
-                <b>
-                    ›
-                </b>
-
-            </button>
-
-        </div>
-
-
-    </main>
-
-
-</section>
-
-
-<!-- =========================================================
-     BOTTOM NAVIGATION
-========================================================= -->
-
-<nav class="bottom-navigation">
-
-
-    <button
-        id="gameNavButton"
-        class="bottom-nav-item active"
-        onclick="openGameTab()"
-    >
-
-        <span>
-            🎮
-        </span>
-
-        <small>
-            Game
-        </small>
-
-    </button>
-
-
-    <button
-        id="messageNavButton"
-        class="bottom-nav-item"
-        onclick="openMessageTab()"
-    >
-
-        <span>
-            💬
-        </span>
-
-        <small>
-            Messages
-        </small>
-
-    </button>
-
-
-    <button
-        id="accountNavButton"
-        class="bottom-nav-item"
-        onclick="openAccount()"
-    >
-
-        <span>
-            👤
-        </span>
-
-        <small>
-            Account
-        </small>
-
-    </button>
-
-</nav>
-
-
-</div>
-
-
-<!-- =========================================================
-     PLAYER PROFILE
-========================================================= -->
-
-<div
-    id="playerProfileModal"
-    class="player-profile-overlay hidden"
->
-
-    <div class="player-profile-card">
-
-
-        <button
-            class="player-profile-close"
-            onclick="closePlayerProfile()"
-        >
-            ×
-        </button>
-
-
-        <div class="player-profile-avatar-wrap">
-
-            <img
-                id="playerProfileAvatar"
-                src=""
-                alt="Player"
-            >
-
-        </div>
-
-
-        <div class="player-profile-name">
-
-            <span id="playerProfileName">
-                Player
-            </span>
-
-            <span id="playerProfileAge">
-                20
-            </span>
-
-        </div>
-
-
-        <!-- LEAGUE -->
-
-        <div class="player-league">
-
-            <div
-                id="playerLeagueIcon"
-                class="league-icon"
-            >
-                🥉
-            </div>
-
-            <div>
-
-                <strong id="playerLeagueName">
-                    Bronze
-                </strong>
-
-                <small>
-                    League
-                </small>
-
-            </div>
-
-        </div>
-
-
-        <!-- RANK -->
-
-        <div class="player-rank-box">
-
-            <span>
-                🏆
-            </span>
-
-            <div>
-
-                <strong id="playerRank">
-                    #346
-                </strong>
-
-                <small>
-                    Rank
-                </small>
-
-            </div>
-
-        </div>
-
-
-        <!-- POINTS -->
-
-        <div class="player-points-grid">
-
-
-            <div class="player-point">
-
-                <span class="point-icon">
-                    💋
-                </span>
-
-                <strong id="profileAdmirePoints">
-                    0
-                </strong>
-
-                <small>
-                    Admire
-                </small>
-
-            </div>
-
-
-            <div class="player-point">
-
-                <span class="point-icon">
-                    🎵
-                </span>
-
-                <strong id="profileSongPoints">
-                    0
-                </strong>
-
-                <small>
-                    Songs
-                </small>
-
-            </div>
-
-
-            <div class="player-point">
-
-                <span class="point-icon">
-                    😊
-                </span>
-
-                <strong id="profileEmotionPoints">
-                    0
-                </strong>
-
-                <small>
-                    Emotions
-                </small>
-
-            </div>
-
-
-            <div class="player-point">
-
-                <span class="point-icon">
-                    ❤️
-                </span>
-
-                <strong id="profileHeartPoints">
-                    0
+                <strong id="heartBalance">
+                    50
                 </strong>
 
                 <small>
@@ -1025,266 +523,219 @@
 
             </div>
 
-        </div>
+
+            <div class="account-currency-card">
+
+                <span class="account-currency-icon money">
+                    $
+                </span>
+
+                <strong id="moneyBalance">
+                    10
+                </strong>
+
+                <small>
+                    Money
+                </small>
+
+            </div>
+
+        </section>
 
 
-        <!-- ACTIONS -->
+        <!-- RANK -->
 
-        <div class="player-profile-actions">
+        <section class="rank-card">
+
+            <div>
+
+                <small>
+                    League
+                </small>
+
+                <strong id="leagueName">
+                    Bronze
+                </strong>
+
+            </div>
+
+            <div class="league-icon">
+                🥉
+            </div>
+
+        </section>
 
 
-            <button
-                class="profile-action admire"
-                onclick="admirePlayer()"
-            >
-                ❤️ Admire
+        <!-- KISS POINTS -->
+
+        <section class="account-stat-card">
+
+            <div>
+
+                <strong id="kissBalance">
+                    0
+                </strong>
+
+                <small>
+                    Kiss points
+                </small>
+
+            </div>
+
+            <div class="stat-icon">
+                💋
+            </div>
+
+        </section>
+
+
+        <!-- SONG POINTS -->
+
+        <section class="account-stat-card">
+
+            <div>
+
+                <strong id="songPoints">
+                    0
+                </strong>
+
+                <small>
+                    Song points
+                </small>
+
+            </div>
+
+            <div class="stat-icon">
+                🎵
+            </div>
+
+        </section>
+
+
+        <!-- STREAK -->
+
+        <section class="streak-card">
+
+            <div class="streak-icon">
+                🔥
+            </div>
+
+            <div>
+
+                <strong id="streakCount">
+                    0 day streak
+                </strong>
+
+                <small>
+                    Keep talking every day
+                </small>
+
+            </div>
+
+        </section>
+
+
+        <!-- ACCOUNT ACTIONS -->
+
+        <section class="account-actions">
+
+            <button onclick="openGiftStore()">
+                🎁
+                <span>Gifts</span>
             </button>
 
-
-            <button
-                class="profile-action gift"
-                onclick="giftSelectedPlayer()"
-            >
-                🎁 Gift
+            <button onclick="openFriends()">
+                👥
+                <span>Friends</span>
             </button>
 
+        </section>
 
-            <button
-                class="profile-action message"
-                onclick="messageSelectedPlayer()"
-            >
-                💬 Message
-            </button>
+    </main>
 
-
-            <button
-                id="kickPlayerButton"
-                class="profile-action kick hidden"
-                onclick="kickSelectedPlayer()"
-            >
-                🚫 Kick
-            </button>
-
-        </div>
-
-    </div>
+</div>
 
 </div>
 
 
-<!-- =========================================================
-     GIFT PANEL
-========================================================= -->
+<!-- =====================================================
+     BOTTOM NAVIGATION
+===================================================== -->
 
-<div
-    id="giftPanel"
-    class="gift-panel hidden"
+<nav
+    id="bottomNavigation"
+    class="bottom-navigation hidden"
 >
 
+    <!-- GAME -->
 
-    <div class="gift-panel-header">
+    <button
+        id="navGame"
+        class="bottom-nav-item active"
+        onclick="openGame()"
+    >
 
-        <div>
+        <span class="nav-icon">
+            🎮
+        </span>
 
-            <strong>
-                🎁 Send a gift
-            </strong>
+        <span>
+            Game
+        </span>
 
-            <small id="giftTargetName">
-                Player
-            </small>
-
-        </div>
-
-
-        <button
-            class="gift-close-button"
-            onclick="closeGiftPanel()"
-        >
-            ×
-        </button>
-
-    </div>
+    </button>
 
 
-    <div class="gift-grid">
+    <!-- MESSAGE -->
+
+    <button
+        id="navMessage"
+        class="bottom-nav-item"
+        onclick="openMessages()"
+    >
+
+        <span class="nav-icon">
+            💬
+        </span>
+
+        <span>
+            Message
+        </span>
+
+    </button>
 
 
-        <button
-            class="gift-item"
-            onclick="sendGift('📱',5)"
-        >
-            <span>📱</span>
-            <b>Phone</b>
-            <small>❤️ 5</small>
-        </button>
+    <!-- ACCOUNT -->
+
+    <button
+        id="navAccount"
+        class="bottom-nav-item"
+        onclick="openAccount()"
+    >
+
+        <span class="nav-icon">
+            👤
+        </span>
+
+        <span>
+            Account
+        </span>
+
+    </button>
+
+</nav>
 
 
-        <button
-            class="gift-item"
-            onclick="sendGift('🍅',1)"
-        >
-            <span>🍅</span>
-            <b>Tomato</b>
-            <small>❤️ 1</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('👖',3)"
-        >
-            <span>👖</span>
-            <b>Pants</b>
-            <small>❤️ 3</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('👙',8)"
-        >
-            <span>👙</span>
-            <b>Lingerie</b>
-            <small>❤️ 8</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('💋',5)"
-        >
-            <span>💋</span>
-            <b>Kiss</b>
-            <small>❤️ 5</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('🌹',3)"
-        >
-            <span>🌹</span>
-            <b>Rose</b>
-            <small>❤️ 3</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('💎',15)"
-        >
-            <span>💎</span>
-            <b>Diamond</b>
-            <small>❤️ 15</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('💄',5)"
-        >
-            <span>💄</span>
-            <b>Lipstick</b>
-            <small>❤️ 5</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('🌸',2)"
-        >
-            <span>🌸</span>
-            <b>Flowers</b>
-            <small>❤️ 2</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('☕',2)"
-        >
-            <span>☕</span>
-            <b>Coffee</b>
-            <small>❤️ 2</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('🍓',2)"
-        >
-            <span>🍓</span>
-            <b>Strawberry</b>
-            <small>❤️ 2</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('🍾',10)"
-        >
-            <span>🍾</span>
-            <b>Champagne</b>
-            <small>❤️ 10</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('🎀',2)"
-        >
-            <span>🎀</span>
-            <b>Candy</b>
-            <small>❤️ 2</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('🧸',4)"
-        >
-            <span>🧸</span>
-            <b>Teddy</b>
-            <small>❤️ 4</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('💍',20)"
-        >
-            <span>💍</span>
-            <b>Ring</b>
-            <small>❤️ 20</small>
-        </button>
-
-
-        <button
-            class="gift-item"
-            onclick="sendGift('🎁',10)"
-        >
-            <span>🎁</span>
-            <b>Surprise</b>
-            <small>❤️ 10</small>
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- =========================================================
-     STORE
-========================================================= -->
+<!-- =====================================================
+     STORE MODAL
+===================================================== -->
 
 <div
     id="storeModal"
     class="modal hidden"
 >
 
-    <div class="modal-card">
-
+    <div class="modal-card store-modal-card">
 
         <button
             class="modal-close"
@@ -1293,21 +744,25 @@
             ×
         </button>
 
+        <div class="modal-title-icon">
+            🛍️
+        </div>
 
         <h2>
-            🛍️ Store
+            Hearts Store
         </h2>
 
-
         <p class="modal-subtitle">
-            Hearts & Money
+            Get Hearts to use inside the game.
         </p>
 
+
+        <!-- DAILY -->
 
         <div class="store-item">
 
             <div class="store-item-icon">
-                ❤️
+                ♥
             </div>
 
             <div class="store-item-info">
@@ -1317,22 +772,26 @@
                 </strong>
 
                 <small>
-                    Claim 50 free hearts
+                    50 free Hearts
                 </small>
 
             </div>
 
-            <button onclick="claimDailyHearts()">
+            <button
+                onclick="claimDailyHearts()"
+            >
                 Claim
             </button>
 
         </div>
 
 
+        <!-- 200 -->
+
         <div class="store-item">
 
             <div class="store-item-icon">
-                ❤️
+                ♥
             </div>
 
             <div class="store-item-info">
@@ -1347,17 +806,21 @@
 
             </div>
 
-            <button onclick="buyHearts(200,100)">
+            <button
+                onclick="buyHearts(200,100)"
+            >
                 Buy
             </button>
 
         </div>
 
 
+        <!-- 600 -->
+
         <div class="store-item">
 
             <div class="store-item-icon">
-                ❤️
+                ♥
             </div>
 
             <div class="store-item-info">
@@ -1372,12 +835,16 @@
 
             </div>
 
-            <button onclick="buyHearts(600,300)">
+            <button
+                onclick="buyHearts(600,300)"
+            >
                 Buy
             </button>
 
         </div>
 
+
+        <!-- 5000 -->
 
         <div class="store-item best-offer">
 
@@ -1386,7 +853,7 @@
             </span>
 
             <div class="store-item-icon">
-                ❤️
+                ♥
             </div>
 
             <div class="store-item-info">
@@ -1401,12 +868,16 @@
 
             </div>
 
-            <button onclick="buyHearts(5000,1000)">
+            <button
+                onclick="buyHearts(5000,1000)"
+            >
                 Buy
             </button>
 
         </div>
 
+
+        <!-- 10000 -->
 
         <div class="store-item best-offer">
 
@@ -1415,7 +886,7 @@
             </span>
 
             <div class="store-item-icon">
-                ❤️
+                ♥
             </div>
 
             <div class="store-item-info">
@@ -1430,7 +901,9 @@
 
             </div>
 
-            <button onclick="buyHearts(10000,2000)">
+            <button
+                onclick="buyHearts(10000,2000)"
+            >
                 Buy
             </button>
 
@@ -1441,9 +914,164 @@
 </div>
 
 
-<!-- =========================================================
+<!-- =====================================================
+     GIFT MODAL
+===================================================== -->
+
+<div
+    id="giftModal"
+    class="modal hidden"
+>
+
+    <div class="modal-card gift-modal-card">
+
+        <button
+            class="modal-close"
+            onclick="closeGiftStore()"
+        >
+            ×
+        </button>
+
+        <h2>
+            🎁 Gifts
+        </h2>
+
+        <p class="modal-subtitle">
+            Send something special.
+        </p>
+
+
+        <div class="gift-grid">
+
+            <button
+                class="gift-card"
+                onclick="sendGift('Rose',20)"
+            >
+
+                <span class="gift-image">
+                    🌹
+                </span>
+
+                <strong>
+                    Rose
+                </strong>
+
+                <small>
+                    20 ♥
+                </small>
+
+            </button>
+
+
+            <button
+                class="gift-card"
+                onclick="sendGift('Phone',100)"
+            >
+
+                <span class="gift-image">
+                    📱
+                </span>
+
+                <strong>
+                    Phone
+                </strong>
+
+                <small>
+                    100 ♥
+                </small>
+
+            </button>
+
+
+            <button
+                class="gift-card"
+                onclick="sendGift('Tomato',40)"
+            >
+
+                <span class="gift-image">
+                    🍅
+                </span>
+
+                <strong>
+                    Tomato
+                </strong>
+
+                <small>
+                    40 ♥
+                </small>
+
+            </button>
+
+
+            <button
+                class="gift-card"
+                onclick="sendGift('Pants',80)"
+            >
+
+                <span class="gift-image">
+                    👖
+                </span>
+
+                <strong>
+                    Pants
+                </strong>
+
+                <small>
+                    80 ♥
+                </small>
+
+            </button>
+
+
+            <button
+                class="gift-card"
+                onclick="sendGift('Crown',200)"
+            >
+
+                <span class="gift-image">
+                    👑
+                </span>
+
+                <strong>
+                    Crown
+                </strong>
+
+                <small>
+                    200 ♥
+                </small>
+
+            </button>
+
+
+            <button
+                class="gift-card premium-gift"
+                onclick="sendGift('Diamond',500)"
+            >
+
+                <span class="gift-image">
+                    💎
+                </span>
+
+                <strong>
+                    Diamond
+                </strong>
+
+                <small>
+                    500 ♥
+                </small>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
      SETTINGS
-========================================================= -->
+===================================================== -->
 
 <div
     id="settingsModal"
@@ -1452,7 +1080,6 @@
 
     <div class="modal-card">
 
-
         <button
             class="modal-close"
             onclick="closeSettings()"
@@ -1460,9 +1087,8 @@
             ×
         </button>
 
-
         <h2>
-            ⚙️ Settings
+            Settings
         </h2>
 
 
@@ -1474,27 +1100,27 @@
 
             <select id="languageSelect">
 
-                <option value="English">
+                <option>
                     English
                 </option>
 
-                <option value="Arabic">
+                <option>
                     Arabic
                 </option>
 
-                <option value="Russian">
+                <option>
                     Russian
                 </option>
 
-                <option value="Turkish">
+                <option>
                     Turkish
                 </option>
 
-                <option value="Uzbek">
+                <option>
                     Uzbek
                 </option>
 
-                <option value="Amharic">
+                <option>
                     Amharic
                 </option>
 
@@ -1509,7 +1135,9 @@
                 Privacy
             </span>
 
-            <button onclick="privacyMessage()">
+            <button
+                onclick="privacyMessage()"
+            >
                 Manage
             </button>
 
@@ -1520,9 +1148,9 @@
 </div>
 
 
-<!-- =========================================================
+<!-- =====================================================
      MUSIC
-========================================================= -->
+===================================================== -->
 
 <div
     id="musicModal"
@@ -1531,7 +1159,6 @@
 
     <div class="modal-card">
 
-
         <button
             class="modal-close"
             onclick="closeMusic()"
@@ -1539,18 +1166,15 @@
             ×
         </button>
 
-
         <h2>
             🎵 Music
         </h2>
-
 
         <input
             id="musicSearch"
             class="modal-input"
             placeholder="Search music..."
         >
-
 
         <button
             class="primary-modal-button"
@@ -1559,7 +1183,6 @@
             Search
         </button>
 
-
         <div id="musicResults"></div>
 
     </div>
@@ -1567,9 +1190,9 @@
 </div>
 
 
-<!-- =========================================================
+<!-- =====================================================
      EMOTIONS
-========================================================= -->
+===================================================== -->
 
 <div
     id="emotionModal"
@@ -1578,7 +1201,6 @@
 
     <div class="modal-card">
 
-
         <button
             class="modal-close"
             onclick="closeEmotions()"
@@ -1586,36 +1208,30 @@
             ×
         </button>
 
-
         <h2>
-            😊 Emotions
+            Emotions
         </h2>
-
 
         <div class="emotion-grid">
 
-
             <button onclick="sendEmotion('happy')">
-                ☺
-                <small>Happy</small>
+                😊
+                <span>Happy</span>
             </button>
-
 
             <button onclick="sendEmotion('love')">
                 ❤️
-                <small>Love</small>
+                <span>Love</span>
             </button>
-
 
             <button onclick="sendEmotion('sad')">
-                ☹
-                <small>Sad</small>
+                😔
+                <span>Sad</span>
             </button>
 
-
             <button onclick="sendEmotion('cool')">
-                ⭐
-                <small>Cool</small>
+                😎
+                <span>Cool</span>
             </button>
 
         </div>
@@ -1625,15 +1241,152 @@
 </div>
 
 
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
+<!-- =====================================================
+     MEMBER PROFILE
+===================================================== -->
 
-<script src="/socket.io/socket.io.js"></script>
+<div
+    id="memberModal"
+    class="modal hidden"
+>
+
+    <div class="modal-card member-modal-card">
+
+        <button
+            class="modal-close"
+            onclick="closeMemberModal()"
+        >
+            ×
+        </button>
+
+        <div class="member-profile-avatar">
+
+            <img
+                id="memberProfileAvatar"
+                src=""
+                alt="Player"
+            >
+
+        </div>
+
+        <h2 id="memberProfileName">
+            Player
+        </h2>
+
+        <p id="memberProfileGender">
+            Male
+        </p>
+
+
+        <div class="member-stat-grid">
+
+            <div>
+                <strong id="memberRank">
+                    Bronze
+                </strong>
+
+                <small>
+                    Rank
+                </small>
+            </div>
+
+            <div>
+                <strong id="memberKissPoints">
+                    0
+                </strong>
+
+                <small>
+                    Kiss
+                </small>
+            </div>
+
+            <div>
+                <strong id="memberAdmirePoints">
+                    0
+                </strong>
+
+                <small>
+                    Admire
+                </small>
+            </div>
+
+            <div>
+                <strong id="memberSongPoints">
+                    0
+                </strong>
+
+                <small>
+                    Songs
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="member-actions">
+
+            <button
+                id="memberAdmireButton"
+                onclick="admireMember()"
+            >
+                ❤️ Admire
+            </button>
+
+            <button
+                id="memberKickButton"
+                onclick="kickMember()"
+            >
+                🚫 Kick
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MESSAGE SEARCH
+===================================================== -->
+
+<div
+    id="messageSearchModal"
+    class="modal hidden"
+>
+
+    <div class="modal-card">
+
+        <button
+            class="modal-close"
+            onclick="closeMessageSearch()"
+        >
+            ×
+        </button>
+
+        <h2>
+            Search Messages
+        </h2>
+
+        <input
+            id="messageSearchInput"
+            class="modal-input"
+            placeholder="Search..."
+            oninput="searchMessages()"
+        >
+
+        <div id="messageSearchResults"></div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SCRIPT
+===================================================== -->
 
 <script src="script.js"></script>
 
-
 </body>
-
 </html>
