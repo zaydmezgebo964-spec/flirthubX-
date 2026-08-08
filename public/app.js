@@ -1,53 +1,49 @@
 /* =========================================================
    FLIRTHUBX — APP.JS
-   Main client-side game logic
+   Fixed room chat system:
+   - Messages are saved per room
+   - Maximum 7 messages per room
+   - 8th message removes the oldest
+   - Leaving a room does NOT delete its messages
+   - Empty-room cleanup can be triggered by the server
 ========================================================= */
 
 "use strict";
 
-/* =========================================================
-   STATE
-========================================================= */
+const MAX_ROOM_MESSAGES = 7;
 
 const state = {
     profileCreated: false,
-
     name: "",
     age: 18,
     gender: "",
     avatar: "",
-
     hearts: 50,
     money: 10,
     kissPoints: 0,
     songPoints: 0,
-
     room: 1,
     streak: 0,
-
     premium: false,
-
     language: "en",
 
     roomMembers: [],
     messages: [],
+    roomMessages: {},
 
     privateMessages: {},
-
     blockedUsers: [],
-
     selectedMember: null,
     currentChatUser: null,
 
     league: "Bronze",
     leaguePoints: 0,
-
     lastDailyReward: null
 };
 
 
 /* =========================================================
-   DEFAULT ROOM PLAYERS
+   DEFAULT PLAYERS
 ========================================================= */
 
 const defaultPlayers = [
@@ -86,11 +82,99 @@ const defaultPlayers = [
 ];
 
 
+let flirthubSocket = null;
+let bottleSpinning = false;
+let kissCountdown = null;
+
+
 /* =========================================================
-   SOCKET
+   HELPERS
 ========================================================= */
 
-let flirthubSocket = null;
+function $(id) {
+    return document.getElementById(id);
+}
+
+
+function getTime() {
+    return new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+
+function escapeHTML(text) {
+    return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+function showModal(id) {
+    const element = $(id);
+
+    if (element) {
+        element.classList.remove("hidden");
+    }
+}
+
+
+function closeModal(id) {
+    const element = $(id);
+
+    if (element) {
+        element.classList.add("hidden");
+    }
+}
+
+
+function notify(message, icon = "✓") {
+
+    const notification = $("notification");
+
+    if (!notification) {
+        console.log(message);
+        return;
+    }
+
+    if ($("notificationText")) {
+        $("notificationText").textContent = message;
+    }
+
+    if ($("notificationIcon")) {
+        $("notificationIcon").textContent = icon;
+    }
+
+    notification.classList.add("show");
+
+    setTimeout(() => {
+        notification.classList.remove("show");
+    }, 2500);
+}
+
+
+function showScreen(id) {
+
+    document.querySelectorAll(".screen").forEach(screen => {
+
+        screen.classList.remove("active");
+        screen.classList.add("hidden");
+
+    });
+
+    const screen = $(id);
+
+    if (screen) {
+
+        screen.classList.remove("hidden");
+        screen.classList.add("active");
+
+    }
+}
 
 
 /* =========================================================
@@ -114,6 +198,7 @@ function saveState() {
         );
 
     }
+
 }
 
 
@@ -138,6 +223,15 @@ function loadState() {
             data
         );
 
+        if (
+            !state.roomMessages ||
+            typeof state.roomMessages !== "object"
+        ) {
+
+            state.roomMessages = {};
+
+        }
+
         return true;
 
     } catch (error) {
@@ -148,172 +242,157 @@ function loadState() {
         );
 
         return false;
+
     }
+
 }
 
 
 /* =========================================================
-   HELPERS
+   ROOM MESSAGE STORAGE
 ========================================================= */
 
-function $(id) {
-    return document.getElementById(id);
-}
+/*
+   IMPORTANT:
+
+   Messages are stored like:
+
+   roomMessages = {
+       "1": [ ...messages... ],
+       "2": [ ...messages... ],
+       "3": [ ...messages... ]
+   }
+
+   So changing rooms does NOT delete another room's messages.
+*/
 
 
-function showElement(id) {
+function loadRoomMessages(room) {
 
-    const element = $(id);
+    const roomId =
+        String(room || 1);
 
-    if (element) {
-        element.classList.remove("hidden");
+    if (
+        !state.roomMessages ||
+        typeof state.roomMessages !== "object"
+    ) {
+
+        state.roomMessages = {};
+
     }
+
+    state.messages =
+        Array.isArray(
+            state.roomMessages[roomId]
+        )
+            ? state.roomMessages[roomId]
+                .slice(-MAX_ROOM_MESSAGES)
+            : [];
+
+    renderMessages();
+
 }
 
 
-function hideElement(id) {
+function saveRoomMessages() {
 
-    const element = $(id);
+    const roomId =
+        String(state.room || 1);
 
-    if (element) {
-        element.classList.add("hidden");
+    if (
+        !state.roomMessages ||
+        typeof state.roomMessages !== "object"
+    ) {
+
+        state.roomMessages = {};
+
     }
-}
 
-
-function showModal(id) {
-
-    const modal = $(id);
-
-    if (modal) {
-        modal.classList.remove("hidden");
+    if (!Array.isArray(state.messages)) {
+        state.messages = [];
     }
+
+    /*
+       Keep ONLY the newest 7.
+    */
+
+    state.messages =
+        state.messages.slice(
+            -MAX_ROOM_MESSAGES
+        );
+
+    state.roomMessages[roomId] =
+        [...state.messages];
+
+    saveState();
+
 }
 
 
-function closeModal(id) {
+/*
+   This is used only when the server tells us
+   that a room has become completely empty.
+*/
 
-    const modal = $(id);
+function clearRoomMessages(room) {
 
-    if (modal) {
-        modal.classList.add("hidden");
+    const roomId =
+        String(room || 1);
+
+    if (
+        !state.roomMessages ||
+        typeof state.roomMessages !== "object"
+    ) {
+
+        state.roomMessages = {};
+
     }
+
+    delete state.roomMessages[roomId];
+
+    if (
+        Number(state.room) ===
+        Number(room)
+    ) {
+
+        state.messages = [];
+
+        renderMessages();
+
+    }
+
+    saveState();
+
 }
 
 
-function notify(message, icon = "✓") {
+/*
+   Server can send:
 
-    const notification =
-        $("notification");
+   {
+       room: 5
+   }
 
-    const text =
-        $("notificationText");
+   when Room 5 becomes completely empty.
+*/
 
-    const iconElement =
-        $("notificationIcon");
+function handleRoomEmpty(data) {
 
-    if (!notification) {
-        alert(message);
+    if (!data) {
         return;
     }
 
-    if (text) {
-        text.textContent = message;
+    const room =
+        data.room !== undefined
+            ? data.room
+            : data.roomNumber;
+
+    if (room === undefined) {
+        return;
     }
 
-    if (iconElement) {
-        iconElement.textContent = icon;
-    }
+    clearRoomMessages(room);
 
-    notification.classList.add(
-        "show"
-    );
-
-    setTimeout(() => {
-
-        notification.classList.remove(
-            "show"
-        );
-
-    }, 2500);
-}
-
-
-function getTime() {
-
-    return new Date()
-        .toLocaleTimeString(
-            [],
-            {
-                hour: "2-digit",
-                minute: "2-digit"
-            }
-        );
-}
-
-
-function escapeHTML(text) {
-
-    return String(text)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-
-/* =========================================================
-   SCREEN NAVIGATION
-========================================================= */
-
-function showScreen(id) {
-
-    document
-        .querySelectorAll(".screen")
-        .forEach(screen => {
-
-            screen.classList.remove(
-                "active"
-            );
-
-            screen.classList.add(
-                "hidden"
-            );
-
-        });
-
-    const screen = $(id);
-
-    if (screen) {
-
-        screen.classList.remove(
-            "hidden"
-        );
-
-        screen.classList.add(
-            "active"
-        );
-
-    }
-}
-
-
-function hideAllScreens() {
-
-    document
-        .querySelectorAll(".screen")
-        .forEach(screen => {
-
-            screen.classList.remove(
-                "active"
-            );
-
-            screen.classList.add(
-                "hidden"
-            );
-
-        });
 }
 
 
@@ -342,6 +421,10 @@ function initializeApp() {
             [...defaultPlayers];
 
     }
+
+    loadRoomMessages(
+        state.room || 1
+    );
 
     setupButtons();
 
@@ -376,26 +459,24 @@ function startLoading() {
             value += 5;
 
             if (progress) {
+
                 progress.style.width =
                     `${value}%`;
+
             }
 
             if (percent) {
+
                 percent.textContent =
                     `${value}%`;
+
             }
 
             if (value >= 100) {
 
-                clearInterval(
-                    interval
-                );
+                clearInterval(interval);
 
                 setTimeout(() => {
-
-                    hideElement(
-                        "loadingScreen"
-                    );
 
                     if (
                         state.profileCreated &&
@@ -404,6 +485,10 @@ function startLoading() {
 
                         showScreen(
                             "homeScreen"
+                        );
+
+                        loadRoomMessages(
+                            state.room
                         );
 
                         renderRoom();
@@ -469,12 +554,13 @@ function setupButtons() {
     );
 
 
-    /* ACCOUNT */
+    /* PROFILE */
 
     $("profileButton")?.addEventListener(
         "click",
         openAccount
     );
+
 
     $("accountBack")?.addEventListener(
         "click",
@@ -490,7 +576,7 @@ function setupButtons() {
     );
 
 
-    /* CREATE ACCOUNT */
+    /* ACCOUNT */
 
     $("createAccountButton")
         ?.addEventListener(
@@ -519,7 +605,7 @@ function setupButtons() {
         );
 
 
-    /* HEARTS */
+    /* HEARTS / STORE */
 
     $("buyHeartButton")
         ?.addEventListener(
@@ -555,7 +641,7 @@ function setupButtons() {
         );
 
 
-    /* CHAT */
+    /* ROOM CHAT */
 
     $("sendRoomMessageButton")
         ?.addEventListener(
@@ -599,7 +685,7 @@ function setupButtons() {
 
                 if (
                     event.target.id ===
-                        "bottleArea" ||
+                    "bottleArea" ||
                     event.target.classList.contains(
                         "bottle-glow"
                     )
@@ -774,7 +860,7 @@ function setupButtons() {
         });
 
 
-    /* CLOSE BUTTONS */
+    /* CLOSE */
 
     document
         .querySelectorAll(
@@ -796,7 +882,7 @@ function setupButtons() {
         });
 
 
-    /* REWARD */
+    /* DAILY REWARD */
 
     $("claimRewardButton")
         ?.addEventListener(
@@ -838,17 +924,48 @@ function setupButtons() {
                     "BUTTON"
                 ) {
 
-                    const emotion =
-                        event.target.textContent;
-
                     sendEmotion(
-                        emotion
+                        event.target.textContent
                     );
 
                 }
 
             }
         );
+
+
+    /* GENDER */
+
+    document
+        .querySelectorAll(
+            ".gender-button"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    document
+                        .querySelectorAll(
+                            ".gender-button"
+                        )
+                        .forEach(item => {
+
+                            item.classList.remove(
+                                "selected"
+                            );
+
+                        });
+
+                    button.classList.add(
+                        "selected"
+                    );
+
+                }
+            );
+
+        });
 
 }
 
@@ -868,6 +985,10 @@ function startGame() {
             "homeScreen"
         );
 
+        loadRoomMessages(
+            state.room
+        );
+
         renderRoom();
 
     } else {
@@ -882,7 +1003,7 @@ function startGame() {
 
 
 /* =========================================================
-   ACCOUNT CREATION
+   CREATE ACCOUNT
 ========================================================= */
 
 function createAccount() {
@@ -895,12 +1016,10 @@ function createAccount() {
             $("ageInput")?.value
         );
 
-
     const genderButton =
         document.querySelector(
             ".gender-button.selected"
         );
-
 
     const gender =
         genderButton
@@ -916,6 +1035,7 @@ function createAccount() {
         );
 
         return;
+
     }
 
 
@@ -930,6 +1050,7 @@ function createAccount() {
         );
 
         return;
+
     }
 
 
@@ -941,6 +1062,7 @@ function createAccount() {
         );
 
         return;
+
     }
 
 
@@ -978,6 +1100,10 @@ function createAccount() {
         "homeScreen"
     );
 
+    loadRoomMessages(
+        state.room
+    );
+
     renderRoom();
 
     notify(
@@ -997,14 +1123,20 @@ function createAccount() {
 function fillAccountForm() {
 
     if ($("nameInput")) {
+
         $("nameInput").value =
             state.name || "";
+
     }
 
+
     if ($("ageInput")) {
+
         $("ageInput").value =
             state.age || 18;
+
     }
+
 
     document
         .querySelectorAll(
@@ -1015,9 +1147,9 @@ function fillAccountForm() {
             button.classList.toggle(
                 "selected",
                 button.dataset.gender ===
-                    String(
-                        state.gender
-                    ).toLowerCase()
+                String(
+                    state.gender
+                ).toLowerCase()
             );
 
         });
@@ -1034,10 +1166,8 @@ function handleAvatarUpload(event) {
         return;
     }
 
-
     const reader =
         new FileReader();
-
 
     reader.onload = () => {
 
@@ -1060,46 +1190,9 @@ function handleAvatarUpload(event) {
 
     };
 
-
     reader.readAsDataURL(file);
 
 }
-
-
-/* =========================================================
-   GENDER BUTTONS
-========================================================= */
-
-document.addEventListener(
-    "click",
-    event => {
-
-        const button =
-            event.target.closest(
-                ".gender-button"
-            );
-
-        if (!button) {
-            return;
-        }
-
-        document
-            .querySelectorAll(
-                ".gender-button"
-            )
-            .forEach(
-                item =>
-                    item.classList.remove(
-                        "selected"
-                    )
-            );
-
-        button.classList.add(
-            "selected"
-        );
-
-    }
-);
 
 
 /* =========================================================
@@ -1119,39 +1212,35 @@ function updateAllUI() {
 
 function updateBalances() {
 
-    const heart =
-        $("heartBalance");
+    if ($("heartBalance")) {
 
-    if (heart) {
-        heart.textContent =
+        $("heartBalance").textContent =
             state.hearts;
+
     }
 
 
-    const profileHearts =
-        $("profileHearts");
+    if ($("profileHearts")) {
 
-    if (profileHearts) {
-        profileHearts.textContent =
+        $("profileHearts").textContent =
             state.hearts;
+
     }
 
 
-    const kisses =
-        $("profileKisses");
+    if ($("profileKisses")) {
 
-    if (kisses) {
-        kisses.textContent =
+        $("profileKisses").textContent =
             state.kissPoints;
+
     }
 
 
-    const songs =
-        $("profileSongPoints");
+    if ($("profileSongPoints")) {
 
-    if (songs) {
-        songs.textContent =
+        $("profileSongPoints").textContent =
             state.songPoints;
+
     }
 
 }
@@ -1160,14 +1249,22 @@ function updateBalances() {
 function updateProfileUI() {
 
     if ($("profileName")) {
+
         $("profileName").textContent =
-            state.name || "Your Name";
+            state.name ||
+            "Your Name";
+
     }
 
+
     if ($("profileAge")) {
+
         $("profileAge").textContent =
-            state.age || 18;
+            state.age ||
+            18;
+
     }
+
 
     if ($("profileAvatar")) {
 
@@ -1178,26 +1275,10 @@ function updateProfileUI() {
 
     }
 
-
-    if ($("accountName")) {
-        $("accountName").textContent =
-            state.name;
-    }
-
 }
 
 
 function updateLeagueUI() {
-
-    const name =
-        $("leagueName");
-
-    const icon =
-        $("leagueIcon");
-
-    const profileLeague =
-        $("profileLeague");
-
 
     let leagueName =
         "Bronze League";
@@ -1207,7 +1288,8 @@ function updateLeagueUI() {
 
 
     if (
-        state.leaguePoints >= 1000
+        state.leaguePoints >=
+        1000
     ) {
 
         leagueName =
@@ -1217,7 +1299,8 @@ function updateLeagueUI() {
             "💎";
 
     } else if (
-        state.leaguePoints >= 600
+        state.leaguePoints >=
+        600
     ) {
 
         leagueName =
@@ -1227,7 +1310,8 @@ function updateLeagueUI() {
             "🥇";
 
     } else if (
-        state.leaguePoints >= 300
+        state.leaguePoints >=
+        300
     ) {
 
         leagueName =
@@ -1239,19 +1323,32 @@ function updateLeagueUI() {
     }
 
 
-    if (name) {
-        name.textContent =
+    if ($("leagueName")) {
+
+        $("leagueName").textContent =
             leagueName;
+
     }
 
-    if (icon) {
-        icon.textContent =
+
+    if ($("leagueIcon")) {
+
+        $("leagueIcon").textContent =
             leagueIcon;
+
     }
 
-    if (profileLeague) {
-        profileLeague.textContent =
-            `${leagueIcon} ${leagueName.replace(" League", "")}`;
+
+    if ($("profileLeague")) {
+
+        $("profileLeague").textContent =
+            `${leagueIcon} ${
+                leagueName.replace(
+                    " League",
+                    ""
+                )
+            }`;
+
     }
 
 }
@@ -1274,6 +1371,15 @@ function openAccount() {
 }
 
 
+function openSettings() {
+
+    showModal(
+        "settingsModal"
+    );
+
+}
+
+
 /* =========================================================
    ROOM
 ========================================================= */
@@ -1284,22 +1390,18 @@ function renderRoom() {
 
     renderMessages();
 
-    const roomNumber =
-        $("roomNumber");
 
-    const playerCount =
-        $("playerCount");
+    if ($("roomNumber")) {
 
-
-    if (roomNumber) {
-        roomNumber.textContent =
+        $("roomNumber").textContent =
             state.room;
+
     }
 
 
-    if (playerCount) {
+    if ($("playerCount")) {
 
-        playerCount.textContent =
+        $("playerCount").textContent =
             `${Math.min(
                 state.roomMembers.length,
                 10
@@ -1324,6 +1426,12 @@ function renderPlayers() {
 
 
     state.roomMembers
+        .filter(
+            player =>
+                !state.blockedUsers.includes(
+                    getPlayerId(player)
+                )
+        )
         .slice(0, 10)
         .forEach(player => {
 
@@ -1355,7 +1463,8 @@ function renderPlayers() {
                 "https://i.pravatar.cc/150?img=12";
 
             img.alt =
-                player.name;
+                player.name ||
+                "Player";
 
 
             avatar.appendChild(
@@ -1386,7 +1495,8 @@ function renderPlayers() {
                 );
 
             name.textContent =
-                player.name;
+                player.name ||
+                "Player";
 
 
             const age =
@@ -1449,19 +1559,9 @@ function openPlayerProfile(player) {
         player;
 
 
-    const avatar =
-        $("userAvatar");
+    if ($("userAvatar")) {
 
-    const name =
-        $("userName");
-
-    const age =
-        $("userAge");
-
-
-    if (avatar) {
-
-        avatar.innerHTML =
+        $("userAvatar").innerHTML =
             `<img src="${
                 player.avatar ||
                 "https://i.pravatar.cc/150"
@@ -1470,17 +1570,21 @@ function openPlayerProfile(player) {
     }
 
 
-    if (name) {
-        name.textContent =
+    if ($("userName")) {
+
+        $("userName").textContent =
             player.name;
+
     }
 
 
-    if (age) {
-        age.textContent =
+    if ($("userAge")) {
+
+        $("userAge").textContent =
             player.age
                 ? `${player.age} years old`
                 : player.gender || "";
+
     }
 
 
@@ -1530,19 +1634,26 @@ function openRoomChanger() {
 
         button.innerHTML =
             `
-                <strong>Room ${room}</strong>
-                <span>
-                    ${current
+            <strong>
+                Room ${room}
+            </strong>
+
+            <span>
+                ${
+                    current
                         ? "CURRENT"
-                        : "Join"}
-                </span>
+                        : "Join"
+                }
+            </span>
             `;
 
 
         if (current) {
+
             button.classList.add(
                 "current"
             );
+
         }
 
 
@@ -1588,6 +1699,20 @@ function changeRoom(room) {
     }
 
 
+    /*
+       Change local room first.
+       Then immediately load that room's
+       saved messages.
+    */
+
+    state.room =
+        nextRoom;
+
+    loadRoomMessages(
+        nextRoom
+    );
+
+
     if (
         flirthubSocket &&
         flirthubSocket.connected
@@ -1603,20 +1728,15 @@ function changeRoom(room) {
 
     } else {
 
-        state.room =
-            nextRoom;
-
-        state.messages = [];
-
         state.roomMembers =
             [...defaultPlayers];
-
-        saveState();
 
         renderRoom();
 
     }
 
+
+    saveState();
 
     closeModal(
         "roomModal"
@@ -1632,12 +1752,8 @@ function changeRoom(room) {
 
 
 /* =========================================================
-   BOTTLE SPIN
+   BOTTLE
 ========================================================= */
-
-let bottleSpinning =
-    false;
-
 
 function spinBottle() {
 
@@ -1648,7 +1764,6 @@ function spinBottle() {
 
     const bottle =
         $("bottle");
-
 
     if (!bottle) {
         return;
@@ -1662,7 +1777,8 @@ function spinBottle() {
     const rotation =
         1080 +
         Math.floor(
-            Math.random() * 720
+            Math.random() *
+            720
         );
 
 
@@ -1687,18 +1803,22 @@ function spinBottle() {
                 false;
 
 
+            const current =
+                getCurrentUser();
+
+
             const players =
                 state.roomMembers.filter(
                     player =>
                         !isSamePlayer(
                             player,
-                            getCurrentUser()
+                            current
                         )
                 );
 
 
             if (
-                players.length === 0
+                !players.length
             ) {
 
                 notify(
@@ -1728,7 +1848,6 @@ function spinBottle() {
                 target
             );
 
-
         },
         3200
     );
@@ -1743,11 +1862,13 @@ function spinBottle() {
 function getCurrentUser() {
 
     return {
+
         id:
             getCurrentUserId(),
 
         name:
-            state.name || "You",
+            state.name ||
+            "You",
 
         age:
             state.age,
@@ -1760,6 +1881,7 @@ function getCurrentUser() {
 
         online:
             true
+
     };
 
 }
@@ -1782,12 +1904,8 @@ function isSamePlayer(a, b) {
 
 
 /* =========================================================
-   KISS CHOICE
+   KISS
 ========================================================= */
-
-let kissCountdown =
-    null;
-
 
 function showKissChoice(player) {
 
@@ -1795,34 +1913,26 @@ function showKissChoice(player) {
         player;
 
 
-    const myName =
-        $("choiceMyName");
+    if ($("choiceMyName")) {
 
-    const targetName =
-        $("choiceTargetName");
+        $("choiceMyName").textContent =
+            state.name ||
+            "You";
 
-    const myAvatar =
-        $("choiceMyAvatar");
-
-    const targetAvatar =
-        $("choiceTargetAvatar");
-
-
-    if (myName) {
-        myName.textContent =
-            state.name || "You";
     }
 
 
-    if (targetName) {
-        targetName.textContent =
+    if ($("choiceTargetName")) {
+
+        $("choiceTargetName").textContent =
             player.name;
+
     }
 
 
-    if (myAvatar) {
+    if ($("choiceMyAvatar")) {
 
-        myAvatar.innerHTML =
+        $("choiceMyAvatar").innerHTML =
             state.avatar
                 ? `<img src="${state.avatar}" alt="">`
                 : "👤";
@@ -1830,9 +1940,9 @@ function showKissChoice(player) {
     }
 
 
-    if (targetAvatar) {
+    if ($("choiceTargetAvatar")) {
 
-        targetAvatar.innerHTML =
+        $("choiceTargetAvatar").innerHTML =
             `<img src="${
                 player.avatar ||
                 "https://i.pravatar.cc/150"
@@ -1850,13 +1960,11 @@ function showKissChoice(player) {
         10;
 
 
-    const timer =
-        $("kissTimer");
+    if ($("kissTimer")) {
 
-
-    if (timer) {
-        timer.textContent =
+        $("kissTimer").textContent =
             seconds;
+
     }
 
 
@@ -1871,9 +1979,11 @@ function showKissChoice(player) {
 
                 seconds--;
 
-                if (timer) {
-                    timer.textContent =
+                if ($("kissTimer")) {
+
+                    $("kissTimer").textContent =
                         seconds;
+
                 }
 
 
@@ -1924,7 +2034,9 @@ function acceptKiss() {
     }
 
 
-    state.kissPoints += 10;
+    state.kissPoints +=
+        10;
+
 
     state.hearts =
         Math.max(
@@ -1933,7 +2045,8 @@ function acceptKiss() {
         );
 
 
-    state.leaguePoints += 10;
+    state.leaguePoints +=
+        10;
 
 
     saveState();
@@ -1987,10 +2100,6 @@ function refuseKiss() {
 }
 
 
-/* =========================================================
-   KISS REQUEST FROM SERVER
-========================================================= */
-
 function handleKissRequest(data) {
 
     const player = {
@@ -2007,10 +2116,6 @@ function handleKissRequest(data) {
             "https://i.pravatar.cc/150"
 
     };
-
-
-    state.selectedMember =
-        player;
 
 
     const accepted =
@@ -2040,9 +2145,11 @@ function handleKissRequest(data) {
 
     if (accepted) {
 
-        state.kissPoints += 10;
+        state.kissPoints +=
+            10;
 
-        state.leaguePoints += 10;
+        state.leaguePoints +=
+            10;
 
         saveState();
 
@@ -2067,7 +2174,6 @@ function sendRoomMessage() {
     const input =
         $("roomMessageInput");
 
-
     if (!input) {
         return;
     }
@@ -2075,7 +2181,6 @@ function sendRoomMessage() {
 
     const text =
         input.value.trim();
-
 
     if (!text) {
         return;
@@ -2091,7 +2196,8 @@ function sendRoomMessage() {
             getCurrentUserId(),
 
         name:
-            state.name || "You",
+            state.name ||
+            "You",
 
         gender:
             state.gender,
@@ -2111,6 +2217,12 @@ function sendRoomMessage() {
     };
 
 
+    /*
+       If connected to the real server,
+       the server sends the message back
+       through "newMessage".
+    */
+
     if (
         flirthubSocket &&
         flirthubSocket.connected
@@ -2126,11 +2238,28 @@ function sendRoomMessage() {
 
     } else {
 
+        /*
+           Local/offline mode.
+        */
+
         state.messages.push(
             message
         );
 
-        saveState();
+
+        /*
+           Maximum 7 messages.
+           The oldest disappears when
+           the 8th message is added.
+        */
+
+        state.messages =
+            state.messages.slice(
+                -MAX_ROOM_MESSAGES
+            );
+
+
+        saveRoomMessages();
 
         renderMessages();
 
@@ -2143,14 +2272,13 @@ function sendRoomMessage() {
 
 
 /* =========================================================
-   RENDER MESSAGES
+   RENDER ROOM MESSAGES
 ========================================================= */
 
 function renderMessages() {
 
     const container =
         $("roomMessages");
-
 
     if (!container) {
         return;
@@ -2160,8 +2288,9 @@ function renderMessages() {
     container.innerHTML = "";
 
 
-    state.messages.forEach(
-        message => {
+    state.messages
+        .slice(-MAX_ROOM_MESSAGES)
+        .forEach(message => {
 
             const wrapper =
                 document.createElement(
@@ -2201,7 +2330,8 @@ function renderMessages() {
 
 
             bubble.textContent =
-                message.text;
+                message.text ||
+                "";
 
 
             const time =
@@ -2223,14 +2353,21 @@ function renderMessages() {
                 name
             );
 
+
             wrapper.appendChild(
                 bubble
             );
+
 
             wrapper.appendChild(
                 time
             );
 
+
+            /*
+               Long press / right click
+               opens translation.
+            */
 
             wrapper.addEventListener(
                 "contextmenu",
@@ -2250,8 +2387,7 @@ function renderMessages() {
                 wrapper
             );
 
-        }
-    );
+        });
 
 
     container.scrollTop =
@@ -2261,10 +2397,14 @@ function renderMessages() {
 
 
 /* =========================================================
-   SOCKET MESSAGE
+   SERVER MESSAGE
 ========================================================= */
 
 function handleNewMessage(message) {
+
+    /*
+       Prevent duplicate messages.
+    */
 
     const exists =
         state.messages.some(
@@ -2279,7 +2419,7 @@ function handleNewMessage(message) {
     }
 
 
-    state.messages.push({
+    const newMessage = {
 
         id:
             message.id ||
@@ -2314,16 +2454,42 @@ function handleNewMessage(message) {
                 ).toLocaleTimeString(
                     [],
                     {
-                        hour: "2-digit",
-                        minute: "2-digit"
+                        hour:
+                            "2-digit",
+
+                        minute:
+                            "2-digit"
                     }
                 )
-                : getTime()
+                : getTime(),
 
-    });
+        timestamp:
+            message.timestamp ||
+            Date.now()
+
+    };
 
 
-    saveState();
+    state.messages.push(
+        newMessage
+    );
+
+
+    /*
+       KEEP ONLY 7.
+    */
+
+    state.messages =
+        state.messages.slice(
+            -MAX_ROOM_MESSAGES
+        );
+
+
+    /*
+       Save to THIS ROOM.
+    */
+
+    saveRoomMessages();
 
     renderMessages();
 
@@ -2341,22 +2507,17 @@ function openTranslation(message) {
     }
 
 
-    const original =
-        $("originalMessage");
+    if ($("originalMessage")) {
 
-    const translated =
-        $("translatedMessage");
-
-
-    if (original) {
-        original.textContent =
+        $("originalMessage").textContent =
             message.text;
+
     }
 
 
-    if (translated) {
+    if ($("translatedMessage")) {
 
-        translated.textContent =
+        $("translatedMessage").textContent =
             getDemoTranslation(
                 message.text
             );
@@ -2372,10 +2533,6 @@ function openTranslation(message) {
 
 
 function getDemoTranslation(text) {
-
-    const lower =
-        String(text).toLowerCase();
-
 
     const translations = {
 
@@ -2398,7 +2555,9 @@ function getDemoTranslation(text) {
 
 
     return (
-        translations[lower] ||
+        translations[
+            String(text).toLowerCase()
+        ] ||
         "Automatic translation will be connected to the translation service."
     );
 
@@ -2429,25 +2588,17 @@ function openPrivateChat() {
     );
 
 
-    const name =
-        $("chatName");
+    if ($("chatName")) {
 
-    const avatar =
-        $("chatAvatar");
-
-    const status =
-        $("chatStatus");
-
-
-    if (name) {
-        name.textContent =
+        $("chatName").textContent =
             user.name;
+
     }
 
 
-    if (avatar) {
+    if ($("chatAvatar")) {
 
-        avatar.innerHTML =
+        $("chatAvatar").innerHTML =
             `<img src="${
                 user.avatar ||
                 "https://i.pravatar.cc/150"
@@ -2456,9 +2607,9 @@ function openPrivateChat() {
     }
 
 
-    if (status) {
+    if ($("chatStatus")) {
 
-        status.textContent =
+        $("chatStatus").textContent =
             user.online
                 ? "Online"
                 : "Offline";
@@ -2481,7 +2632,6 @@ function sendPrivateMessage() {
     const input =
         $("privateMessageInput");
 
-
     if (!input) {
         return;
     }
@@ -2490,7 +2640,6 @@ function sendPrivateMessage() {
     const text =
         input.value.trim();
 
-
     if (!text) {
         return;
     }
@@ -2498,7 +2647,6 @@ function sendPrivateMessage() {
 
     const user =
         state.currentChatUser;
-
 
     if (!user) {
         return;
@@ -2544,6 +2692,10 @@ function sendPrivateMessage() {
 
     renderPrivateMessages();
 
+
+    /*
+       Temporary demo reply.
+    */
 
     setTimeout(
         () => {
@@ -2592,7 +2744,6 @@ function renderPrivateMessages() {
     const container =
         $("privateMessages");
 
-
     if (!container) {
         return;
     }
@@ -2600,7 +2751,6 @@ function renderPrivateMessages() {
 
     const user =
         state.currentChatUser;
-
 
     if (!user) {
         return;
@@ -2621,31 +2771,29 @@ function renderPrivateMessages() {
     container.innerHTML = "";
 
 
-    messages.forEach(
-        message => {
+    messages.forEach(message => {
 
-            const bubble =
-                document.createElement(
-                    "div"
-                );
-
-
-            bubble.className =
-                message.mine
-                    ? "private-message mine"
-                    : "private-message other";
-
-
-            bubble.textContent =
-                message.text;
-
-
-            container.appendChild(
-                bubble
+        const bubble =
+            document.createElement(
+                "div"
             );
 
-        }
-    );
+
+        bubble.className =
+            message.mine
+                ? "private-message mine"
+                : "private-message other";
+
+
+        bubble.textContent =
+            message.text;
+
+
+        container.appendChild(
+            bubble
+        );
+
+    });
 
 
     container.scrollTop =
@@ -2783,6 +2931,7 @@ function searchMusic() {
             `;
 
         return;
+
     }
 
 
@@ -2847,11 +2996,15 @@ function playSong(song) {
     }
 
 
-    state.money -= 10;
+    state.money -=
+        10;
 
-    state.songPoints += 10;
+    state.songPoints +=
+        10;
 
-    state.leaguePoints += 5;
+    state.leaguePoints +=
+        5;
+
 
     saveState();
 
@@ -2880,7 +3033,6 @@ function openGiftStore() {
     const grid =
         $("giftGrid");
 
-
     if (!grid) {
         return;
     }
@@ -2892,39 +3044,69 @@ function openGiftStore() {
     const gifts = [
 
         {
-            emoji: "🌹",
-            name: "Rose",
-            price: 10
+            emoji:
+                "🌹",
+
+            name:
+                "Rose",
+
+            price:
+                10
         },
 
         {
-            emoji: "🍫",
-            name: "Chocolate",
-            price: 20
+            emoji:
+                "🍫",
+
+            name:
+                "Chocolate",
+
+            price:
+                20
         },
 
         {
-            emoji: "💐",
-            name: "Flowers",
-            price: 30
+            emoji:
+                "💐",
+
+            name:
+                "Flowers",
+
+            price:
+                30
         },
 
         {
-            emoji: "💎",
-            name: "Diamond",
-            price: 100
+            emoji:
+                "💎",
+
+            name:
+                "Diamond",
+
+            price:
+                100
         },
 
         {
-            emoji: "💖",
-            name: "Love Heart",
-            price: 50
+            emoji:
+                "💖",
+
+            name:
+                "Love Heart",
+
+            price:
+                50
         },
 
         {
-            emoji: "🎁",
-            name: "Mystery Gift",
-            price: 75
+            emoji:
+                "🎁",
+
+            name:
+                "Mystery Gift",
+
+            price:
+                75
         }
 
     ];
@@ -3022,8 +3204,8 @@ function sendGift(gift) {
     state.hearts -=
         gift.price;
 
-
-    state.kissPoints += 2;
+    state.kissPoints +=
+        2;
 
     state.leaguePoints +=
         Math.floor(
@@ -3050,7 +3232,7 @@ function sendGift(gift) {
 
 
 /* =========================================================
-   EMOTIONS
+   EMOTION
 ========================================================= */
 
 function sendEmotion(emotion) {
@@ -3080,12 +3262,8 @@ function sendEmotion(emotion) {
 
 function openStore() {
 
-    const amount =
-        50;
-
-
     state.hearts +=
-        amount;
+        50;
 
 
     saveState();
@@ -3094,7 +3272,7 @@ function openStore() {
 
 
     notify(
-        `+${amount} free Hearts ❤️`,
+        "+50 free Hearts ❤️",
         "❤️"
     );
 
@@ -3110,7 +3288,10 @@ function claimDailyReward() {
     const today =
         new Date()
             .toISOString()
-            .slice(0, 10);
+            .slice(
+                0,
+                10
+            );
 
 
     if (
@@ -3169,28 +3350,30 @@ function changeLanguage(language) {
 
     const names = {
 
-        en: "English",
+        en:
+            "English",
 
-        ar: "العربية",
+        ar:
+            "العربية",
 
-        ru: "Русский",
+        ru:
+            "Русский",
 
-        tr: "Türkçe",
+        tr:
+            "Türkçe",
 
-        uz: "O'zbek",
+        uz:
+            "O'zbek",
 
-        ko: "한국어"
+        ko:
+            "한국어"
 
     };
 
 
-    const current =
-        $("currentLanguage");
+    if ($("currentLanguage")) {
 
-
-    if (current) {
-
-        current.textContent =
+        $("currentLanguage").textContent =
             names[language] ||
             "English";
 
@@ -3216,7 +3399,7 @@ function changeLanguage(language) {
 
 
 /* =========================================================
-   SOCKET.IO CONNECTION
+   SOCKET.IO
 ========================================================= */
 
 function connectFlirtHubServer() {
@@ -3227,10 +3410,11 @@ function connectFlirtHubServer() {
     ) {
 
         console.warn(
-            "Socket.IO is not available. Running local mode."
+            "Socket.IO unavailable. Running local mode."
         );
 
         return;
+
     }
 
 
@@ -3256,6 +3440,11 @@ function connectFlirtHubServer() {
         );
 
 
+        /*
+           When server confirms the room,
+           restore THIS ROOM's saved messages.
+        */
+
         flirthubSocket.on(
             "roomJoined",
             data => {
@@ -3276,6 +3465,11 @@ function connectFlirtHubServer() {
                         data.users;
 
                 }
+
+
+                loadRoomMessages(
+                    state.room
+                );
 
 
                 saveState();
@@ -3342,6 +3536,7 @@ function connectFlirtHubServer() {
 
                 renderRoom();
 
+
                 notify(
                     `${player.name} joined the room.`,
                     "👋"
@@ -3369,6 +3564,25 @@ function connectFlirtHubServer() {
         );
 
 
+        /*
+           Server should emit one of these when
+           there are ZERO users left in a room.
+        */
+
+        flirthubSocket.on(
+            "roomEmpty",
+            handleRoomEmpty
+        );
+
+
+        flirthubSocket.on(
+            "roomCleared",
+            handleRoomEmpty
+        );
+
+
+        /* ROOM MESSAGE */
+
         flirthubSocket.on(
             "newMessage",
             handleNewMessage
@@ -3387,6 +3601,8 @@ function connectFlirtHubServer() {
             }
         );
 
+
+        /* KISS */
 
         flirthubSocket.on(
             "kissRequest",
@@ -3408,19 +3624,27 @@ function connectFlirtHubServer() {
                     state.leaguePoints +=
                         10;
 
+
                     saveState();
 
                     updateAllUI();
 
+
                     notify(
-                        `${data.fromName || "Player"} accepted your kiss! 💋`,
+                        `${
+                            data.fromName ||
+                            "Player"
+                        } accepted your kiss! 💋`,
                         "💋"
                     );
 
                 } else {
 
                     notify(
-                        `${data.fromName || "Player"} refused your kiss.`,
+                        `${
+                            data.fromName ||
+                            "Player"
+                        } refused your kiss.`,
                         "❌"
                     );
 
@@ -3572,22 +3796,27 @@ function joinCurrentRoom() {
         {
 
             room:
-                state.room || 1,
+                state.room ||
+                1,
 
             id:
                 getCurrentUserId(),
 
             name:
-                state.name || "Player",
+                state.name ||
+                "Player",
 
             age:
-                state.age || 18,
+                state.age ||
+                18,
 
             gender:
-                state.gender || "Male",
+                state.gender ||
+                "Male",
 
             avatar:
-                state.avatar || ""
+                state.avatar ||
+                ""
 
         }
     );
@@ -3596,8 +3825,7 @@ function joinCurrentRoom() {
 
 
 /* =========================================================
-   MAKE GLOBAL FUNCTIONS
-   For HTML buttons that may use onclick=""
+   GLOBAL FUNCTIONS
 ========================================================= */
 
 window.startGame =
@@ -3640,12 +3868,22 @@ window.sendGift =
     sendGift;
 
 window.openSettings =
-    () => showModal(
-        "settingsModal"
-    );
+    openSettings;
 
 window.closeModal =
     closeModal;
+
+
+/*
+   These are available if your server later
+   needs to trigger room cleanup.
+*/
+
+window.clearRoomMessages =
+    clearRoomMessages;
+
+window.handleRoomEmpty =
+    handleRoomEmpty;
 
 
 /* =========================================================
