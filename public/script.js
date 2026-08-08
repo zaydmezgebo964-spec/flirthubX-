@@ -1,3577 +1,1430 @@
 /* =========================================================
-   FLIRTHUBX — SCRIPT.JS
-   GAME / MESSAGE / ACCOUNT
-========================================================= */
+   FLIRTHUB-X
+   game.js
+   ========================================================= */
 
+document.addEventListener("DOMContentLoaded", () => {
 
-/* =========================================================
-   STATE
-========================================================= */
+    /* =========================
+       ELEMENTS
+    ========================= */
 
-const state = {
+    const loadingScreen =
+        document.getElementById("loading-screen");
 
-    profileCreated: false,
+    const startButton =
+        document.getElementById("start-btn");
 
-    name: "",
-    age: 18,
-    gender: "",
-    avatar: "",
+    const accountScreen =
+        document.getElementById("account-screen");
 
-    hearts: 50,
-    money: 10,
+    const avatarScreen =
+        document.getElementById("avatar-screen");
 
-    kissPoints: 0,
-    songPoints: 0,
-
-    room: 1,
-
-    streak: 0,
-
-    premium: false,
-
-    selectedGender: "",
-
-    messages: [],
-
-    roomMembers: [],
-
-    lastDailyClaim: null,
-
-    league: "Bronze"
-
-};
-
-
-/* =========================================================
-   DEFAULT ROOM PLAYERS
-========================================================= */
-
-const demoPlayers = [
-
-    {
-        id: "demo-1",
-        socketId: "demo-1",
-        name: "Alex",
-        gender: "Male",
-        avatar: "https://i.pravatar.cc/300?img=12",
-        online: true,
-        rank: 124,
-        admire: 18,
-        kissPoints: 25,
-        league: "Bronze"
-    },
-
-    {
-        id: "demo-2",
-        socketId: "demo-2",
-        name: "Mia",
-        gender: "Female",
-        avatar: "https://i.pravatar.cc/300?img=47",
-        online: true,
-        rank: 82,
-        admire: 34,
-        kissPoints: 41,
-        league: "Silver"
-    },
-
-    {
-        id: "demo-3",
-        socketId: "demo-3",
-        name: "Daniel",
-        gender: "Male",
-        avatar: "https://i.pravatar.cc/300?img=11",
-        online: true,
-        rank: 156,
-        admire: 12,
-        kissPoints: 17,
-        league: "Bronze"
-    },
-
-    {
-        id: "demo-4",
-        socketId: "demo-4",
-        name: "Lina",
-        gender: "Female",
-        avatar: "https://i.pravatar.cc/300?img=44",
-        online: false,
-        rank: 44,
-        admire: 61,
-        kissPoints: 72,
-        league: "Gold"
-    }
-
-];
-
-
-/* =========================================================
-   STORAGE
-========================================================= */
-
-function saveState() {
-
-    try {
-
-        localStorage.setItem(
-            "flirthubx_state",
-            JSON.stringify(state)
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Could not save FlirtHubX state:",
-            error
-        );
-
-    }
-
-}
-
-
-function loadState() {
-
-    try {
-
-        const saved =
-            localStorage.getItem(
-                "flirthubx_state"
-            );
-
-        if (!saved) {
-
-            state.roomMembers =
-                [...demoPlayers];
-
-            return false;
-
-        }
-
-
-        const data =
-            JSON.parse(saved);
-
-
-        Object.assign(
-            state,
-            data
-        );
-
-
-        if (
-            !Array.isArray(
-                state.roomMembers
-            ) ||
-            state.roomMembers.length === 0
-        ) {
-
-            state.roomMembers =
-                [...demoPlayers];
-
-        }
-
-
-        if (
-            !Array.isArray(
-                state.messages
-            )
-        ) {
-
-            state.messages = [];
-
-        }
-
-
-        return true;
-
-    } catch (error) {
-
-        console.error(
-            "Could not load FlirtHubX data:",
-            error
-        );
-
-
-        state.roomMembers =
-            [...demoPlayers];
-
-
-        return false;
-
-    }
-
-}
-
-
-/* =========================================================
-   SCREEN SYSTEM
-========================================================= */
-
-function hideAllScreens() {
-
-    const screens = [
-
-        "loadingScreen",
-        "startScreen",
-        "profileScreen",
-        "avatarScreen",
-        "homeScreen",
-        "accountScreen"
-
-    ];
-
-
-    screens.forEach(id => {
-
-        const element =
-            document.getElementById(id);
-
-        if (element) {
-
-            element.classList.add(
-                "hidden"
-            );
-
-        }
-
-    });
-
-}
-
-
-function showScreen(id) {
-
-    hideAllScreens();
-
-
-    const element =
-        document.getElementById(id);
-
-
-    if (element) {
-
-        element.classList.remove(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   INITIALIZATION
-========================================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        const existingAccount =
-            loadState();
-
-
-        initializeTelegram();
-
-
-        setTimeout(
-            () => {
-
-                const loading =
-                    document.getElementById(
-                        "loadingScreen"
-                    );
-
-
-                if (loading) {
-
-                    loading.classList.add(
-                        "hidden"
-                    );
-
-                }
-
-
-                if (
-                    existingAccount &&
-                    state.profileCreated &&
-                    state.name
-                ) {
-
-                    updateAccountUI();
-
-                    updateRoomCurrencyUI();
-
-                    renderRoom();
-
-                    showScreen(
-                        "homeScreen"
-                    );
-
-                } else {
-
-                    showScreen(
-                        "startScreen"
-                    );
-
-                }
-
-            },
-            1800
-        );
-
-    }
-);
-
-
-/* =========================================================
-   START
-========================================================= */
-
-function startGame() {
-
-    showScreen(
-        "profileScreen"
-    );
-
-}
-
-
-/* =========================================================
-   PROFILE
-========================================================= */
-
-function backToStart() {
-
-    showScreen(
-        "startScreen"
-    );
-
-}
-
-
-function backToProfile() {
-
-    showScreen(
-        "profileScreen"
-    );
-
-}
-
-
-function selectGender(
-    button,
-    gender
-) {
-
-    state.selectedGender =
-        gender;
-
-
-    document
-        .querySelectorAll(
-            ".gender-option"
-        )
-        .forEach(
-            option => {
-
-                option.classList.remove(
-                    "selected"
-                );
-
-            }
-        );
-
-
-    if (button) {
-
-        button.classList.add(
-            "selected"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PROFILE → AVATAR
-========================================================= */
-
-function continueToAvatar() {
+    const gameScreen =
+        document.getElementById("game-screen");
 
     const nameInput =
-        document.getElementById(
-            "playerName"
-        );
-
+        document.getElementById("name");
 
     const ageInput =
-        document.getElementById(
-            "playerAge"
-        );
-
-
-    const name =
-        nameInput
-            ? nameInput.value.trim()
-            : "";
-
-
-    const age =
-        ageInput
-            ? Number(
-                ageInput.value
-            )
-            : 0;
-
-
-    if (!name) {
-
-        alert(
-            "Please enter your name."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !age ||
-        age < 18
-    ) {
-
-        alert(
-            "You must be 18 or older to use FlirtHubX."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !state.selectedGender
-    ) {
-
-        alert(
-            "Please select your gender."
-        );
-
-        return;
-
-    }
-
-
-    state.name =
-        name.slice(0, 20);
-
-
-    state.age =
-        age;
-
-
-    state.gender =
-        state.selectedGender;
-
-
-    showScreen(
-        "avatarScreen"
-    );
-
-}
-
-
-/* =========================================================
-   GALLERY AVATAR
-========================================================= */
-
-function openAvatarGallery() {
-
-    let input =
-        document.getElementById(
-            "avatarGalleryInput"
-        );
-
-
-    if (!input) {
-
-        input =
-            document.createElement(
-                "input"
-            );
-
-
-        input.type =
-            "file";
-
-
-        input.id =
-            "avatarGalleryInput";
-
-
-        input.accept =
-            "image/*";
-
-
-        input.style.display =
-            "none";
-
-
-        document.body.appendChild(
-            input
-        );
-
-
-        input.addEventListener(
-            "change",
-            handleAvatarFile
-        );
-
-    }
-
-
-    input.click();
-
-}
-
-
-function handleAvatarFile(event) {
-
-    const file =
-        event.target.files &&
-        event.target.files[0];
-
-
-    if (!file) {
-        return;
-    }
-
-
-    if (
-        !file.type.startsWith(
-            "image/"
-        )
-    ) {
-
-        alert(
-            "Please select an image."
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * Compress the image before storing it.
-     * This prevents localStorage from becoming
-     * unnecessarily huge.
-     */
-
-    const reader =
-        new FileReader();
-
-
-    reader.onload =
-        function () {
-
-            const image =
-                new Image();
-
-
-            image.onload =
-                function () {
-
-                    const canvas =
-                        document.createElement(
-                            "canvas"
-                        );
-
-
-                    const maxSize =
-                        500;
-
-
-                    let width =
-                        image.width;
-
-
-                    let height =
-                        image.height;
-
-
-                    if (
-                        width >
-                        height
-                    ) {
-
-                        if (
-                            width >
-                            maxSize
-                        ) {
-
-                            height =
-                                height *
-                                maxSize /
-                                width;
-
-                            width =
-                                maxSize;
-
-                        }
-
-                    } else {
-
-                        if (
-                            height >
-                            maxSize
-                        ) {
-
-                            width =
-                                width *
-                                maxSize /
-                                height;
-
-                            height =
-                                maxSize;
-
-                        }
-
-                    }
-
-
-                    canvas.width =
-                        width;
-
-
-                    canvas.height =
-                        height;
-
-
-                    const ctx =
-                        canvas.getContext(
-                            "2d"
-                        );
-
-
-                    ctx.drawImage(
-                        image,
-                        0,
-                        0,
-                        width,
-                        height
-                    );
-
-
-                    state.avatar =
-                        canvas.toDataURL(
-                            "image/jpeg",
-                            0.82
-                        );
-
-
-                    state.selectedAvatar =
-                        state.avatar;
-
-
-                    showAvatarPreview();
-
-
-                    saveState();
-
-                };
-
-
-            image.src =
-                reader.result;
-
-        };
-
-
-    reader.readAsDataURL(
-        file
-    );
-
-}
-
-
-/* =========================================================
-   AVATAR PREVIEW
-========================================================= */
-
-function showAvatarPreview() {
-
-    const preview =
-        document.getElementById(
-            "avatarPreview"
-        );
-
-
-    if (preview) {
-
-        preview.src =
-            state.avatar;
-
-        preview.classList.remove(
-            "hidden"
-        );
-
-    }
-
-
-    const avatarImages =
-        document.querySelectorAll(
-            ".avatar-preview-image"
-        );
-
-
-    avatarImages.forEach(
-        image => {
-
-            image.src =
-                state.avatar;
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   AVATAR SELECTION
-========================================================= */
-
-function selectAvatar(
-    button,
-    avatar
-) {
-
-    state.selectedAvatar =
-        avatar;
-
-
-    document
-        .querySelectorAll(
-            ".avatar-option"
-        )
-        .forEach(
-            option => {
-
-                option.classList.remove(
-                    "selected"
-                );
-
+        document.getElementById("age");
+
+    const genderSelect =
+        document.getElementById("gender");
+
+    const accountContinue =
+        document.getElementById("account-continue");
+
+    const avatarInput =
+        document.getElementById("avatar-input");
+
+    const avatarSquare =
+        document.getElementById("avatar-square");
+
+    const avatarPreview =
+        document.getElementById("avatar-preview");
+
+    const avatarContinue =
+        document.getElementById("avatar-continue");
+
+    const avatarSkip =
+        document.getElementById("avatar-skip");
+
+    const backAvatar =
+        document.getElementById("back-avatar");
+
+    const backAccount =
+        document.getElementById("back-account");
+
+
+    /* =========================
+       GAME DATA
+    ========================= */
+
+    let player = {
+        name: "",
+        age: "",
+        gender: "",
+        avatar: null
+    };
+
+    let selectedAvatar = null;
+
+
+    /* =========================
+       DEFAULT AVATARS
+    ========================= */
+
+    const boyAvatar =
+        "data:image/svg+xml;charset=UTF-8," +
+        encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="300"
+                 height="300"
+                 viewBox="0 0 300 300">
+
+                <defs>
+                    <linearGradient id="bg"
+                        x1="0" y1="0"
+                        x2="1" y2="1">
+                        <stop offset="0%"
+                              stop-color="#5b4bdb"/>
+                        <stop offset="100%"
+                              stop-color="#9c5de5"/>
+                    </linearGradient>
+                </defs>
+
+                <rect width="300"
+                      height="300"
+                      rx="40"
+                      fill="url(#bg)"/>
+
+                <circle cx="150"
+                        cy="120"
+                        r="65"
+                        fill="#f2c09b"/>
+
+                <path d="
+                    M83 116
+                    C78 45 221 38 218 119
+                    C193 82 111 81 83 116Z"
+                    fill="#2d2528"/>
+
+                <circle cx="125"
+                        cy="125"
+                        r="7"
+                        fill="#222"/>
+
+                <circle cx="175"
+                        cy="125"
+                        r="7"
+                        fill="#222"/>
+
+                <path d="
+                    M130 160
+                    Q150 175 170 160"
+                    fill="none"
+                    stroke="#9b4c52"
+                    stroke-width="6"
+                    stroke-linecap="round"/>
+
+                <path d="
+                    M75 285
+                    Q85 205 150 200
+                    Q215 205 225 285"
+                    fill="#302f75"/>
+            </svg>
+        `);
+
+
+    const girlAvatar =
+        "data:image/svg+xml;charset=UTF-8," +
+        encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="300"
+                 height="300"
+                 viewBox="0 0 300 300">
+
+                <defs>
+                    <linearGradient id="bg"
+                        x1="0" y1="0"
+                        x2="1" y2="1">
+                        <stop offset="0%"
+                              stop-color="#e63c91"/>
+                        <stop offset="100%"
+                              stop-color="#8e4de8"/>
+                    </linearGradient>
+                </defs>
+
+                <rect width="300"
+                      height="300"
+                      rx="40"
+                      fill="url(#bg)"/>
+
+                <circle cx="150"
+                        cy="125"
+                        r="63"
+                        fill="#f4c7a5"/>
+
+                <path d="
+                    M82 135
+                    C45 85 80 35 145 42
+                    C220 30 250 95 213 155
+                    L195 112
+                    C173 83 126 82 101 110
+                    Z"
+                    fill="#5a3428"/>
+
+                <circle cx="125"
+                        cy="128"
+                        r="7"
+                        fill="#222"/>
+
+                <circle cx="175"
+                        cy="128"
+                        r="7"
+                        fill="#222"/>
+
+                <path d="
+                    M130 165
+                    Q150 178 170 165"
+                    fill="none"
+                    stroke="#a94d62"
+                    stroke-width="6"
+                    stroke-linecap="round"/>
+
+                <path d="
+                    M72 285
+                    Q85 205 150 200
+                    Q215 205 228 285"
+                    fill="#e94c9b"/>
+            </svg>
+        `);
+
+
+    /* =========================
+       SHOW / HIDE SCREENS
+    ========================= */
+
+    function showScreen(screen) {
+
+        const screens = [
+            loadingScreen,
+            accountScreen,
+            avatarScreen,
+            gameScreen
+        ];
+
+        screens.forEach(item => {
+            if (item) {
+                item.classList.remove("active");
+                item.style.display = "none";
             }
-        );
+        });
 
+        if (screen) {
+            screen.style.display = "flex";
 
-    if (button) {
-
-        button.classList.add(
-            "selected"
-        );
-
-    }
-
-
-    if (
-        typeof avatar ===
-        "string"
-    ) {
-
-        state.avatar =
-            avatar;
-
-        showAvatarPreview();
-
-    }
-
-}
-
-
-/* =========================================================
-   FINISH PROFILE
-========================================================= */
-
-function finishProfile() {
-
-    if (
-        !state.selectedAvatar &&
-        !state.avatar
-    ) {
-
-        alert(
-            "Please choose a profile picture."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        state.selectedAvatar
-    ) {
-
-        state.avatar =
-            state.selectedAvatar;
-
-    }
-
-
-    state.profileCreated =
-        true;
-
-
-    state.roomMembers =
-        [...demoPlayers];
-
-
-    saveState();
-
-
-    updateAccountUI();
-
-    updateRoomCurrencyUI();
-
-    renderRoom();
-
-
-    showScreen(
-        "homeScreen"
-    );
-
-
-    /*
-     * Connect after profile creation.
-     */
-
-    if (
-        typeof connectFlirtHubServer ===
-        "function"
-    ) {
-
-        connectFlirtHubServer();
-
-    }
-
-}
-
-
-/* =========================================================
-   ACCOUNT
-========================================================= */
-
-function updateAccountUI() {
-
-    const name =
-        document.getElementById(
-            "accountName"
-        );
-
-
-    const age =
-        document.getElementById(
-            "accountAge"
-        );
-
-
-    const gender =
-        document.getElementById(
-            "accountGender"
-        );
-
-
-    const avatar =
-        document.getElementById(
-            "accountAvatar"
-        );
-
-
-    const hearts =
-        document.getElementById(
-            "heartBalance"
-        );
-
-
-    const money =
-        document.getElementById(
-            "moneyBalance"
-        );
-
-
-    const kisses =
-        document.getElementById(
-            "kissBalance"
-        );
-
-
-    const songs =
-        document.getElementById(
-            "songPoints"
-        );
-
-
-    const streak =
-        document.getElementById(
-            "streakCount"
-        );
-
-
-    const premium =
-        document.getElementById(
-            "premiumTag"
-        );
-
-
-    if (name) {
-
-        name.textContent =
-            state.name ||
-            "Player";
-
-    }
-
-
-    if (age) {
-
-        age.textContent =
-            state.age ||
-            18;
-
-    }
-
-
-    if (gender) {
-
-        gender.textContent =
-            state.gender ||
-            "Male";
-
-    }
-
-
-    if (avatar) {
-
-        avatar.src =
-            state.avatar ||
-            "https://i.pravatar.cc/300?img=12";
-
-    }
-
-
-    if (hearts) {
-
-        hearts.textContent =
-            state.hearts;
-
-    }
-
-
-    if (money) {
-
-        money.textContent =
-            state.money;
-
-    }
-
-
-    if (kisses) {
-
-        kisses.textContent =
-            state.kissPoints;
-
-    }
-
-
-    if (songs) {
-
-        songs.textContent =
-            state.songPoints;
-
-    }
-
-
-    if (streak) {
-
-        streak.textContent =
-            `${state.streak} day streak`;
-
-    }
-
-
-    if (premium) {
-
-        premium.classList.toggle(
-            "hidden",
-            !state.premium
-        );
-
-    }
-
-
-    const league =
-        document.getElementById(
-            "leagueName"
-        );
-
-
-    if (league) {
-
-        league.textContent =
-            state.league ||
-            "Bronze";
-
-    }
-
-}
-
-
-/* =========================================================
-   ROOM CURRENCY
-========================================================= */
-
-function updateRoomCurrencyUI() {
-
-    const possibleHeartIds = [
-
-        "roomHeartBalance",
-        "roomHearts",
-        "roomHeartCount"
-
-    ];
-
-
-    const possibleMoneyIds = [
-
-        "roomMoneyBalance",
-        "roomMoney",
-        "roomMoneyCount"
-
-    ];
-
-
-    possibleHeartIds.forEach(
-        id => {
-
-            const element =
-                document.getElementById(
-                    id
-                );
-
-
-            if (element) {
-
-                element.textContent =
-                    state.hearts;
-
-            }
-
+            setTimeout(() => {
+                screen.classList.add("active");
+            }, 20);
         }
-    );
+    }
 
 
-    possibleMoneyIds.forEach(
-        id => {
+    /* =========================
+       LOADING
+    ========================= */
 
-            const element =
-                document.getElementById(
-                    id
-                );
+    setTimeout(() => {
 
-
-            if (element) {
-
-                element.textContent =
-                    state.money;
-
-            }
-
+        if (loadingScreen) {
+            loadingScreen.classList.add("loaded");
         }
-    );
 
-}
-
-
-/* =========================================================
-   NAVIGATION
-========================================================= */
-
-function openRoomTab() {
-
-    updateRoomCurrencyUI();
-
-    renderRoom();
-
-    showScreen(
-        "homeScreen"
-    );
-
-}
+    }, 1200);
 
 
-function openAccount() {
+    /* =========================
+       START GAME
+    ========================= */
 
-    updateAccountUI();
+    if (startButton) {
 
-    showScreen(
-        "accountScreen"
-    );
+        startButton.addEventListener("click", () => {
 
-}
+            showScreen(accountScreen);
 
-
-function openMessageTab() {
-
-    /*
-     * Message screen can be connected
-     * when your HTML contains messageScreen.
-     */
-
-    const messageScreen =
-        document.getElementById(
-            "messageScreen"
-        );
-
-
-    if (messageScreen) {
-
-        renderMessages();
-
-        updateMessageStreak();
-
-        showScreen(
-            "messageScreen"
-        );
-
-    } else {
-
-        /*
-         * If the current HTML uses the room
-         * as the message page, keep it here.
-         */
-
-        renderMessages();
-
-        showScreen(
-            "homeScreen"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   ROOM
-========================================================= */
-
-function renderRoom() {
-
-    const roomNumber =
-        document.getElementById(
-            "roomNumber"
-        );
-
-
-    const roomPeople =
-        document.getElementById(
-            "roomPeople"
-        );
-
-
-    if (roomNumber) {
-
-        roomNumber.textContent =
-            state.room;
+        });
 
     }
 
 
-    if (roomPeople) {
+    /* =========================
+       ACCOUNT CONTINUE
+    ========================= */
 
-        roomPeople.textContent =
-            Math.min(
-                state.roomMembers.length,
-                10
-            );
+    if (accountContinue) {
 
-    }
+        accountContinue.addEventListener("click", () => {
 
+            const name =
+                nameInput ?
+                nameInput.value.trim() :
+                "";
 
-    updateRoomCurrencyUI();
+            const age =
+                ageInput ?
+                Number(ageInput.value) :
+                0;
 
-
-    renderRoomMembers();
-
-}
-
-
-/* =========================================================
-   ROOM MEMBER CARDS
-========================================================= */
-
-function renderRoomMembers() {
-
-    const container =
-        document.getElementById(
-            "roomMembers"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    container.innerHTML =
-        "";
-
-
-    const players =
-        state.roomMembers
-            .slice(0, 10);
-
-
-    players.forEach(
-        member => {
-
-            const wrapper =
-                document.createElement(
-                    "button"
-                );
-
-
-            wrapper.type =
-                "button";
-
-
-            wrapper.className =
-                "room-player-card";
-
-
-            wrapper.dataset.socketId =
-                member.socketId ||
-                member.id ||
+            const gender =
+                genderSelect ?
+                genderSelect.value :
                 "";
 
 
-            const image =
-                document.createElement(
-                    "img"
-                );
+            if (!name) {
+                alert("Please enter your name.");
+                return;
+            }
 
 
-            image.className =
-                "room-player-avatar";
+            if (!age || age < 18) {
+                alert("You must be 18 or older.");
+                return;
+            }
 
 
-            image.src =
-                member.avatar ||
-                "https://i.pravatar.cc/300?img=12";
+            if (!gender) {
+                alert("Please choose your gender.");
+                return;
+            }
 
 
-            image.alt =
-                member.name ||
-                "Player";
+            player.name = name;
+            player.age = age;
+            player.gender = gender;
 
 
-            const name =
-                document.createElement(
-                    "span"
-                );
+            prepareAvatarScreen();
+
+            showScreen(avatarScreen);
+
+        });
+
+    }
 
 
-            name.className =
-                "room-player-name";
+    /* =========================
+       PREPARE AVATAR SCREEN
+    ========================= */
+
+    function prepareAvatarScreen() {
+
+        selectedAvatar = null;
+
+        if (!avatarPreview) return;
 
 
-            name.textContent =
-                member.name ||
-                "Player";
+        if (
+            player.gender.toLowerCase() === "male" ||
+            player.gender.toLowerCase() === "boy"
+        ) {
+
+            avatarPreview.src = boyAvatar;
+
+        } else if (
+            player.gender.toLowerCase() === "female" ||
+            player.gender.toLowerCase() === "girl"
+        ) {
+
+            avatarPreview.src = girlAvatar;
+
+        } else {
+
+            avatarPreview.src = boyAvatar;
+
+        }
 
 
-            const league =
-                document.createElement(
-                    "small"
-                );
+        avatarPreview.classList.remove("uploaded");
 
 
-            league.className =
-                "room-player-league";
+        if (avatarSquare) {
+            avatarSquare.classList.remove("has-image");
+        }
 
 
-            league.textContent =
-                member.league ||
-                "Bronze";
+        if (avatarInput) {
+            avatarInput.value = "";
+        }
+
+    }
 
 
-            wrapper.appendChild(
-                image
-            );
+    /* =========================
+       CLICK AVATAR SQUARE
+    ========================= */
+
+    if (avatarSquare && avatarInput) {
+
+        avatarSquare.addEventListener("click", () => {
+
+            avatarInput.click();
+
+        });
+
+    }
 
 
-            wrapper.appendChild(
-                name
-            );
+    /* =========================
+       CHOOSE FROM GALLERY
+    ========================= */
+
+    if (avatarInput) {
+
+        avatarInput.addEventListener("change", event => {
+
+            const file =
+                event.target.files &&
+                event.target.files[0];
 
 
-            wrapper.appendChild(
-                league
-            );
+            if (!file) return;
 
 
-            wrapper.addEventListener(
-                "click",
-                () => {
+            if (!file.type.startsWith("image/")) {
 
-                    openMemberAccount(
-                        member
+                alert("Please choose an image.");
+                return;
+
+            }
+
+
+            const reader = new FileReader();
+
+
+            reader.onload = e => {
+
+                selectedAvatar = e.target.result;
+
+                if (avatarPreview) {
+
+                    avatarPreview.src =
+                        selectedAvatar;
+
+                    avatarPreview.classList.add(
+                        "uploaded"
                     );
 
                 }
-            );
 
 
-            container.appendChild(
-                wrapper
-            );
+                if (avatarSquare) {
 
-        }
-    );
-
-
-    /*
-     * Make the room look populated in demo mode.
-     */
-
-    if (
-        players.length === 0
-    ) {
-
-        container.innerHTML =
-            `
-            <div class="empty-room">
-                Waiting for players...
-            </div>
-            `;
-
-    }
-
-}
-
-
-/* =========================================================
-   MEMBER ACCOUNT CARD
-========================================================= */
-
-function openMemberAccount(
-    member
-) {
-
-    const existing =
-        document.getElementById(
-            "memberProfileModal"
-        );
-
-
-    if (existing) {
-
-        existing.remove();
-
-    }
-
-
-    const modal =
-        document.createElement(
-            "div"
-        );
-
-
-    modal.id =
-        "memberProfileModal";
-
-
-    modal.className =
-        "modal member-profile-modal";
-
-
-    const card =
-        document.createElement(
-            "div"
-        );
-
-
-    card.className =
-        "modal-card member-profile-card";
-
-
-    const close =
-        document.createElement(
-            "button"
-        );
-
-
-    close.className =
-        "modal-close";
-
-
-    close.textContent =
-        "×";
-
-
-    close.onclick =
-        () => modal.remove();
-
-
-    const avatar =
-        document.createElement(
-            "img"
-        );
-
-
-    avatar.className =
-        "member-profile-avatar";
-
-
-    avatar.src =
-        member.avatar ||
-        "https://i.pravatar.cc/300?img=12";
-
-
-    const name =
-        document.createElement(
-            "h2"
-        );
-
-
-    name.textContent =
-        member.name ||
-        "Player";
-
-
-    const league =
-        document.createElement(
-            "div"
-        );
-
-
-    league.className =
-        "member-league";
-
-
-    league.textContent =
-        `🏆 ${member.league || "Bronze"} League`;
-
-
-    const stats =
-        document.createElement(
-            "div"
-        );
-
-
-    stats.className =
-        "member-stat-grid";
-
-
-    stats.innerHTML =
-        `
-
-        <div class="member-stat">
-            <strong>${member.rank || 0}</strong>
-            <small>Rank</small>
-        </div>
-
-        <div class="member-stat">
-            <strong>${member.admire || 0}</strong>
-            <small>Admire</small>
-        </div>
-
-        <div class="member-stat">
-            <strong>${member.kissPoints || 0}</strong>
-            <small>Kiss</small>
-        </div>
-
-        `;
-
-
-    const admire =
-        document.createElement(
-            "button"
-        );
-
-
-    admire.className =
-        "primary-modal-button";
-
-
-    admire.textContent =
-        "❤️ Admire";
-
-
-    admire.onclick =
-        () => {
-
-            state.hearts =
-                Math.max(
-                    0,
-                    state.hearts - 1
-                );
-
-
-            state.kissPoints += 1;
-
-
-            saveState();
-
-
-            updateAccountUI();
-
-            updateRoomCurrencyUI();
-
-
-            admire.textContent =
-                "❤️ Admired";
-
-
-            admire.disabled =
-                true;
-
-        };
-
-
-    const kick =
-        document.createElement(
-            "button"
-        );
-
-
-    kick.className =
-        "danger-button";
-
-
-    kick.textContent =
-        "Kick";
-
-
-    kick.onclick =
-        () => {
-
-            if (
-                member.socketId &&
-                flirthubSocket &&
-                flirthubSocket.connected
-            ) {
-
-                blockPlayer(
-                    member.socketId
-                );
-
-            } else {
-
-                alert(
-                    `${member.name} cannot be kicked in demo mode.`
-                );
-
-            }
-
-        };
-
-
-    card.appendChild(
-        close
-    );
-
-
-    card.appendChild(
-        avatar
-    );
-
-
-    card.appendChild(
-        name
-    );
-
-
-    card.appendChild(
-        league
-    );
-
-
-    card.appendChild(
-        stats
-    );
-
-
-    card.appendChild(
-        admire
-    );
-
-
-    card.appendChild(
-        kick
-    );
-
-
-    modal.appendChild(
-        card
-    );
-
-
-    document.body.appendChild(
-        modal
-    );
-
-}
-
-
-/* =========================================================
-   SPIN BOTTLE
-========================================================= */
-
-function spinBottle() {
-
-    const players =
-        state.roomMembers
-            .filter(
-                player =>
-                    player.id !==
-                    getCurrentUserId()
-            );
-
-
-    if (
-        players.length === 0
-    ) {
-
-        alert(
-            "Waiting for more players to join the room. 🍾"
-        );
-
-        return;
-
-    }
-
-
-    const selected =
-        players[
-            Math.floor(
-                Math.random() *
-                players.length
-            )
-        ];
-
-
-    const bottle =
-        document.querySelector(
-            ".spin-bottle"
-        );
-
-
-    if (bottle) {
-
-        bottle.classList.add(
-            "spinning"
-        );
-
-
-        setTimeout(
-            () => {
-
-                bottle.classList.remove(
-                    "spinning"
-                );
-
-            },
-            1800
-        );
-
-    }
-
-
-    setTimeout(
-        () => {
-
-            openMemberAccount(
-                selected
-            );
-
-        },
-        1900
-    );
-
-}
-
-
-/* =========================================================
-   MESSAGES
-========================================================= */
-
-function renderMessages() {
-
-    const container =
-        document.getElementById(
-            "roomMessages"
-        ) ||
-        document.getElementById(
-            "messageList"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    container.innerHTML =
-        "";
-
-
-    state.messages.forEach(
-        message => {
-
-            const wrapper =
-                document.createElement(
-                    "div"
-                );
-
-
-            wrapper.className =
-                `message ${
-                    message.mine
-                        ? "mine"
-                        : "other"
-                }`;
-
-
-            const name =
-                document.createElement(
-                    "span"
-                );
-
-
-            name.className =
-                "message-name";
-
-
-            name.textContent =
-                message.name ||
-                "Player";
-
-
-            const bubble =
-                document.createElement(
-                    "div"
-                );
-
-
-            bubble.className =
-                "message-bubble";
-
-
-            const text =
-                document.createElement(
-                    "span"
-                );
-
-
-            text.textContent =
-                message.text;
-
-
-            bubble.appendChild(
-                text
-            );
-
-
-            if (
-                message.translation
-            ) {
-
-                const translation =
-                    document.createElement(
-                        "small"
-                    );
-
-
-                translation.className =
-                    "message-translation";
-
-
-                translation.textContent =
-                    message.translation;
-
-
-                bubble.appendChild(
-                    translation
-                );
-
-            }
-
-
-            const time =
-                document.createElement(
-                    "small"
-                );
-
-
-            time.className =
-                "message-time";
-
-
-            time.textContent =
-                message.time ||
-                getTime();
-
-
-            wrapper.appendChild(
-                name
-            );
-
-
-            wrapper.appendChild(
-                bubble
-            );
-
-
-            wrapper.appendChild(
-                time
-            );
-
-
-            wrapper.addEventListener(
-                "contextmenu",
-                event => {
-
-                    event.preventDefault();
-
-                    translateMessage(
-                        message
+                    avatarSquare.classList.add(
+                        "has-image"
                     );
 
                 }
-            );
-
-
-            container.appendChild(
-                wrapper
-            );
-
-        }
-    );
-
-
-    container.scrollTop =
-        container.scrollHeight;
-
-}
-
-
-/* =========================================================
-   SEND MESSAGE
-========================================================= */
-
-function sendRoomMessage() {
-
-    const input =
-        document.getElementById(
-            "roomInput"
-        );
-
-
-    if (!input) {
-        return;
-    }
-
-
-    const text =
-        input.value.trim();
-
-
-    if (!text) {
-        return;
-    }
-
-
-    if (
-        text.length >
-        500
-    ) {
-
-        alert(
-            "Message is too long."
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * Real multiplayer.
-     */
-
-    if (
-        flirthubSocket &&
-        flirthubSocket.connected
-    ) {
-
-        flirthubSocket.emit(
-            "sendMessage",
-            {
-                text:
-                    text
-            }
-        );
-
-
-        input.value =
-            "";
-
-
-        return;
-
-    }
-
-
-    /*
-     * Offline/demo mode.
-     */
-
-    const message = {
-
-        id:
-            Date.now(),
-
-        name:
-            state.name ||
-            "You",
-
-        gender:
-            state.gender,
-
-        text:
-            text,
-
-        translation:
-            "",
-
-        mine:
-            true,
-
-        time:
-            getTime()
-
-    };
-
-
-    state.messages.push(
-        message
-    );
-
-
-    input.value =
-        "";
-
-
-    saveState();
-
-    renderMessages();
-
-
-    /*
-     * Demo reply.
-     */
-
-    setTimeout(
-        () => {
-
-            const reply = {
-
-                id:
-                    Date.now(),
-
-                name:
-                    "Alex",
-
-                gender:
-                    "Male",
-
-                text:
-                    "Nice to meet you! 😊",
-
-                translation:
-                    "",
-
-                mine:
-                    false,
-
-                time:
-                    getTime()
 
             };
 
 
-            state.messages.push(
-                reply
-            );
+            reader.readAsDataURL(file);
 
-
-            saveState();
-
-            renderMessages();
-
-        },
-        900
-    );
-
-}
-
-
-/* =========================================================
-   ENTER KEY
-========================================================= */
-
-function handleRoomEnter(
-    event
-) {
-
-    if (
-        event.key ===
-        "Enter"
-    ) {
-
-        event.preventDefault();
-
-        sendRoomMessage();
-
-    }
-
-}
-
-
-/* =========================================================
-   TYPING
-========================================================= */
-
-function handleTyping() {
-
-    if (
-        flirthubSocket &&
-        flirthubSocket.connected
-    ) {
-
-        flirthubSocket.emit(
-            "typing"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   TRANSLATION
-========================================================= */
-
-function translateMessage(
-    message
-) {
-
-    if (
-        message.translation
-    ) {
-
-        const original =
-            message.text;
-
-
-        message.text =
-            message.translation;
-
-
-        message.translation =
-            original;
-
-    } else {
-
-        message.translation =
-            "Translation will appear here.";
+        });
 
     }
 
 
-    saveState();
+    /* =========================
+       CONTINUE AFTER AVATAR
+    ========================= */
 
-    renderMessages();
+    if (avatarContinue) {
 
-}
+        avatarContinue.addEventListener("click", () => {
 
+            if (selectedAvatar) {
 
-/* =========================================================
-   MESSAGE STREAK
-========================================================= */
+                player.avatar =
+                    selectedAvatar;
 
-function updateMessageStreak() {
+            } else {
 
-    const elements =
-        document.querySelectorAll(
-            ".message-streak, #messageStreak, #streakCount"
-        );
+                /*
+                 User did not upload a photo.
+                 Use automatic avatar.
+                */
 
+                if (
+                    player.gender.toLowerCase() === "female" ||
+                    player.gender.toLowerCase() === "girl"
+                ) {
 
-    elements.forEach(
-        element => {
+                    player.avatar =
+                        girlAvatar;
 
-            element.textContent =
-                `🔥 ${state.streak} day streak`;
+                } else {
 
-        }
-    );
+                    player.avatar =
+                        boyAvatar;
 
-}
+                }
 
-
-/* =========================================================
-   TIME
-========================================================= */
-
-function getTime() {
-
-    return new Date()
-        .toLocaleTimeString(
-            [],
-            {
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit"
             }
-        );
-
-}
 
 
-/* =========================================================
-   CHANGE ROOM
-========================================================= */
+            savePlayer();
 
-function changeRoom() {
+            openGame();
 
-    if (
-        flirthubSocket &&
-        flirthubSocket.connected
-    ) {
+        });
 
-        let nextRoom =
-            Number(state.room) + 1;
+    }
 
 
-        if (
-            nextRoom >
-            9999
-        ) {
+    /* =========================
+       SKIP AVATAR
+    ========================= */
 
-            nextRoom =
-                1;
+    if (avatarSkip) {
 
-        }
+        avatarSkip.addEventListener("click", () => {
 
+            if (
+                player.gender.toLowerCase() === "female" ||
+                player.gender.toLowerCase() === "girl"
+            ) {
 
-        flirthubSocket.emit(
-            "changeRoom",
-            {
-                room:
-                    nextRoom
+                player.avatar =
+                    girlAvatar;
+
+            } else {
+
+                player.avatar =
+                    boyAvatar;
+
             }
-        );
 
 
-        return;
+            savePlayer();
 
-    }
+            openGame();
 
-
-    state.room += 1;
-
-
-    if (
-        state.room >
-        20
-    ) {
-
-        state.room =
-            1;
+        });
 
     }
 
 
-    saveState();
+    /* =========================
+       BACK FROM AVATAR
+    ========================= */
 
-    renderRoom();
+    if (backAvatar) {
 
-}
+        backAvatar.addEventListener("click", () => {
 
+            showScreen(accountScreen);
 
-/* =========================================================
-   STORE
-========================================================= */
-
-function openStore() {
-
-    const modal =
-        document.getElementById(
-            "storeModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.remove(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-function closeStore() {
-
-    const modal =
-        document.getElementById(
-            "storeModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.add(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   DAILY HEARTS
-========================================================= */
-
-function claimDailyHearts() {
-
-    const today =
-        new Date()
-            .toISOString()
-            .split("T")[0];
-
-
-    if (
-        state.lastDailyClaim ===
-        today
-    ) {
-
-        alert(
-            "You already claimed today's Hearts. ❤️"
-        );
-
-        return;
+        });
 
     }
 
 
-    state.hearts +=
-        50;
+    /* =========================
+       BACK FROM ACCOUNT
+    ========================= */
 
+    if (backAccount) {
 
-    state.lastDailyClaim =
-        today;
+        backAccount.addEventListener("click", () => {
 
+            showScreen(loadingScreen);
 
-    saveState();
-
-
-    updateAccountUI();
-
-    updateRoomCurrencyUI();
-
-
-    alert(
-        "You received 50 free Hearts! ❤️"
-    );
-
-}
-
-
-/* =========================================================
-   BUY HEARTS
-========================================================= */
-
-function buyHearts(
-    amount,
-    stars
-) {
-
-    /*
-     * This is only the front-end hook.
-     * Telegram Stars payment must be verified
-     * by the server before adding Hearts.
-     */
-
-    if (
-        window.Telegram &&
-        Telegram.WebApp
-    ) {
-
-        console.log(
-            "Telegram Stars purchase requested:",
-            amount,
-            stars
-        );
+        });
 
     }
 
 
-    alert(
-        `${amount.toLocaleString()} Hearts\n\n` +
-        `Price: ${stars} Telegram Stars\n\n` +
-        `Telegram payment will be connected through the server.`
-    );
-
-}
-
-
-/* =========================================================
-   GIFTS
-========================================================= */
-
-function openGiftStore() {
-
-    let modal =
-        document.getElementById(
-            "giftModal"
-        );
-
-
-    if (!modal) {
-
-        modal =
-            createGiftModal();
-
-    }
-
-
-    modal.classList.remove(
-        "hidden"
-    );
-
-}
-
-
-function createGiftModal() {
-
-    const modal =
-        document.createElement(
-            "div"
-        );
-
-
-    modal.id =
-        "giftModal";
-
-
-    modal.className =
-        "modal hidden";
-
-
-    modal.innerHTML = `
-
-        <div class="modal-card gift-modal-card">
-
-            <button
-                class="modal-close"
-                onclick="closeGiftStore()"
-            >
-                ×
-            </button>
-
-            <h2>🎁 Gifts</h2>
-
-            <p class="modal-subtitle">
-                Send something special
-            </p>
-
-            <div class="gift-grid">
-
-                <button
-                    class="gift-card"
-                    onclick="sendGift('Tomato',20,'🍅')"
-                >
-                    <span class="gift-image">
-                        🍅
-                    </span>
-
-                    <strong>
-                        Tomato
-                    </strong>
-
-                    <small>
-                        20 ❤️
-                    </small>
-                </button>
-
-
-                <button
-                    class="gift-card"
-                    onclick="sendGift('Flower',30,'🌷')"
-                >
-                    <span class="gift-image">
-                        🌷
-                    </span>
-
-                    <strong>
-                        Flower
-                    </strong>
-
-                    <small>
-                        30 ❤️
-                    </small>
-                </button>
-
-
-                <button
-                    class="gift-card"
-                    onclick="sendGift('Pants',60,'👖')"
-                >
-                    <span class="gift-image">
-                        👖
-                    </span>
-
-                    <strong>
-                        Stylish Pants
-                    </strong>
-
-                    <small>
-                        60 ❤️
-                    </small>
-                </button>
-
-
-                <button
-                    class="gift-card"
-                    onclick="sendGift('Rose',100,'🌹')"
-                >
-                    <span class="gift-image">
-                        🌹
-                    </span>
-
-                    <strong>
-                        Red Rose
-                    </strong>
-
-                    <small>
-                        100 ❤️
-                    </small>
-                </button>
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(
-        modal
-    );
-
-
-    return modal;
-
-}
-
-
-function closeGiftStore() {
-
-    const modal =
-        document.getElementById(
-            "giftModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.add(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-function sendGift(
-    giftName,
-    price,
-    icon
-) {
-
-    if (
-        state.hearts <
-        price
-    ) {
-
-        alert(
-            "You don't have enough Hearts. ❤️"
-        );
-
-        return;
-
-    }
-
-
-    state.hearts -=
-        price;
-
-
-    saveState();
-
-
-    updateAccountUI();
-
-    updateRoomCurrencyUI();
-
-
-    closeGiftStore();
-
-
-    alert(
-        `${icon} ${giftName} sent!`
-    );
-
-}
-
-
-/* =========================================================
-   FRIENDS
-========================================================= */
-
-function openFriends() {
-
-    alert(
-        "Friends list will appear here. 👥"
-    );
-
-}
-
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-function openSettings() {
-
-    const modal =
-        document.getElementById(
-            "settingsModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.remove(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-function closeSettings() {
-
-    const modal =
-        document.getElementById(
-            "settingsModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.add(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-function privacyMessage() {
-
-    alert(
-        "Privacy controls will be connected to the FlirtHubX account system."
-    );
-
-}
-
-
-/* =========================================================
-   MUSIC
-========================================================= */
-
-function openMusic() {
-
-    const modal =
-        document.getElementById(
-            "musicModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.remove(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-function closeMusic() {
-
-    const modal =
-        document.getElementById(
-            "musicModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.add(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-function searchMusic() {
-
-    const input =
-        document.getElementById(
-            "musicSearch"
-        );
-
-
-    const results =
-        document.getElementById(
-            "musicResults"
-        );
-
-
-    if (
-        !input ||
-        !results
-    ) {
-
-        return;
-
-    }
-
-
-    const search =
-        input.value.trim();
-
-
-    if (!search) {
-
-        results.innerHTML =
-            "<p>Type a song name first.</p>";
-
-        return;
-
-    }
-
-
-    results.innerHTML = `
-
-        <div class="music-result">
-
-            <div class="music-cover">
-                ♪
-            </div>
-
-            <div>
-                <strong>
-                    ${escapeHTML(search)}
-                </strong>
-
-                <small>
-                    YouTube Music
-                </small>
-            </div>
-
-            <button
-                onclick="playSong('${escapeAttribute(search)}')"
-            >
-                Play
-            </button>
-
-        </div>
-
-    `;
-
-}
-
-
-function playSong(
-    song
-) {
-
-    state.songPoints +=
-        10;
-
-
-    state.money =
-        Math.max(
-            0,
-            state.money - 10
-        );
-
-
-    const title =
-        document.getElementById(
-            "musicTitle"
-        );
-
-
-    if (title) {
-
-        title.textContent =
-            song;
-
-    }
-
-
-    const player =
-        document.getElementById(
-            "musicPlayer"
-        );
-
-
-    if (player) {
-
-        player.classList.remove(
-            "hidden"
-        );
-
-    }
-
-
-    saveState();
-
-
-    updateAccountUI();
-
-    updateRoomCurrencyUI();
-
-}
-
-
-/* =========================================================
-   EMOTIONS
-========================================================= */
-
-function openEmotions() {
-
-    const modal =
-        document.getElementById(
-            "emotionModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.remove(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-function closeEmotions() {
-
-    const modal =
-        document.getElementById(
-            "emotionModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.add(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-function sendEmotion(
-    type
-) {
-
-    const emotions = {
-
-        happy:
-            "😊",
-
-        love:
-            "❤️",
-
-        sad:
-            "😔",
-
-        cool:
-            "😎"
-
-    };
-
-
-    const input =
-        document.getElementById(
-            "roomInput"
-        );
-
-
-    if (input) {
-
-        input.value =
-            emotions[type] ||
-            "😊";
-
-
-        input.focus();
-
-    }
-
-
-    closeEmotions();
-
-}
-
-
-/* =========================================================
-   PREMIUM
-========================================================= */
-
-function activatePremium() {
-
-    state.premium =
-        true;
-
-
-    saveState();
-
-
-    updateAccountUI();
-
-
-    alert(
-        "Premium activated! ✨"
-    );
-
-}
-
-
-/* =========================================================
-   HTML SAFETY
-========================================================= */
-
-function escapeHTML(
-    text
-) {
-
-    return String(text)
-
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
-}
-
-
-function escapeAttribute(
-    text
-) {
-
-    return String(text)
-
-        .replaceAll(
-            "\\",
-            "\\\\"
-        )
-
-        .replaceAll(
-            "'",
-            "\\'"
-        )
-
-        .replaceAll(
-            '"',
-            "&quot;"
-        );
-
-}
-
-
-/* =========================================================
-   USER ID
-========================================================= */
-
-function getCurrentUserId() {
-
-    if (
-        window.Telegram &&
-        Telegram.WebApp &&
-        Telegram.WebApp.initDataUnsafe &&
-        Telegram.WebApp.initDataUnsafe.user
-    ) {
-
-        return String(
-            Telegram.WebApp
-                .initDataUnsafe
-                .user
-                .id
-        );
-
-    }
-
-
-    let localId =
-        localStorage.getItem(
-            "flirthubx_local_id"
-        );
-
-
-    if (!localId) {
-
-        localId =
-            "local-" +
-            Date.now() +
-            "-" +
-            Math.random()
-                .toString(36)
-                .slice(2, 8);
-
-
-        localStorage.setItem(
-            "flirthubx_local_id",
-            localId
-        );
-
-    }
-
-
-    return localId;
-
-}
-
-
-/* =========================================================
-   TELEGRAM
-========================================================= */
-
-function initializeTelegram() {
-
-    if (
-        typeof Telegram !==
-        "undefined" &&
-        Telegram.WebApp
-    ) {
+    /* =========================
+       SAVE PLAYER
+    ========================= */
+
+    function savePlayer() {
 
         try {
 
-            Telegram.WebApp.ready();
-
-            Telegram.WebApp.expand();
+            localStorage.setItem(
+                "flirthubXPlayer",
+                JSON.stringify(player)
+            );
 
         } catch (error) {
 
             console.log(
-                "Telegram WebApp initialization skipped."
+                "Could not save player:",
+                error
             );
 
         }
 
     }
 
-}
+
+    /* =========================
+       LOAD PLAYER
+    ========================= */
+
+    function loadPlayer() {
+
+        try {
+
+            const saved =
+                localStorage.getItem(
+                    "flirthubXPlayer"
+                );
 
 
-/* =========================================================
-   REAL-TIME SOCKET.IO
-========================================================= */
-
-let flirthubSocket =
-    null;
+            if (!saved) return;
 
 
-let socketConnecting =
-    false;
+            const data =
+                JSON.parse(saved);
 
 
-/* =========================================================
-   CONNECT
-========================================================= */
+            if (!data) return;
 
-function connectFlirtHubServer() {
 
-    if (
-        socketConnecting
-    ) {
+            player = {
+                ...player,
+                ...data
+            };
 
-        return;
+
+        } catch (error) {
+
+            console.log(
+                "Could not load player:",
+                error
+            );
+
+        }
 
     }
 
 
-    if (
-        flirthubSocket &&
-        flirthubSocket.connected
-    ) {
+    /* =========================
+       OPEN GAME
+    ========================= */
 
-        joinCurrentRoom();
+    function openGame() {
 
-        return;
+        showScreen(gameScreen);
+
+        updateGamePlayer();
 
     }
 
 
-    if (
-        typeof io ===
-        "undefined"
-    ) {
+    /* =========================
+       UPDATE PLAYER IN GAME
+    ========================= */
 
-        console.warn(
-            "Socket.IO is not loaded."
+    function updateGamePlayer() {
+
+        const playerNameElements =
+            document.querySelectorAll(
+                "[data-player-name]"
+            );
+
+
+        playerNameElements.forEach(element => {
+
+            element.textContent =
+                player.name || "You";
+
+        });
+
+
+        const playerAvatarElements =
+            document.querySelectorAll(
+                "[data-player-avatar]"
+            );
+
+
+        playerAvatarElements.forEach(element => {
+
+            if (player.avatar) {
+
+                element.src =
+                    player.avatar;
+
+            }
+
+        });
+
+    }
+
+
+    /* =====================================================
+       GAME NAVIGATION
+       GAME / MESSAGE / ACCOUNT
+       ===================================================== */
+
+    const bottomButtons =
+        document.querySelectorAll(
+            "[data-tab]"
         );
 
-        return;
+
+    const gameTab =
+        document.getElementById("game-tab");
+
+    const messageTab =
+        document.getElementById("message-tab");
+
+    const accountTab =
+        document.getElementById("account-tab");
+
+
+    bottomButtons.forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const tab =
+                button.dataset.tab;
+
+
+            if (tab === "game") {
+
+                showTab(gameTab);
+
+            }
+
+            if (tab === "message") {
+
+                showTab(messageTab);
+
+            }
+
+            if (tab === "account") {
+
+                showTab(accountTab);
+
+            }
+
+        });
+
+    });
+
+
+    function showTab(tab) {
+
+        const tabs = [
+            gameTab,
+            messageTab,
+            accountTab
+        ];
+
+
+        tabs.forEach(item => {
+
+            if (item) {
+
+                item.classList.remove(
+                    "active"
+                );
+
+                item.style.display =
+                    "none";
+
+            }
+
+        });
+
+
+        if (tab) {
+
+            tab.style.display =
+                "block";
+
+            setTimeout(() => {
+
+                tab.classList.add(
+                    "active"
+                );
+
+            }, 10);
+
+        }
 
     }
 
 
-    socketConnecting =
-        true;
-
-
-    flirthubSocket =
-        io();
-
-
-    flirthubSocket.on(
-        "connect",
-        () => {
-
-            socketConnecting =
-                false;
-
-
-            console.log(
-                "FlirtHubX connected:",
-                flirthubSocket.id
-            );
-
-
-            joinCurrentRoom();
-
-        }
-    );
-
-
-    flirthubSocket.on(
-        "connect_error",
-        error => {
-
-            socketConnecting =
-                false;
-
-
-            console.warn(
-                "FlirtHubX connection error:",
-                error.message
-            );
-
-        }
-    );
-
-
-    flirthubSocket.on(
-        "disconnect",
-        () => {
-
-            console.log(
-                "FlirtHubX disconnected."
-            );
-
-        }
-    );
-
-
     /* =====================================================
-       ROOM JOINED
-    ===================================================== */
+       ROOM / SPIN BOTTLE
+       ===================================================== */
 
-    flirthubSocket.on(
-        "roomJoined",
-        data => {
-
-            state.room =
-                Number(
-                    data.room
-                ) || 1;
+    const spinBottle =
+        document.getElementById(
+            "spin-bottle"
+        );
 
 
-            state.roomMembers =
-                Array.isArray(
-                    data.users
-                )
-                    ? data.users
-                    : [];
+    if (spinBottle) {
 
+        spinBottle.addEventListener(
+            "click",
+            () => {
 
-            saveState();
-
-            renderRoom();
-
-        }
-    );
-
-
-    /* =====================================================
-       ROOM FULL
-    ===================================================== */
-
-    flirthubSocket.on(
-        "roomFull",
-        data => {
-
-            alert(
-                `Room ${data.room} is full (10/10).`
-            );
-
-        }
-    );
-
-
-    /* =====================================================
-       PLAYER JOINED
-    ===================================================== */
-
-    flirthubSocket.on(
-        "playerJoined",
-        player => {
-
-            const exists =
-                state.roomMembers.some(
-                    user =>
-                        user.socketId ===
-                        player.socketId
+                spinBottle.classList.add(
+                    "spinning"
                 );
 
 
-            if (!exists) {
+                setTimeout(() => {
 
-                state.roomMembers.push(
-                    player
-                );
-
-            }
+                    spinBottle.classList.remove(
+                        "spinning"
+                    );
 
 
-            renderRoom();
-
-        }
-    );
-
-
-    /* =====================================================
-       PLAYER LEFT
-    ===================================================== */
-
-    flirthubSocket.on(
-        "playerLeft",
-        data => {
-
-            state.roomMembers =
-                state.roomMembers.filter(
-                    user =>
-                        user.socketId !==
-                        data.socketId
-                );
+                    const players = [
+                        "Alex",
+                        "Mia",
+                        "Daniel",
+                        "Lina"
+                    ];
 
 
-            renderRoom();
-
-        }
-    );
-
-
-    /* =====================================================
-       ROOM USERS
-    ===================================================== */
-
-    flirthubSocket.on(
-        "roomUsers",
-        users => {
-
-            if (
-                Array.isArray(users)
-            ) {
-
-                state.roomMembers =
-                    users;
-
-                renderRoom();
-
-            }
-
-        }
-    );
-
-
-    /* =====================================================
-       NEW MESSAGE
-    ===================================================== */
-
-    flirthubSocket.on(
-        "newMessage",
-        message => {
-
-            const exists =
-                state.messages.some(
-                    existing =>
-                        existing.id ===
-                        message.id
-                );
-
-
-            if (!exists) {
-
-                state.messages.push({
-
-                    id:
-                        message.id,
-
-                    name:
-                        message.name,
-
-                    gender:
-                        message.gender,
-
-                    text:
-                        message.text,
-
-                    translation:
-                        "",
-
-                    mine:
-                        message.userId ===
-                        getCurrentUserId(),
-
-                    time:
-                        new Date(
-                            message.timestamp
-                        )
-                            .toLocaleTimeString(
-                                [],
-                                {
-                                    hour:
-                                        "2-digit",
-
-                                    minute:
-                                        "2-digit"
-                                }
+                    const randomPlayer =
+                        players[
+                            Math.floor(
+                                Math.random() *
+                                players.length
                             )
+                        ];
 
-                });
+
+                    alert(
+                        "The bottle chose " +
+                        randomPlayer +
+                        " ❤️"
+                    );
+
+                }, 1800);
 
             }
+        );
 
-
-            saveState();
-
-            renderMessages();
-
-        }
-    );
+    }
 
 
     /* =====================================================
-       KISS REQUEST
-    ===================================================== */
+       GIFT SYSTEM
+       Gifts belong INSIDE the GAME/ROOM,
+       NOT inside the bottom navigation.
+       ===================================================== */
 
-    flirthubSocket.on(
-        "kissRequest",
-        data => {
+    const giftButton =
+        document.getElementById(
+            "gift-button"
+        );
 
-            const accepted =
-                confirm(
-                    `${data.fromName} wants to kiss you 💋`
+    const giftPanel =
+        document.getElementById(
+            "gift-panel"
+        );
+
+
+    if (giftButton && giftPanel) {
+
+        giftButton.addEventListener(
+            "click",
+            () => {
+
+                giftPanel.classList.toggle(
+                    "active"
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =========================
+       GIFT SELECTION
+    ========================= */
+
+    document.querySelectorAll(
+        "[data-gift]"
+    ).forEach(gift => {
+
+        gift.addEventListener(
+            "click",
+            () => {
+
+                const giftName =
+                    gift.dataset.gift ||
+                    "Gift";
+
+
+                const target =
+                    gift.dataset.target ||
+                    "Alex";
+
+
+                sendGift(
+                    giftName,
+                    target
+                );
+
+            }
+        );
+
+    });
+
+
+    function sendGift(
+        giftName,
+        target
+    ) {
+
+        const giftMessage =
+            document.createElement(
+                "div"
+            );
+
+
+        giftMessage.className =
+            "gift-message";
+
+
+        giftMessage.innerHTML = `
+            <span class="gift-icon">🎁</span>
+            <strong>${escapeHTML(player.name)}</strong>
+            sent
+            <strong>${escapeHTML(giftName)}</strong>
+            to
+            <strong>${escapeHTML(target)}</strong>
+        `;
+
+
+        const messageArea =
+            document.getElementById(
+                "game-messages"
+            );
+
+
+        if (messageArea) {
+
+            messageArea.appendChild(
+                giftMessage
+            );
+
+            messageArea.scrollTop =
+                messageArea.scrollHeight;
+
+        }
+
+
+        if (giftPanel) {
+
+            giftPanel.classList.remove(
+                "active"
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CHAT
+       ===================================================== */
+
+    const messageInput =
+        document.getElementById(
+            "message-input"
+        );
+
+    const sendMessageButton =
+        document.getElementById(
+            "send-message"
+        );
+
+    const gameMessages =
+        document.getElementById(
+            "game-messages"
+        );
+
+
+    function sendChatMessage() {
+
+        if (!messageInput) return;
+
+
+        const text =
+            messageInput.value.trim();
+
+
+        if (!text) return;
+
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+
+        message.className =
+            "chat-message outgoing";
+
+
+        message.innerHTML = `
+            <div class="message-name">
+                ${escapeHTML(
+                    player.name || "You"
+                )}
+            </div>
+
+            <div class="message-bubble">
+                ${escapeHTML(text)}
+            </div>
+
+            <div class="message-time">
+                ${getTime()}
+            </div>
+        `;
+
+
+        if (gameMessages) {
+
+            gameMessages.appendChild(
+                message
+            );
+
+            gameMessages.scrollTop =
+                gameMessages.scrollHeight;
+
+        }
+
+
+        messageInput.value = "";
+
+
+        simulateReply();
+
+    }
+
+
+    if (sendMessageButton) {
+
+        sendMessageButton.addEventListener(
+            "click",
+            sendChatMessage
+        );
+
+    }
+
+
+    if (messageInput) {
+
+        messageInput.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    sendChatMessage();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================
+       SIMULATED CHAT REPLY
+    ========================= */
+
+    function simulateReply() {
+
+        const replies = [
+
+            "Nice to meet you 😊",
+
+            "Haha, really? 😄",
+
+            "That's cute ❤️",
+
+            "Tell me more about you.",
+
+            "Maybe we should spin the bottle 😉",
+
+            "You seem interesting 👀",
+
+            "I like your vibe ❤️"
+
+        ];
+
+
+        const reply =
+            replies[
+                Math.floor(
+                    Math.random() *
+                    replies.length
+                )
+            ];
+
+
+        setTimeout(() => {
+
+            if (!gameMessages) return;
+
+
+            const message =
+                document.createElement(
+                    "div"
                 );
 
 
-            flirthubSocket.emit(
-                "kissResponse",
+            message.className =
+                "chat-message incoming";
+
+
+            message.innerHTML = `
+                <div class="message-name">
+                    Alex
+                </div>
+
+                <div class="message-bubble">
+                    ${reply}
+                </div>
+
+                <div class="message-time">
+                    ${getTime()}
+                </div>
+            `;
+
+
+            gameMessages.appendChild(
+                message
+            );
+
+
+            gameMessages.scrollTop =
+                gameMessages.scrollHeight;
+
+
+        }, 900);
+
+    }
+
+
+    /* =====================================================
+       ACCOUNT PROFILE
+       ===================================================== */
+
+    const accountName =
+        document.getElementById(
+            "account-name"
+        );
+
+    const accountAge =
+        document.getElementById(
+            "account-age"
+        );
+
+    const accountGender =
+        document.getElementById(
+            "account-gender"
+        );
+
+    const saveAccountButton =
+        document.getElementById(
+            "save-account"
+        );
+
+
+    function updateAccountPage() {
+
+        if (accountName) {
+
+            accountName.textContent =
+                player.name || "Player";
+
+        }
+
+
+        if (accountAge) {
+
+            accountAge.textContent =
+                player.age || "";
+
+        }
+
+
+        if (accountGender) {
+
+            accountGender.textContent =
+                player.gender || "";
+
+        }
+
+    }
+
+
+    if (accountTab) {
+
+        accountTab.addEventListener(
+            "click",
+            updateAccountPage
+        );
+
+    }
+
+
+    if (saveAccountButton) {
+
+        saveAccountButton.addEventListener(
+            "click",
+            () => {
+
+                if (accountName) {
+
+                    player.name =
+                        accountName.value.trim();
+
+                }
+
+
+                if (accountAge) {
+
+                    player.age =
+                        accountAge.value;
+
+                }
+
+
+                savePlayer();
+
+                updateGamePlayer();
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       ROOM PLAYER CARDS
+       ===================================================== */
+
+    document.querySelectorAll(
+        "[data-player-card]"
+    ).forEach(card => {
+
+        card.addEventListener(
+            "click",
+            () => {
+
+                const name =
+                    card.dataset.playerCard ||
+                    "Player";
+
+
+                openPlayerProfile(name);
+
+            }
+        );
+
+    });
+
+
+    /* =====================================================
+       PLAYER PROFILE POPUP
+       ===================================================== */
+
+    function openPlayerProfile(name) {
+
+        const popup =
+            document.getElementById(
+                "player-profile"
+            );
+
+
+        if (!popup) return;
+
+
+        const nameElement =
+            popup.querySelector(
+                "[data-profile-name]"
+            );
+
+
+        if (nameElement) {
+
+            nameElement.textContent =
+                name;
+
+        }
+
+
+        popup.classList.add(
+            "active"
+        );
+
+    }
+
+
+    const closeProfile =
+        document.getElementById(
+            "close-player-profile"
+        );
+
+
+    if (closeProfile) {
+
+        closeProfile.addEventListener(
+            "click",
+            () => {
+
+                const popup =
+                    document.getElementById(
+                        "player-profile"
+                    );
+
+
+                if (popup) {
+
+                    popup.classList.remove(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       HELPER FUNCTIONS
+       ===================================================== */
+
+    function getTime() {
+
+        return new Date()
+            .toLocaleTimeString(
+                [],
                 {
-
-                    targetSocketId:
-                        data.fromSocketId,
-
-                    accepted:
-                        accepted
-
+                    hour: "2-digit",
+                    minute: "2-digit"
                 }
             );
 
-        }
-    );
-
-
-    /* =====================================================
-       KISS RESPONSE
-    ===================================================== */
-
-    flirthubSocket.on(
-        "kissResponse",
-        data => {
-
-            if (
-                data.accepted
-            ) {
-
-                alert(
-                    `${data.fromName} accepted the kiss! 💋`
-                );
-
-            } else {
-
-                alert(
-                    `${data.fromName} rejected the kiss.`
-                );
-
-            }
-
-        }
-    );
-
-
-    /* =====================================================
-       BLOCK
-    ===================================================== */
-
-    flirthubSocket.on(
-        "playerBlocked",
-        () => {
-
-            alert(
-                "Player blocked."
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   JOIN ROOM
-========================================================= */
-
-function joinCurrentRoom() {
-
-    if (
-        !flirthubSocket ||
-        !flirthubSocket.connected
-    ) {
-
-        return;
-
     }
 
 
-    flirthubSocket.emit(
-        "joinRoom",
-        {
+    function escapeHTML(value) {
 
-            room:
-                state.room || 1,
-
-            id:
-                getCurrentUserId(),
-
-            name:
-                state.name ||
-                "Player",
-
-            gender:
-                state.gender ||
-                "Male",
-
-            avatar:
-                state.avatar ||
-                ""
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   KISS REQUEST
-========================================================= */
-
-function requestKiss(
-    socketId
-) {
-
-    if (
-        !flirthubSocket ||
-        !flirthubSocket.connected
-    ) {
-
-        alert(
-            "You are not connected to multiplayer yet."
-        );
-
-        return;
-
-    }
-
-
-    flirthubSocket.emit(
-        "kissRequest",
-        {
-
-            targetSocketId:
-                socketId
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   BLOCK
-========================================================= */
-
-function blockPlayer(
-    socketId
-) {
-
-    if (
-        !flirthubSocket ||
-        !flirthubSocket.connected
-    ) {
-
-        alert(
-            "You are not connected to multiplayer yet."
-        );
-
-        return;
-
-    }
-
-
-    if (!socketId) {
-        return;
-    }
-
-
-    if (
-        !confirm(
-            "Block this player?"
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    flirthubSocket.emit(
-        "blockPlayer",
-        {
-
-            targetSocketId:
-                socketId
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CLOSE MODALS WHEN CLICKING OUTSIDE
-========================================================= */
-
-document.addEventListener(
-    "click",
-    event => {
-
-        if (
-            event.target.classList &&
-            event.target.classList.contains(
-                "modal"
+        return String(value)
+            .replace(
+                /&/g,
+                "&amp;"
             )
-        ) {
-
-            event.target.classList.add(
-                "hidden"
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
             );
+
+    }
+
+
+    /* =========================
+       INITIALIZE
+    ========================= */
+
+    loadPlayer();
+
+
+    /*
+       If the user already has an account,
+       don't force them through onboarding
+       every time.
+    */
+
+    if (
+        player.name &&
+        player.age &&
+        player.avatar &&
+        gameScreen
+    ) {
+
+        showScreen(gameScreen);
+
+        updateGamePlayer();
+
+    } else {
+
+        /*
+           Keep loading screen visible
+           when opening for the first time.
+        */
+
+        if (loadingScreen) {
+
+            loadingScreen.style.display =
+                "flex";
+
+        }
+
+        if (accountScreen) {
+
+            accountScreen.style.display =
+                "none";
+
+        }
+
+        if (avatarScreen) {
+
+            avatarScreen.style.display =
+                "none";
+
+        }
+
+        if (gameScreen) {
+
+            gameScreen.style.display =
+                "none";
 
         }
 
     }
-);
 
-
-/* =========================================================
-   GLOBAL STARTUP
-========================================================= */
-
-initializeTelegram();
+});
