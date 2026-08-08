@@ -1,3 +1,7 @@
+// ============================================================
+// FLIRTHUBX — SERVER.JS
+// ============================================================
+
 const express = require("express");
 const http = require("http");
 const path = require("path");
@@ -5,106 +9,190 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 const PORT = process.env.PORT || 3000;
+
+
+// ============================================================
+// MIDDLEWARE
+// ============================================================
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve the FlirtHubX frontend
-app.use(express.static(path.join(__dirname, "public")));
 
-// Basic health check
+// ============================================================
+// FRONTEND
+// ============================================================
+
+app.use(
+    express.static(
+        path.join(__dirname, "public")
+    )
+);
+
+
+// ============================================================
+// STATUS
+// ============================================================
+
 app.get("/api/status", (req, res) => {
+
     res.json({
         success: true,
         app: "FlirtHubX",
-        status: "online"
+        status: "online",
+        multiplayer: true
     });
+
 });
 
-// Store active rooms in memory.
-// This is the first multiplayer foundation.
-// Later we will connect a real database.
+
+// ============================================================
+// ROOMS
+// ============================================================
+
 const rooms = new Map();
 
+const MAX_PLAYERS_PER_ROOM = 10;
+const MAX_ROOM_NUMBER = 9999;
+
+
 function getRoom(roomNumber) {
+
     if (!rooms.has(roomNumber)) {
+
         rooms.set(roomNumber, {
             users: new Map()
         });
+
     }
 
     return rooms.get(roomNumber);
+
 }
 
-function getRoomUsers(roomNumber) {
-    const room = getRoom(roomNumber);
 
-    return Array.from(room.users.values());
+function getRoomUsers(roomNumber) {
+
+    const room = rooms.get(roomNumber);
+
+    if (!room) {
+        return [];
+    }
+
+    return Array.from(
+        room.users.values()
+    );
+
+}
+
+
+function deleteEmptyRoom(roomNumber) {
+
+    const room = rooms.get(roomNumber);
+
+    if (
+        room &&
+        room.users.size === 0
+    ) {
+
+        rooms.delete(roomNumber);
+
+    }
+
 }
 
 
 // ============================================================
-// SOCKET.IO — REAL-TIME ROOM SYSTEM
+// SOCKET.IO
 // ============================================================
 
 io.on("connection", (socket) => {
 
-    console.log("Player connected:", socket.id);
+    console.log(
+        "Player connected:",
+        socket.id
+    );
+
 
     let currentRoom = null;
     let currentUser = null;
 
 
-    // --------------------------------------------------------
+    // ========================================================
     // JOIN ROOM
-    // --------------------------------------------------------
+    // ========================================================
 
     socket.on("joinRoom", (data = {}) => {
 
-        const requestedRoom =
+        let roomNumber =
             Number(data.room) || 1;
 
-        const roomNumber =
-            Math.max(1, Math.min(9999, requestedRoom));
+        roomNumber =
+            Math.max(
+                1,
+                Math.min(
+                    MAX_ROOM_NUMBER,
+                    roomNumber
+                )
+            );
 
-        const room = getRoom(roomNumber);
 
-        // Maximum 10 players per room
-        if (room.users.size >= 10) {
+        const room =
+            getRoom(roomNumber);
 
-            socket.emit("roomFull", {
-                room: roomNumber
-            });
+
+        // ----------------------------------------------------
+        // ROOM FULL
+        // ----------------------------------------------------
+
+        if (
+            room.users.size >=
+            MAX_PLAYERS_PER_ROOM
+        ) {
+
+            socket.emit(
+                "roomFull",
+                {
+                    room: roomNumber
+                }
+            );
 
             return;
         }
 
 
-        // Leave previous room first
+        // ----------------------------------------------------
+        // REMOVE FROM OLD ROOM
+        // ----------------------------------------------------
+
         if (currentRoom) {
 
-            socket.leave(
-                `room-${currentRoom}`
-            );
+            leaveCurrentRoom();
 
-            if (rooms.has(currentRoom)) {
-
-                rooms
-                    .get(currentRoom)
-                    .users
-                    .delete(socket.id);
-
-            }
         }
 
 
-        currentRoom = roomNumber;
+        // ----------------------------------------------------
+        // CREATE PLAYER
+        // ----------------------------------------------------
+
+        currentRoom =
+            roomNumber;
+
 
         currentUser = {
-            socketId: socket.id,
+
+            socketId:
+                socket.id,
 
             id:
                 String(
@@ -129,9 +217,12 @@ io.on("connection", (socket) => {
                     ""
                 ).slice(0, 500),
 
-            online: true,
+            online:
+                true,
 
-            joinedAt: Date.now()
+            joinedAt:
+                Date.now()
+
         };
 
 
@@ -140,42 +231,56 @@ io.on("connection", (socket) => {
             currentUser
         );
 
+
         socket.join(
             `room-${currentRoom}`
         );
 
 
-        // Send room information to this player
-        socket.emit("roomJoined", {
+        // ----------------------------------------------------
+        // SEND ROOM TO PLAYER
+        // ----------------------------------------------------
 
-            room: currentRoom,
+        socket.emit(
+            "roomJoined",
+            {
 
-            users:
+                room:
+                    currentRoom,
+
+                users:
+                    getRoomUsers(
+                        currentRoom
+                    )
+
+            }
+        );
+
+
+        // ----------------------------------------------------
+        // TELL OTHER PLAYERS
+        // ----------------------------------------------------
+
+        socket
+            .to(`room-${currentRoom}`)
+            .emit(
+                "playerJoined",
+                currentUser
+            );
+
+
+        // ----------------------------------------------------
+        // UPDATE ROOM USERS
+        // ----------------------------------------------------
+
+        io
+            .to(`room-${currentRoom}`)
+            .emit(
+                "roomUsers",
                 getRoomUsers(
                     currentRoom
                 )
-
-        });
-
-
-        // Tell everyone else
-        socket.to(
-            `room-${currentRoom}`
-        ).emit(
-            "playerJoined",
-            currentUser
-        );
-
-
-        // Update player count
-        io.to(
-            `room-${currentRoom}`
-        ).emit(
-            "roomUsers",
-            getRoomUsers(
-                currentRoom
-            )
-        );
+            );
 
 
         console.log(
@@ -185,467 +290,643 @@ io.on("connection", (socket) => {
     });
 
 
-    // --------------------------------------------------------
+    // ========================================================
     // CHAT MESSAGE
-    // --------------------------------------------------------
+    // ========================================================
 
-    socket.on("sendMessage", (data = {}) => {
+    socket.on(
+        "sendMessage",
+        (data = {}) => {
 
-        if (!currentRoom || !currentUser) {
-            return;
+            if (
+                !currentRoom ||
+                !currentUser
+            ) {
+                return;
+            }
+
+
+            let text =
+                String(
+                    data.text || ""
+                ).trim();
+
+
+            if (!text) {
+                return;
+            }
+
+
+            // Maximum message length
+            if (text.length > 500) {
+
+                text =
+                    text.slice(0, 500);
+
+            }
+
+
+            const message = {
+
+                id:
+                    `${Date.now()}-${socket.id}`,
+
+                room:
+                    currentRoom,
+
+                userId:
+                    currentUser.id,
+
+                socketId:
+                    socket.id,
+
+                name:
+                    currentUser.name,
+
+                gender:
+                    currentUser.gender,
+
+                avatar:
+                    currentUser.avatar,
+
+                text:
+                    text,
+
+                timestamp:
+                    Date.now()
+
+            };
+
+
+            // Send to everyone in the room
+            io
+                .to(`room-${currentRoom}`)
+                .emit(
+                    "newMessage",
+                    message
+                );
+
         }
+    );
 
 
-        const text =
-            String(
-                data.text || ""
-            ).trim();
-
-
-        if (!text) {
-            return;
-        }
-
-
-        if (text.length > 500) {
-            return;
-        }
-
-
-        const message = {
-
-            id:
-                `${Date.now()}-${socket.id}`,
-
-            room:
-                currentRoom,
-
-            userId:
-                currentUser.id,
-
-            name:
-                currentUser.name,
-
-            gender:
-                currentUser.gender,
-
-            avatar:
-                currentUser.avatar,
-
-            text:
-                text,
-
-            timestamp:
-                Date.now()
-
-        };
-
-
-        // Send to everyone in the same room
-        io.to(
-            `room-${currentRoom}`
-        ).emit(
-            "newMessage",
-            message
-        );
-
-    });
-
-
-    // --------------------------------------------------------
+    // ========================================================
     // CHANGE ROOM
-    // --------------------------------------------------------
+    // ========================================================
 
-    socket.on("changeRoom", (data = {}) => {
+    socket.on(
+        "changeRoom",
+        (data = {}) => {
 
-        const newRoom =
-            Number(data.room);
-
-
-        if (
-            !Number.isInteger(newRoom) ||
-            newRoom < 1
-        ) {
-            return;
-        }
+            if (!currentUser) {
+                return;
+            }
 
 
-        const targetRoom =
-            getRoom(newRoom);
+            let newRoom =
+                Number(data.room);
 
 
-        // Don't allow entering a full room
-        if (
-            targetRoom.users.size >= 10 &&
-            currentRoom !== newRoom
-        ) {
-
-            socket.emit(
-                "roomFull",
-                {
-                    room: newRoom
-                }
-            );
-
-            return;
-        }
+            if (
+                !Number.isInteger(
+                    newRoom
+                )
+            ) {
+                return;
+            }
 
 
-        // Remove player from old room
-        if (currentRoom) {
+            newRoom =
+                Math.max(
+                    1,
+                    Math.min(
+                        MAX_ROOM_NUMBER,
+                        newRoom
+                    )
+                );
 
-            socket.leave(
+
+            if (
+                newRoom ===
+                currentRoom
+            ) {
+                return;
+            }
+
+
+            const targetRoom =
+                getRoom(newRoom);
+
+
+            // ------------------------------------------------
+            // TARGET ROOM FULL
+            // ------------------------------------------------
+
+            if (
+                targetRoom.users.size >=
+                MAX_PLAYERS_PER_ROOM
+            ) {
+
+                socket.emit(
+                    "roomFull",
+                    {
+                        room:
+                            newRoom
+                    }
+                );
+
+                return;
+            }
+
+
+            // ------------------------------------------------
+            // LEAVE OLD ROOM
+            // ------------------------------------------------
+
+            leaveCurrentRoom();
+
+
+            // ------------------------------------------------
+            // JOIN NEW ROOM
+            // ------------------------------------------------
+
+            currentRoom =
+                newRoom;
+
+
+            socket.join(
                 `room-${currentRoom}`
             );
 
 
-            const oldRoom =
-                rooms.get(currentRoom);
+            currentUser.online =
+                true;
 
 
-            if (oldRoom) {
-
-                oldRoom.users.delete(
-                    socket.id
+            const newRoomData =
+                getRoom(
+                    currentRoom
                 );
 
 
-                io.to(
-                    `room-${currentRoom}`
-                ).emit(
-                    "playerLeft",
-                    {
-                        socketId:
-                            socket.id
-                    }
+            newRoomData.users.set(
+                socket.id,
+                currentUser
+            );
+
+
+            // ------------------------------------------------
+            // SEND NEW ROOM
+            // ------------------------------------------------
+
+            socket.emit(
+                "roomJoined",
+                {
+
+                    room:
+                        currentRoom,
+
+                    users:
+                        getRoomUsers(
+                            currentRoom
+                        )
+
+                }
+            );
+
+
+            // ------------------------------------------------
+            // TELL OTHER PLAYERS
+            // ------------------------------------------------
+
+            socket
+                .to(`room-${currentRoom}`)
+                .emit(
+                    "playerJoined",
+                    currentUser
                 );
 
 
-                io.to(
-                    `room-${currentRoom}`
-                ).emit(
+            io
+                .to(`room-${currentRoom}`)
+                .emit(
                     "roomUsers",
                     getRoomUsers(
                         currentRoom
                     )
                 );
 
+
+            console.log(
+                `${currentUser.name} moved to room ${currentRoom}`
+            );
+
+        }
+    );
+
+
+    // ========================================================
+    // KISS REQUEST
+    // ========================================================
+
+    socket.on(
+        "kissRequest",
+        (data = {}) => {
+
+            if (
+                !currentRoom ||
+                !currentUser
+            ) {
+                return;
             }
+
+
+            const targetSocket =
+                String(
+                    data.targetSocketId ||
+                    ""
+                );
+
+
+            if (!targetSocket) {
+                return;
+            }
+
+
+            // Make sure target is actually
+            // inside the same room.
+
+            const room =
+                rooms.get(
+                    currentRoom
+                );
+
+
+            if (
+                !room ||
+                !room.users.has(
+                    targetSocket
+                )
+            ) {
+                return;
+            }
+
+
+            io
+                .to(targetSocket)
+                .emit(
+                    "kissRequest",
+                    {
+
+                        fromSocketId:
+                            socket.id,
+
+                        fromName:
+                            currentUser.name,
+
+                        timeout:
+                            10000
+
+                    }
+                );
+
+        }
+    );
+
+
+    // ========================================================
+    // KISS RESPONSE
+    // ========================================================
+
+    socket.on(
+        "kissResponse",
+        (data = {}) => {
+
+            const targetSocket =
+                String(
+                    data.targetSocketId ||
+                    ""
+                );
+
+
+            if (!targetSocket) {
+                return;
+            }
+
+
+            io
+                .to(targetSocket)
+                .emit(
+                    "kissResponse",
+                    {
+
+                        accepted:
+                            Boolean(
+                                data.accepted
+                            ),
+
+                        fromSocketId:
+                            socket.id,
+
+                        fromName:
+                            currentUser
+                                ? currentUser.name
+                                : "Player"
+
+                    }
+                );
+
+        }
+    );
+
+
+    // ========================================================
+    // BLOCK PLAYER
+    // ========================================================
+
+    socket.on(
+        "blockPlayer",
+        (data = {}) => {
+
+            const targetSocket =
+                String(
+                    data.targetSocketId ||
+                    ""
+                );
+
+
+            if (!targetSocket) {
+                return;
+            }
+
+
+            socket.emit(
+                "playerBlocked",
+                {
+
+                    socketId:
+                        targetSocket
+
+                }
+            );
+
+        }
+    );
+
+
+    // ========================================================
+    // TYPING
+    // ========================================================
+
+    socket.on(
+        "typing",
+        () => {
+
+            if (!currentRoom) {
+                return;
+            }
+
+
+            socket
+                .to(`room-${currentRoom}`)
+                .emit(
+                    "playerTyping",
+                    {
+
+                        socketId:
+                            socket.id,
+
+                        name:
+                            currentUser
+                                ? currentUser.name
+                                : "Player"
+
+                    }
+                );
+
+        }
+    );
+
+
+    socket.on(
+        "stopTyping",
+        () => {
+
+            if (!currentRoom) {
+                return;
+            }
+
+
+            socket
+                .to(`room-${currentRoom}`)
+                .emit(
+                    "playerStoppedTyping",
+                    {
+
+                        socketId:
+                            socket.id
+
+                    }
+                );
+
+        }
+    );
+
+
+    // ========================================================
+    // PLAYER PROFILE UPDATE
+    // ========================================================
+
+    socket.on(
+        "updateProfile",
+        (data = {}) => {
+
+            if (
+                !currentUser ||
+                !currentRoom
+            ) {
+                return;
+            }
+
+
+            if (
+                typeof data.name ===
+                "string"
+            ) {
+
+                currentUser.name =
+                    data.name
+                        .trim()
+                        .slice(0, 20);
+
+            }
+
+
+            if (
+                data.gender ===
+                "Male" ||
+                data.gender ===
+                "Female"
+            ) {
+
+                currentUser.gender =
+                    data.gender;
+
+            }
+
+
+            if (
+                typeof data.avatar ===
+                "string"
+            ) {
+
+                currentUser.avatar =
+                    data.avatar.slice(
+                        0,
+                        500
+                    );
+
+            }
+
+
+            const room =
+                rooms.get(
+                    currentRoom
+                );
+
+
+            if (room) {
+
+                room.users.set(
+                    socket.id,
+                    currentUser
+                );
+
+            }
+
+
+            io
+                .to(`room-${currentRoom}`)
+                .emit(
+                    "roomUsers",
+                    getRoomUsers(
+                        currentRoom
+                    )
+                );
+
+        }
+    );
+
+
+    // ========================================================
+    // LEAVE ROOM HELPER
+    // ========================================================
+
+    function leaveCurrentRoom() {
+
+        if (!currentRoom) {
+            return;
+        }
+
+
+        const oldRoomNumber =
+            currentRoom;
+
+
+        const oldRoom =
+            rooms.get(
+                oldRoomNumber
+            );
+
+
+        socket.leave(
+            `room-${oldRoomNumber}`
+        );
+
+
+        if (oldRoom) {
+
+            oldRoom.users.delete(
+                socket.id
+            );
+
+
+            io
+                .to(`room-${oldRoomNumber}`)
+                .emit(
+                    "playerLeft",
+                    {
+
+                        socketId:
+                            socket.id
+
+                    }
+                );
+
+
+            io
+                .to(`room-${oldRoomNumber}`)
+                .emit(
+                    "roomUsers",
+                    getRoomUsers(
+                        oldRoomNumber
+                    )
+                );
+
+
+            deleteEmptyRoom(
+                oldRoomNumber
+            );
 
         }
 
 
         currentRoom =
-            newRoom;
+            null;
 
+    }
 
-        socket.join(
-            `room-${currentRoom}`
-        );
 
-
-        if (!currentUser) {
-            return;
-        }
-
-
-        currentUser.online = true;
-
-
-        getRoom(
-            currentRoom
-        ).users.set(
-            socket.id,
-            currentUser
-        );
-
-
-        socket.emit(
-            "roomJoined",
-            {
-                room:
-                    currentRoom,
-
-                users:
-                    getRoomUsers(
-                        currentRoom
-                    )
-            }
-        );
-
-
-        socket.to(
-            `room-${currentRoom}`
-        ).emit(
-            "playerJoined",
-            currentUser
-        );
-
-
-        io.to(
-            `room-${currentRoom}`
-        ).emit(
-            "roomUsers",
-            getRoomUsers(
-                currentRoom
-            )
-        );
-
-    });
-
-
-    // --------------------------------------------------------
-    // KISS REQUEST
-    // --------------------------------------------------------
-
-    socket.on("kissRequest", (data = {}) => {
-
-        if (!currentRoom) {
-            return;
-        }
-
-
-        const targetSocket =
-            String(
-                data.targetSocketId || ""
-            );
-
-
-        if (!targetSocket) {
-            return;
-        }
-
-
-        io.to(
-            targetSocket
-        ).emit(
-            "kissRequest",
-            {
-                fromSocketId:
-                    socket.id,
-
-                fromName:
-                    currentUser
-                        ? currentUser.name
-                        : "Player",
-
-                timeout:
-                    10000
-            }
-        );
-
-    });
-
-
-    // --------------------------------------------------------
-    // KISS RESPONSE
-    // --------------------------------------------------------
-
-    socket.on("kissResponse", (data = {}) => {
-
-        const target =
-            String(
-                data.targetSocketId || ""
-            );
-
-
-        if (!target) {
-            return;
-        }
-
-
-        io.to(
-            target
-        ).emit(
-            "kissResponse",
-            {
-                accepted:
-                    Boolean(
-                        data.accepted
-                    ),
-
-                fromSocketId:
-                    socket.id,
-
-                fromName:
-                    currentUser
-                        ? currentUser.name
-                        : "Player"
-            }
-        );
-
-    });
-
-
-    // --------------------------------------------------------
-    // BLOCK PLAYER
-    // --------------------------------------------------------
-
-    socket.on("blockPlayer", (data = {}) => {
-
-        const targetSocket =
-            String(
-                data.targetSocketId || ""
-            );
-
-
-        if (!targetSocket) {
-            return;
-        }
-
-
-        socket.emit(
-            "playerBlocked",
-            {
-                socketId:
-                    targetSocket
-            }
-        );
-
-
-        /*
-         * The blocked player is not removed
-         * from the entire room for everyone.
-         *
-         * The real database block list will later
-         * control exactly what each person can see.
-         */
-    });
-
-
-    // --------------------------------------------------------
-    // TYPING
-    // --------------------------------------------------------
-
-    socket.on("typing", () => {
-
-        if (!currentRoom) {
-            return;
-        }
-
-
-        socket.to(
-            `room-${currentRoom}`
-        ).emit(
-            "playerTyping",
-            {
-                socketId:
-                    socket.id,
-
-                name:
-                    currentUser
-                        ? currentUser.name
-                        : "Player"
-            }
-        );
-
-    });
-
-
-    socket.on("stopTyping", () => {
-
-        if (!currentRoom) {
-            return;
-        }
-
-
-        socket.to(
-            `room-${currentRoom}`
-        ).emit(
-            "playerStoppedTyping",
-            {
-                socketId:
-                    socket.id
-            }
-        );
-
-    });
-
-
-    // --------------------------------------------------------
+    // ========================================================
     // DISCONNECT
-    // --------------------------------------------------------
+    // ========================================================
 
-    socket.on("disconnect", () => {
+    socket.on(
+        "disconnect",
+        () => {
 
-        console.log(
-            "Player disconnected:",
-            socket.id
-        );
-
-
-        if (!currentRoom) {
-            return;
-        }
-
-
-        const room =
-            rooms.get(
-                currentRoom
-            );
-
-
-        if (room) {
-
-            room.users.delete(
+            console.log(
+                "Player disconnected:",
                 socket.id
             );
 
 
-            io.to(
-                `room-${currentRoom}`
-            ).emit(
-                "playerLeft",
-                {
-                    socketId:
-                        socket.id
-                }
-            );
-
-
-            io.to(
-                `room-${currentRoom}`
-            ).emit(
-                "roomUsers",
-                getRoomUsers(
-                    currentRoom
-                )
-            );
-
-
-            // Remove empty rooms from memory
-            if (
-                room.users.size === 0
-            ) {
-
-                rooms.delete(
-                    currentRoom
-                );
-
-            }
+            leaveCurrentRoom();
 
         }
-
-    });
-
-});
-
-
-// ============================================================
-// FALLBACK — SEND INDEX.HTML
-// ============================================================
-
-app.get("*", (req, res) => {
-
-    res.sendFile(
-        path.join(
-            __dirname,
-            "public",
-            "index.html"
-        )
     );
 
 });
+
+
+// ============================================================
+// FALLBACK
+// ============================================================
+
+app.get(
+    "*",
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "public",
+                "index.html"
+            )
+        );
+
+    }
+);
 
 
 // ============================================================
@@ -657,7 +938,35 @@ server.listen(
     () => {
 
         console.log(
-            `FlirtHubX server running on port ${PORT}`
+            "================================="
+        );
+
+        console.log(
+            "       FLIRTHUBX SERVER"
+        );
+
+        console.log(
+            "================================="
+        );
+
+        console.log(
+            `Server running on port ${PORT}`
+        );
+
+        console.log(
+            `Rooms: 1-${MAX_ROOM_NUMBER}`
+        );
+
+        console.log(
+            `Players per room: ${MAX_PLAYERS_PER_ROOM}`
+        );
+
+        console.log(
+            "Multiplayer: ENABLED"
+        );
+
+        console.log(
+            "================================="
         );
 
     }
