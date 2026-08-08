@@ -1,141 +1,160 @@
 /* =========================================================
-   FLIRTHUBX — STYLE.CSS
-   Game / Room + Messages + Account
-========================================================= */
-
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+   FLIRTHUBX — style.css
+   ========================================================= */
 
 * {
     box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #08080d;
+    --card: #12121a;
+    --card2: #181821;
+    --pink: #ff3f81;
+    --pink2: #ff6b9d;
+    --purple: #8d5cff;
+    --text: #ffffff;
+    --muted: #9999a8;
+    --green: #35df8a;
+    --gold: #ffc94a;
 }
 
 html,
 body {
-    margin: 0;
-    padding: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
-    font-family: "Montserrat", sans-serif;
-    background: #0d0b12;
-    color: #ffffff;
 }
 
 body {
-    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
 }
 
 /* =========================================================
    GENERAL
-========================================================= */
+   ========================================================= */
 
 button,
 input,
 select {
-    font-family: inherit;
+    font: inherit;
 }
 
 button {
     border: 0;
-    outline: none;
     cursor: pointer;
+    color: white;
 }
 
 .hidden {
     display: none !important;
 }
 
-.screen,
-.app-screen {
-    width: 100%;
-    height: 100dvh;
-}
 
 /* =========================================================
    LOADING
-========================================================= */
+   ========================================================= */
 
-#loadingScreen {
+#loading-screen {
     position: fixed;
     inset: 0;
     z-index: 9999;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     background:
-        radial-gradient(circle at center, #2a1730 0%, #100c14 55%, #08070b 100%);
+        linear-gradient(
+            rgba(0,0,0,.2),
+            rgba(0,0,0,.35)
+        ),
+        url("grok_1785922772462.jpg")
+        center / cover no-repeat;
+
+    transition:
+        opacity .7s ease,
+        visibility .7s ease;
 }
 
-.loading-icon {
-    width: 78px;
-    height: 78px;
-    position: relative;
+#loading-screen.loaded {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
-.loading-ring {
-    width: 78px;
-    height: 78px;
-    border-radius: 50%;
-    border: 5px solid rgba(255,255,255,.12);
-    border-top-color: #ff2f8b;
-    border-right-color: #ff5ca8;
-    animation: loadingSpin 1s linear infinite;
-}
-
-@keyframes loadingSpin {
-    to {
-        transform: rotate(360deg);
-    }
-}
 
 /* =========================================================
    START SCREEN
-========================================================= */
+   ========================================================= */
 
-#startScreen {
+#start-screen {
     position: fixed;
     inset: 0;
-    z-index: 900;
+
     display: flex;
-    justify-content: center;
     align-items: flex-end;
+    justify-content: center;
+
     padding: 0 25px 70px;
 
     background:
-        radial-gradient(circle at 50% 35%, rgba(255,50,140,.22), transparent 35%),
-        linear-gradient(180deg, #151019, #09070d);
+        linear-gradient(
+            rgba(0,0,0,.1),
+            rgba(0,0,0,.55)
+        ),
+        url("grok_1785922772462.jpg")
+        center / cover no-repeat;
 }
 
-.start-button {
-    width: min(420px, 90%);
+#start-btn {
+    width: min(340px, 90%);
     height: 62px;
-    border-radius: 22px;
 
-    color: white;
+    border-radius: 20px;
+
     font-size: 20px;
     font-weight: 800;
     letter-spacing: 2px;
 
-    background: linear-gradient(135deg, #ff3b91, #d81d72);
+    background:
+        linear-gradient(
+            135deg,
+            var(--pink),
+            var(--purple)
+        );
 
     box-shadow:
-        0 12px 35px rgba(255,40,135,.30),
-        inset 0 1px 0 rgba(255,255,255,.25);
+        0 10px 35px rgba(255,63,129,.35);
 
-    transition: .2s ease;
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
 }
 
-.start-button:active {
+#start-btn:active {
     transform: scale(.96);
 }
 
-/* =========================================================
-   PROFILE SETUP
-========================================================= */
 
-#profileScreen,
-#avatarScreen {
+/* =========================================================
+   ACCOUNT CREATION
+   ========================================================= */
+
+#account-screen,
+#avatar-screen {
+    position: fixed;
+    inset: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -143,1136 +162,1175 @@ button {
     padding: 20px;
 
     background:
-        radial-gradient(circle at top, rgba(255,52,140,.18), transparent 40%),
-        #0c0a10;
+        radial-gradient(
+            circle at top,
+            #272034,
+            #08080d 65%
+        );
 }
 
 .setup-card {
-    width: 100%;
-    max-width: 430px;
-    max-height: 94dvh;
+    width: min(430px, 100%);
+    max-height: 92vh;
     overflow-y: auto;
 
     padding: 28px 22px;
 
     border-radius: 28px;
 
-    background: rgba(28,24,34,.96);
-    border: 1px solid rgba(255,255,255,.08);
+    background:
+        rgba(18,18,26,.96);
 
-    box-shadow: 0 25px 80px rgba(0,0,0,.45);
-}
+    border: 1px solid rgba(255,255,255,.07);
 
-.back-button {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-
-    color: white;
-    background: rgba(255,255,255,.08);
-
-    font-size: 23px;
-}
-
-.setup-step {
-    margin-top: 20px;
-
-    color: #ff4a99;
-    font-size: 13px;
-    font-weight: 700;
+    box-shadow:
+        0 25px 80px rgba(0,0,0,.5);
 }
 
 .setup-card h1 {
-    margin: 8px 0;
+    margin-top: 25px;
     font-size: 28px;
 }
 
-.setup-subtitle {
-    margin-bottom: 25px;
-    color: #9d98a4;
-    font-size: 14px;
+.setup-card p {
+    margin: 8px 0 25px;
+    color: var(--muted);
 }
 
 .setup-card label {
     display: block;
-    margin: 18px 0 8px;
+    margin: 17px 0 8px;
 
-    color: #c5bfca;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
+    color: #c8c8d2;
 }
 
-.setup-card input {
+.setup-card input,
+.setup-card select {
     width: 100%;
-    height: 53px;
+    height: 52px;
 
-    padding: 0 16px;
+    padding: 0 15px;
 
-    color: white;
-    background: #17141d;
-
-    border: 1px solid #292531;
-    border-radius: 16px;
+    border: 1px solid #292936;
+    border-radius: 15px;
 
     outline: none;
-}
 
-.setup-card input:focus {
-    border-color: #ff3c91;
-}
-
-.gender-selector {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.gender-option {
-    min-height: 65px;
-    border-radius: 17px;
-
-    color: #c6c1ca;
-    background: #17141d;
-
-    border: 1px solid #292531;
-}
-
-.gender-option.selected {
     color: white;
-    border-color: #ff3c91;
-    background: rgba(255,49,143,.12);
+    background: #0d0d14;
 }
 
-.gender-icon {
+.setup-card input:focus,
+.setup-card select:focus {
+    border-color: var(--pink);
+}
+
+
+/* =========================================================
+   BACK BUTTON
+   ========================================================= */
+
+#back-account,
+#back-avatar {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 13px;
+
+    background: #22222c;
+
     font-size: 22px;
-    display: block;
 }
 
-.continue-button {
-    width: 100%;
-    height: 55px;
-    margin-top: 25px;
-
-    color: white;
-    font-weight: 800;
-
-    border-radius: 17px;
-    background: linear-gradient(135deg,#ff3b91,#d51c70);
-
-    box-shadow: 0 10px 30px rgba(255,40,140,.2);
-}
 
 /* =========================================================
-   AVATARS
-========================================================= */
+   AVATAR
+   ========================================================= */
 
-.avatar-grid {
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
-    gap: 12px;
-}
-
-.avatar-option {
-    padding: 4px;
-    border-radius: 20px;
-    background: #17141d;
-}
-
-.avatar-option img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: 16px;
-}
-
-.avatar-option.selected {
-    background: linear-gradient(135deg,#ff3b91,#ff83bb);
-}
-
-/* =========================================================
-   MAIN APP
-========================================================= */
-
-#homeScreen {
+#avatar-square {
     position: relative;
-    display: flex;
-    flex-direction: column;
+
+    width: 190px;
+    height: 190px;
+
+    margin: 25px auto;
+
+    border-radius: 28px;
+
+    overflow: hidden;
 
     background:
-        radial-gradient(circle at 50% 35%, rgba(145,66,190,.20), transparent 35%),
-        linear-gradient(180deg,#171022,#0b0910);
-}
+        linear-gradient(
+            135deg,
+            #252533,
+            #15151e
+        );
 
-/* =========================================================
-   TOP GAME HEADER
-========================================================= */
-
-.top-header {
-    flex-shrink: 0;
-
-    min-height: 76px;
-    padding: 10px 14px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    background: rgba(14,11,20,.96);
-    border-bottom: 1px solid rgba(255,255,255,.06);
-}
-
-.room-info {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-
-.room-number {
-    font-size: 21px;
-    font-weight: 800;
-}
-
-.room-people {
-    padding: 8px 12px;
-
-    border-radius: 20px;
-
-    background: #24202b;
-    color: #aaa3b0;
-
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.header-actions {
-    display: flex;
-    gap: 9px;
-}
-
-.icon-button {
-    width: 50px;
-    height: 50px;
+    border: 2px dashed #4b4b5b;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-radius: 17px;
-
-    color: #fff;
-    background: linear-gradient(145deg,#211d28,#15121b);
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.06),
-        0 5px 15px rgba(0,0,0,.25);
+    transition:
+        border .2s ease,
+        transform .2s ease;
 }
 
-.icon-button svg {
-    width: 25px;
-    height: 25px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-/* =========================================================
-   ROOM / GAME AREA
-========================================================= */
-
-.room-members {
-    flex: 1;
-    min-height: 0;
-
-    position: relative;
-    overflow-y: auto;
-
-    padding: 20px 14px 120px;
-
-    display: grid;
-    grid-template-columns: repeat(2,minmax(0,1fr));
-    gap: 15px;
-
-    align-content: start;
-}
-
-/*
-    When JS creates .player-card:
-    These are intentionally SQUARE like the reference game.
-*/
-
-.player-card {
-    position: relative;
-
-    width: 100%;
-    aspect-ratio: 1 / 1;
-
-    border-radius: 18px;
-    overflow: hidden;
-
-    background: #211b2d;
-
-    border: 2px solid rgba(255,255,255,.07);
-
-    box-shadow:
-        0 8px 20px rgba(0,0,0,.30),
-        inset 0 0 0 1px rgba(255,255,255,.04);
-
-    transition: .2s ease;
-}
-
-.player-card:active {
+#avatar-square:active {
     transform: scale(.97);
 }
 
-.player-card img {
+#avatar-square.has-image {
+    border-style: solid;
+    border-color: var(--pink);
+}
+
+#avatar-preview {
     width: 100%;
     height: 100%;
-
-    display: block;
 
     object-fit: cover;
 }
 
-/* Name at bottom */
+#avatar-square::after {
+    content: "+";
 
-.player-card .player-name {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
 
-    padding: 25px 8px 9px;
-
-    color: white;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 700;
-
-    background: linear-gradient(
-        transparent,
-        rgba(0,0,0,.85)
-    );
-}
-
-/* Online indicator ONLY on the player card */
-
-.player-card .online-dot {
-    position: absolute;
-    right: 8px;
-    bottom: 9px;
-
-    width: 10px;
-    height: 10px;
-
-    border-radius: 50%;
-
-    background: #35df83;
-    border: 2px solid #17131d;
-}
-
-/* =========================================================
-   GAME CURRENCY / GAME BUTTONS
-========================================================= */
-
-.game-currency-bar {
-    position: absolute;
-    top: 8px;
-    left: 10px;
     right: 10px;
+    bottom: 10px;
 
-    z-index: 30;
+    width: 45px;
+    height: 45px;
 
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
 
-    pointer-events: none;
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pink),
+            var(--purple)
+        );
+
+    font-size: 30px;
+    font-weight: 300;
+
+    box-shadow:
+        0 7px 20px rgba(0,0,0,.4);
 }
 
-.game-currency {
-    pointer-events: auto;
+#avatar-input {
+    display: none;
+}
 
-    min-width: 75px;
-    height: 48px;
+#avatar-skip {
+    display: block;
 
-    padding: 5px 10px;
+    margin: 15px auto 0;
 
+    background: transparent;
+
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   CONTINUE
+   ========================================================= */
+
+#account-continue,
+#avatar-continue {
+    width: 100%;
+    height: 54px;
+
+    margin-top: 25px;
+
+    border-radius: 17px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pink),
+            var(--purple)
+        );
+
+    font-weight: 800;
+
+    box-shadow:
+        0 10px 30px rgba(255,63,129,.2);
+}
+
+
+/* =========================================================
+   GENDER
+   ========================================================= */
+
+.gender-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.gender-option {
+    height: 55px;
+
+    border-radius: 15px;
+
+    background: #0d0d14;
+
+    border: 1px solid #292936;
+}
+
+.gender-option.active,
+.gender-option:focus {
+    border-color: var(--pink);
+    background: rgba(255,63,129,.12);
+}
+
+
+/* =========================================================
+   GAME SCREEN
+   ========================================================= */
+
+#game-screen {
+    position: fixed;
+    inset: 0;
+
+    display: none;
+
+    flex-direction: column;
+
+    background:
+        radial-gradient(
+            circle at 20% 0%,
+            #231c32,
+            transparent 35%
+        ),
+        #09090e;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   GAME TOP AREA
+   ========================================================= */
+
+.game-content {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding:
+        15px
+        15px
+        100px;
+}
+
+
+/* =========================================================
+   ROOM CARD
+   ========================================================= */
+
+.room-card {
+    width: 100%;
+
+    aspect-ratio: 1 / 1;
+
+    min-height: 330px;
+    max-height: 500px;
+
+    position: relative;
+
+    border-radius: 28px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #20202c,
+            #111119
+        );
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.35);
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   ROOM HEADER
+   ========================================================= */
+
+.room-header {
+    position: absolute;
+
+    top: 12px;
+    left: 12px;
+    right: 12px;
+
+    z-index: 5;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        auto
+        1fr;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+/* =========================================================
+   ROOM CENTER
+   ========================================================= */
+
+.room-title {
+    text-align: center;
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.room-count {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 11px;
+
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   ROOM CURRENCY BUTTONS
+   ========================================================= */
+
+.room-left-actions,
+.room-right-actions {
     display: flex;
     align-items: center;
     gap: 7px;
-
-    border-radius: 16px;
-
-    color: white;
-
-    background: linear-gradient(145deg,#241d31,#120f18);
-
-    border: 1px solid rgba(255,255,255,.08);
-
-    box-shadow:
-        0 7px 20px rgba(0,0,0,.35),
-        inset 0 1px 0 rgba(255,255,255,.08);
 }
 
-.game-currency .currency-icon {
-    width: 31px;
-    height: 31px;
+.room-right-actions {
+    justify-content: flex-end;
+}
+
+.game-icon-button {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 14px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-radius: 50%;
-
-    font-size: 19px;
-}
-
-.heart-game-icon {
-    color: white;
-
     background:
-        radial-gradient(circle at 30% 25%,#ff9dbd,#ff267b 65%,#a9004c);
-    
-    text-shadow: 0 2px 5px rgba(0,0,0,.3);
-}
+        linear-gradient(
+            145deg,
+            #20202b,
+            #111118
+        );
 
-.money-game-icon {
-    color: #fff;
-    background:
-        radial-gradient(circle at 30% 25%,#ffe985,#e9a900 65%,#9a5700);
-}
-
-.game-currency strong {
-    font-size: 15px;
-}
-
-/* Store */
-
-.game-store-button {
-    width: 50px;
-    height: 50px;
-
-    border-radius: 16px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: white;
-
-    background: linear-gradient(145deg,#302738,#17121f);
+    border:
+        1px solid rgba(255,255,255,.1);
 
     box-shadow:
-        0 7px 20px rgba(0,0,0,.3),
-        inset 0 1px 0 rgba(255,255,255,.08);
+        0 6px 18px rgba(0,0,0,.35);
+
+    font-size: 18px;
+
+    transition:
+        transform .2s ease;
 }
 
-.game-store-button svg {
-    width: 27px;
-    height: 27px;
-
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+.game-icon-button:active {
+    transform: scale(.9);
 }
+
+
+/* =========================================================
+   REALISTIC GAME CURRENCY
+   ========================================================= */
+
+.heart-game {
+    color: #ff4d78;
+
+    text-shadow:
+        0 0 12px rgba(255,60,110,.7);
+}
+
+.money-game {
+    color: #7df2b1;
+
+    text-shadow:
+        0 0 12px rgba(80,230,150,.5);
+}
+
+.store-game {
+    color: #ffd45c;
+
+    text-shadow:
+        0 0 12px rgba(255,200,70,.55);
+}
+
+
+/* =========================================================
+   ROOM PLAYERS
+   ========================================================= */
+
+.room-player {
+    position: absolute;
+
+    width: 92px;
+    height: 112px;
+
+    padding: 5px;
+
+    border-radius: 19px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #252532,
+            #15151d
+        );
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,.35);
+
+    text-align: center;
+
+    transition:
+        transform .2s ease;
+}
+
+.room-player:active {
+    transform: scale(.93);
+}
+
+.room-player img {
+    width: 72px;
+    height: 72px;
+
+    object-fit: cover;
+
+    border-radius: 15px;
+
+    display: block;
+
+    margin: 0 auto 5px;
+}
+
+.room-player-name {
+    font-size: 12px;
+    font-weight: 700;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* PLAYER POSITIONS */
+
+.room-player:nth-of-type(1) {
+    top: 74px;
+    left: 18px;
+}
+
+.room-player:nth-of-type(2) {
+    top: 74px;
+    right: 18px;
+}
+
+.room-player:nth-of-type(3) {
+    bottom: 18px;
+    left: 18px;
+}
+
+.room-player:nth-of-type(4) {
+    bottom: 18px;
+    right: 18px;
+}
+
 
 /* =========================================================
    SPIN BOTTLE
-========================================================= */
+   ========================================================= */
 
-.spin-bottle-area {
+#spin-bottle {
     position: absolute;
 
-    top: 50%;
     left: 50%;
+    top: 50%;
 
-    transform: translate(-50%,-50%);
+    transform:
+        translate(-50%, -50%);
 
-    z-index: 20;
-
-    width: 150px;
-    height: 150px;
+    width: 90px;
+    height: 110px;
 
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 
-    border-radius: 50%;
+    background: transparent;
 
-    background:
-        radial-gradient(circle,
-            rgba(255,255,255,.08),
-            rgba(255,255,255,0) 68%);
+    z-index: 4;
 }
 
-.spin-bottle {
-    width: 95px;
-    height: 95px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 68px;
+.bottle-icon {
+    font-size: 55px;
 
     filter:
-        drop-shadow(0 10px 12px rgba(0,0,0,.5));
-
-    transition: transform .8s cubic-bezier(.2,.8,.2,1);
+        drop-shadow(
+            0 8px 15px rgba(0,0,0,.5)
+        );
 }
 
-.spin-bottle.spinning {
-    animation: bottleSpin 1.3s cubic-bezier(.2,.8,.2,1);
+.bottle-label {
+    margin-top: 3px;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    color: #ddd;
+
+    letter-spacing: 1px;
+}
+
+#spin-bottle.spinning {
+    animation:
+        bottleSpin 1.8s
+        cubic-bezier(.4,0,.2,1);
 }
 
 @keyframes bottleSpin {
     from {
-        transform: rotate(0deg);
+        transform:
+            translate(-50%, -50%)
+            rotate(0);
     }
+
     to {
-        transform: rotate(1080deg);
+        transform:
+            translate(-50%, -50%)
+            rotate(1080deg);
     }
 }
 
-.spin-label {
-    position: absolute;
-    bottom: -25px;
-
-    width: 180px;
-
-    text-align: center;
-
-    color: white;
-    font-size: 13px;
-    font-weight: 800;
-
-    text-shadow: 0 2px 5px #000;
-}
 
 /* =========================================================
-   GIFT BUTTON INSIDE GAME
-========================================================= */
+   GIFT BUTTON
+   ========================================================= */
 
-.gift-game-button {
+#gift-button {
     position: absolute;
-    z-index: 40;
 
-    right: 15px;
-    bottom: 115px;
+    right: 50%;
+    bottom: 12px;
 
-    width: 58px;
-    height: 58px;
+    transform: translateX(50%);
 
-    border-radius: 19px;
+    width: 50px;
+    height: 50px;
 
-    font-size: 28px;
+    border-radius: 16px;
 
-    background: linear-gradient(145deg,#ff5c9e,#d61d70);
+    background:
+        linear-gradient(
+            135deg,
+            #ff3f81,
+            #9c5cff
+        );
 
     box-shadow:
-        0 8px 25px rgba(255,40,135,.30),
-        inset 0 1px 0 rgba(255,255,255,.25);
-}
+        0 8px 25px rgba(255,63,129,.3);
 
-/* =========================================================
-   MESSAGE AREA
-   IMPORTANT:
-   ROOM AND MESSAGES ARE SEPARATE
-========================================================= */
-
-.room-messages {
-    display: none;
-}
-
-/* When JS switches to message view */
-
-.message-screen {
-    position: fixed;
-    inset: 0;
-
-    z-index: 100;
-
-    display: flex;
-    flex-direction: column;
-
-    background:
-        linear-gradient(180deg,#17121d,#0c0a10);
-}
-
-/* Message header */
-
-.message-header {
-    height: 65px;
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    padding: 8px 15px;
-
-    background: rgba(15,12,20,.98);
-    border-bottom: 1px solid rgba(255,255,255,.07);
-}
-
-.message-header img {
-    width: 43px;
-    height: 43px;
-
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.message-header strong {
-    font-size: 15px;
-}
-
-.message-header small {
-    display: block;
-    margin-top: 2px;
-
-    color: #85808c;
-    font-size: 11px;
-}
-
-/* Messages scroll */
-
-.message-list {
-    flex: 1;
-    overflow-y: auto;
-
-    padding: 20px 14px 12px;
-
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-/* TikTok-like message */
-
-.chat-message {
-    max-width: 78%;
-
-    padding: 11px 15px;
-
-    border-radius: 18px;
-
-    font-size: 14px;
-    line-height: 1.45;
-
-    word-break: break-word;
-}
-
-.chat-message.received {
-    align-self: flex-start;
-
-    background: #211d28;
-
-    border-bottom-left-radius: 5px;
-}
-
-.chat-message.sent {
-    align-self: flex-end;
-
-    color: white;
-
-    background: linear-gradient(
-        135deg,
-        #ff3f91,
-        #d51e70
-    );
-
-    border-bottom-right-radius: 5px;
-}
-
-.chat-message .sender {
-    display: block;
-
-    margin-bottom: 4px;
-
-    color: #ff5ca2;
-    font-size: 11px;
-    font-weight: 800;
-}
-
-.chat-message.sent .sender {
-    color: rgba(255,255,255,.75);
-}
-
-.chat-time {
-    margin-top: 4px;
-
-    color: #77717c;
-
-    font-size: 9px;
-}
-
-/* Message input */
-
-.message-input-area {
-    flex-shrink: 0;
-
-    min-height: 70px;
-
-    padding: 9px 12px;
-
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    background: #100d15;
-    border-top: 1px solid rgba(255,255,255,.07);
-}
-
-.message-input-area input {
-    flex: 1;
-
-    height: 51px;
-
-    padding: 0 17px;
-
-    color: white;
-
-    background: #1d1922;
-
-    border: 1px solid #2b2632;
-    border-radius: 27px;
-
-    outline: none;
-
-    font-size: 14px;
-}
-
-.message-input-area input:focus {
-    border-color: #ff3e91;
-}
-
-.message-send {
-    width: 51px;
-    height: 51px;
-
-    border-radius: 50%;
-
-    color: white;
-
-    background: linear-gradient(135deg,#ff3d91,#e51e76);
-
-    font-size: 20px;
-}
-
-/* =========================================================
-   GIFT PANEL
-========================================================= */
-
-.gift-panel {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    z-index: 500;
-
-    max-height: 72dvh;
-
-    padding: 20px 14px 30px;
-
-    border-radius: 27px 27px 0 0;
-
-    background:
-        linear-gradient(180deg,#25202d,#121017);
-
-    box-shadow: 0 -20px 60px rgba(0,0,0,.55);
-
-    overflow-y: auto;
-}
-
-.gift-panel h2 {
-    margin: 0 0 5px;
-
-    text-align: center;
-
-    font-size: 19px;
-}
-
-.gift-panel-subtitle {
-    margin: 0 0 18px;
-
-    text-align: center;
-
-    color: #96909d;
-
-    font-size: 12px;
-}
-
-.gift-grid {
-    display: grid;
-    grid-template-columns: repeat(4,1fr);
-    gap: 10px;
-}
-
-.gift-item {
-    min-height: 95px;
-
-    padding: 8px 5px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 17px;
-
-    background: #1c1822;
-    border: 1px solid rgba(255,255,255,.06);
-
-    transition: .15s ease;
-}
-
-.gift-item:active {
-    transform: scale(.94);
-}
-
-.gift-image {
-    width: 48px;
-    height: 48px;
-
-    object-fit: contain;
-
-    font-size: 38px;
-}
-
-.gift-name {
-    margin-top: 4px;
-
-    color: #ddd7e0;
-
-    font-size: 9px;
-    text-align: center;
-}
-
-.gift-price {
-    margin-top: 3px;
-
-    color: #ff5a9e;
-
-    font-size: 10px;
-    font-weight: 800;
-}
-
-/* =========================================================
-   ACCOUNT
-========================================================= */
-
-#accountScreen {
-    position: fixed;
-    inset: 0;
-
-    z-index: 90;
-
-    display: flex;
-    flex-direction: column;
-
-    background:
-        radial-gradient(circle at top,rgba(155,50,180,.16),transparent 38%),
-        #0e0b13;
-}
-
-.simple-header {
-    height: 70px;
-    flex-shrink: 0;
-
-    padding: 0 17px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    border-bottom: 1px solid rgba(255,255,255,.06);
-}
-
-.simple-header h2 {
-    margin: 0;
-    font-size: 21px;
-}
-
-.account-profile {
-    flex: 1;
-    overflow-y: auto;
-
-    padding: 25px 16px 110px;
-
-    text-align: center;
-}
-
-.profile-frame {
-    width: 96px;
-    height: 96px;
-
-    margin: 0 auto 12px;
-
-    padding: 3px;
-
-    border-radius: 50%;
-
-    background: linear-gradient(135deg,#ff3f91,#7629d7);
-}
-
-.profile-frame img {
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-
-    border-radius: 50%;
-}
-
-.account-profile h1 {
-    margin: 5px 0;
-
-    font-size: 23px;
-}
-
-.account-meta {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-
-    color: #918a98;
-
-    font-size: 12px;
-}
-
-.premium-tag {
-    width: max-content;
-
-    margin: 10px auto;
-
-    padding: 6px 12px;
-
-    border-radius: 20px;
-
-    color: #ffe18a;
-
-    background: rgba(255,202,69,.12);
-
-    font-size: 10px;
-    font-weight: 800;
-}
-
-/* =========================================================
-   ACCOUNT CURRENCIES
-========================================================= */
-
-.currency-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-
-    gap: 10px;
-
-    margin-top: 18px;
-}
-
-.currency-box {
-    min-height: 72px;
-
-    padding: 10px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-
-    border-radius: 20px;
-
-    background: linear-gradient(145deg,#211c28,#15121b);
-
-    border: 1px solid rgba(255,255,255,.06);
-}
-
-.currency-icon {
-    width: 40px;
-    height: 40px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
+    z-index: 6;
 
     font-size: 22px;
 }
 
-.heart-icon {
-    color: white;
-
-    background:
-        radial-gradient(circle at 30% 25%,#ffabc9,#ff267e 60%,#a4004b);
-
-    box-shadow: 0 5px 15px rgba(255,30,120,.25);
-}
-
-.money-icon {
-    color: #fff;
-
-    background:
-        radial-gradient(circle at 30% 25%,#fff39d,#e7ad00 65%,#955300);
-}
-
-.currency-box strong {
-    display: block;
-    font-size: 18px;
-}
-
-.currency-box small {
-    color: #8f8995;
-    font-size: 9px;
-}
 
 /* =========================================================
-   ACCOUNT STAT CARDS
-========================================================= */
+   GIFT PANEL
+   ========================================================= */
 
-.account-stat-card,
-.streak-card {
-    min-height: 68px;
+#gift-panel {
+    position: absolute;
 
-    margin-top: 10px;
-    padding: 12px 16px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+
+    z-index: 20;
+
+    padding: 15px;
+
+    border-radius: 22px;
+
+    background:
+        rgba(18,18,27,.98);
+
+    border:
+        1px solid rgba(255,255,255,.1);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.7);
+
+    display: none;
+}
+
+#gift-panel.active {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 8px;
+}
+
+.gift-item {
+    min-height: 75px;
+
+    padding: 8px;
+
+    border-radius: 15px;
+
+    background: #22222d;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+}
+
+.gift-item-icon {
+    font-size: 27px;
+}
+
+.gift-item-name {
+    font-size: 10px;
+    color: #ccc;
+}
+
+
+/* =========================================================
+   MESSAGE SCREEN
+   ========================================================= */
+
+#message-tab {
+    display: none;
+
+    height: 100%;
+
+    overflow: hidden;
+
+    background: #09090e;
+}
+
+.message-page {
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================================
+   MESSAGE HEADER
+   ========================================================= */
+
+.message-header {
+    height: 65px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 15px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.06);
+
+    background: #101018;
+}
+
+.message-header h2 {
+    font-size: 20px;
+}
+
+
+/* =========================================================
+   TIKTOK STYLE CHAT
+   ========================================================= */
+
+#game-messages {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 15px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+.chat-message {
+    max-width: 78%;
+}
+
+.chat-message.outgoing {
+    align-self: flex-end;
+    text-align: right;
+}
+
+.chat-message.incoming {
+    align-self: flex-start;
+}
+
+.message-name {
+    margin-bottom: 4px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    color: #a9a9b5;
+}
+
+.message-bubble {
+    display: inline-block;
+
+    padding: 10px 14px;
+
+    border-radius: 18px;
+
+    font-size: 14px;
+    line-height: 1.4;
+
+    background: #20202b;
+}
+
+.outgoing .message-bubble {
+    background:
+        linear-gradient(
+            135deg,
+            #ff3f81,
+            #9c5cff
+        );
+}
+
+.message-time {
+    margin-top: 3px;
+
+    font-size: 9px;
+
+    color: #777785;
+}
+
+
+/* =========================================================
+   MESSAGE INPUT
+   ========================================================= */
+
+.message-input-area {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 10px 12px;
+
+    background: #101018;
+
+    border-top:
+        1px solid rgba(255,255,255,.06);
+}
+
+#message-input {
+    flex: 1;
+
+    height: 45px;
+
+    padding: 0 15px;
+
+    border-radius: 22px;
+
+    outline: none;
+
+    border: 1px solid #292936;
+
+    color: white;
+
+    background: #1a1a23;
+}
+
+#send-message {
+    width: 45px;
+    height: 45px;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pink),
+            var(--purple)
+        );
+}
+
+
+/* =========================================================
+   ACCOUNT SCREEN
+   ========================================================= */
+
+#account-tab {
+    display: none;
+
+    height: 100%;
+
+    overflow-y: auto;
+
+    padding: 20px 15px 110px;
+
+    background: #09090e;
+}
+
+.account-card {
+    width: 100%;
+
+    padding: 25px;
+
+    border-radius: 26px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #191923,
+            #101018
+        );
+
+    border:
+        1px solid rgba(255,255,255,.07);
+
+    text-align: center;
+}
+
+.account-avatar {
+    width: 105px;
+    height: 105px;
+
+    margin: auto;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+
+    border:
+        3px solid var(--pink);
+}
+
+.account-card h1 {
+    margin-top: 12px;
+    font-size: 23px;
+}
+
+.account-meta {
+    margin-top: 5px;
+
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   ACCOUNT STATS
+   ========================================================= */
+
+.account-stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 10px;
+
+    margin-top: 15px;
+}
+
+.account-stat {
+    padding: 16px;
+
+    border-radius: 18px;
+
+    background: #171720;
+
+    text-align: center;
+}
+
+.account-stat strong {
+    display: block;
+
+    font-size: 20px;
+}
+
+.account-stat small {
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   RANK / LEAGUE
+   ========================================================= */
+
+.league-card {
+    margin-top: 12px;
+
+    padding: 17px;
+
+    border-radius: 19px;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    border-radius: 19px;
-
-    background: #19151f;
-    border: 1px solid rgba(255,255,255,.06);
-
-    text-align: left;
+    background:
+        linear-gradient(
+            135deg,
+            #201c30,
+            #15151e
+        );
 }
 
-.account-stat-card strong,
-.streak-card strong {
-    display: block;
-
-    font-size: 16px;
+.league-icon {
+    font-size: 35px;
 }
 
-.account-stat-card small,
-.streak-card small {
-    display: block;
-
-    margin-top: 4px;
-
-    color: #85808c;
-    font-size: 10px;
-}
-
-.league-badge {
-    padding: 8px 13px;
-
-    border-radius: 15px;
-
-    color: #d2a8ff;
-
-    background: rgba(149,72,255,.13);
-
-    font-size: 11px;
+.league-name {
     font-weight: 800;
 }
 
-.streak-fire {
-    margin-right: 12px;
-
-    font-size: 28px;
-}
-
-.streak-card {
-    justify-content: flex-start;
-}
 
 /* =========================================================
-   ACCOUNT ACTIONS
-========================================================= */
+   ACCOUNT BUTTONS
+   ========================================================= */
 
-.account-actions {
+.account-buttons {
     display: grid;
-    grid-template-columns: repeat(3,1fr);
 
-    gap: 9px;
+    grid-template-columns:
+        repeat(2, 1fr);
 
-    margin-top: 12px;
+    gap: 10px;
+
+    margin-top: 15px;
 }
 
-.account-actions button {
+.account-button {
     min-height: 55px;
+
+    border-radius: 17px;
+
+    background: #191922;
+
+    border:
+        1px solid rgba(255,255,255,.06);
+}
+
+.account-button:active {
+    transform: scale(.97);
+}
+
+
+/* =========================================================
+   PLAYER PROFILE POPUP
+   ========================================================= */
+
+#player-profile {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 500;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        rgba(0,0,0,.7);
+
+    backdrop-filter:
+        blur(10px);
+}
+
+#player-profile.active {
+    display: flex;
+}
+
+.player-profile-card {
+    width: min(370px, 100%);
+
+    padding: 25px;
+
+    border-radius: 27px;
+
+    background:
+        #171720;
+
+    text-align: center;
+}
+
+.profile-rank-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 8px;
+
+    margin-top: 15px;
+}
+
+.profile-point {
+    padding: 15px;
 
     border-radius: 16px;
 
-    color: #eee;
-
-    background: #1d1923;
-
-    border: 1px solid rgba(255,255,255,.06);
-
-    font-size: 11px;
-    font-weight: 700;
+    background: #22222d;
 }
 
-.account-actions button:active {
-    transform: scale(.95);
+.kick-button {
+    width: 100%;
+
+    height: 50px;
+
+    margin-top: 12px;
+
+    border-radius: 15px;
+
+    background: #8e273d;
 }
+
+.admire-button {
+    width: 100%;
+
+    height: 50px;
+
+    margin-top: 8px;
+
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pink),
+            var(--purple)
+        );
+}
+
 
 /* =========================================================
    BOTTOM NAVIGATION
-========================================================= */
+   ONLY 3:
+   GAME / MESSAGE / ACCOUNT
+   ========================================================= */
 
 .bottom-navigation {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
 
-    z-index: 400;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
 
-    height: 72px;
+    height: 68px;
+
+    z-index: 100;
 
     display: grid;
-    grid-template-columns: repeat(3,1fr);
 
-    background: rgba(14,11,18,.98);
+    grid-template-columns:
+        repeat(3, 1fr);
 
-    border-top: 1px solid rgba(255,255,255,.07);
+    padding: 5px;
 
-    padding-bottom: env(safe-area-inset-bottom);
+    border-radius: 22px;
+
+    background:
+        rgba(20,20,29,.96);
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.5);
+
+    backdrop-filter:
+        blur(15px);
 }
 
 .bottom-nav-item {
+    position: relative;
+
     display: flex;
     flex-direction: column;
+
     align-items: center;
     justify-content: center;
 
     gap: 4px;
 
-    color: #77717f;
+    border-radius: 17px;
 
     background: transparent;
 
-    font-size: 9px;
-    font-weight: 600;
+    color: #777785;
+
+    font-size: 10px;
+
+    transition:
+        color .2s ease,
+        background .2s ease;
 }
 
 .bottom-nav-item svg {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
 
     fill: none;
+
     stroke: currentColor;
 
     stroke-width: 1.8;
@@ -1282,330 +1340,117 @@ button {
 }
 
 .bottom-nav-item.active {
-    color: #ff3f91;
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,63,129,.2),
+            rgba(141,92,255,.2)
+        );
 }
 
-.bottom-nav-item.active svg {
-    filter: drop-shadow(0 3px 7px rgba(255,50,140,.35));
-}
+.bottom-nav-item.active::after {
+    content: "";
 
-/* =========================================================
-   MODALS
-========================================================= */
-
-.modal {
-    position: fixed;
-    inset: 0;
-
-    z-index: 1000;
-
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-
-    background: rgba(0,0,0,.65);
-    backdrop-filter: blur(6px);
-}
-
-.modal-card {
-    position: relative;
-
-    width: 100%;
-    max-width: 500px;
-    max-height: 85dvh;
-
-    overflow-y: auto;
-
-    padding: 25px 18px 30px;
-
-    border-radius: 28px 28px 0 0;
-
-    background: #17131c;
-
-    box-shadow: 0 -20px 70px rgba(0,0,0,.5);
-}
-
-.modal-card h2 {
-    margin: 0;
-
-    font-size: 22px;
-}
-
-.modal-subtitle {
-    color: #85808c;
-    font-size: 12px;
-}
-
-.modal-close {
     position: absolute;
 
-    top: 15px;
-    right: 15px;
+    bottom: 3px;
 
-    width: 38px;
-    height: 38px;
+    width: 20px;
+    height: 3px;
 
-    border-radius: 50%;
-
-    color: #aaa3af;
-    background: #25202b;
-
-    font-size: 22px;
-}
-
-/* =========================================================
-   STORE
-========================================================= */
-
-.store-item {
-    position: relative;
-
-    min-height: 75px;
-
-    margin-top: 10px;
-    padding: 10px;
-
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    border-radius: 18px;
-
-    background: #211c27;
-
-    border: 1px solid rgba(255,255,255,.05);
-}
-
-.store-item-icon {
-    width: 46px;
-    height: 46px;
-
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    font-size: 24px;
-
-    background: #34222e;
-    color: #ff4b99;
-}
-
-.store-item-info {
-    flex: 1;
-    text-align: left;
-}
-
-.store-item-info strong {
-    display: block;
-    font-size: 12px;
-}
-
-.store-item-info small {
-    display: block;
-    margin-top: 3px;
-
-    color: #85808d;
-    font-size: 9px;
-}
-
-.store-item > button {
-    padding: 9px 13px;
-
-    border-radius: 12px;
-
-    color: white;
-
-    background: #ff3187;
-
-    font-size: 10px;
-    font-weight: 800;
-}
-
-.best-offer {
-    border-color: rgba(255,65,150,.25);
-}
-
-.offer-label {
-    position: absolute;
-
-    top: -7px;
-    left: 10px;
-
-    padding: 3px 7px;
-
-    border-radius: 7px;
-
-    color: white;
-
-    background: #ff3187;
-
-    font-size: 7px;
-    font-weight: 800;
-}
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-.setting-item {
-    min-height: 55px;
-
-    margin-top: 10px;
-    padding: 10px 13px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    border-radius: 16px;
-
-    background: #211c27;
-
-    color: #dcd7df;
-
-    font-size: 12px;
-}
-
-.setting-item select,
-.setting-item button {
-    padding: 8px 10px;
-
-    color: white;
-
-    background: #302a37;
-
-    border: 0;
     border-radius: 10px;
+
+    background: var(--pink);
 }
+
 
 /* =========================================================
-   MUSIC
-========================================================= */
+   GIFT MESSAGE
+   ========================================================= */
 
-.modal-input {
-    width: 100%;
-    height: 50px;
-
-    margin-top: 20px;
-    padding: 0 14px;
-
-    color: white;
-
-    background: #211c27;
-
-    border: 1px solid #302a37;
-
-    border-radius: 15px;
-
-    outline: none;
-}
-
-.primary-modal-button {
-    width: 100%;
-    height: 50px;
-
-    margin-top: 10px;
-
-    color: white;
-
-    border-radius: 15px;
-
-    background: #ff3187;
-
-    font-weight: 800;
-}
-
-/* =========================================================
-   EMOTIONS
-========================================================= */
-
-.emotion-grid {
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
-
-    gap: 10px;
-
-    margin-top: 20px;
-}
-
-.emotion-grid button {
-    min-height: 75px;
+.gift-message {
+    padding: 10px 14px;
 
     border-radius: 17px;
 
-    color: #eee;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,63,129,.16),
+            rgba(141,92,255,.16)
+        );
 
-    background: #211c27;
+    border:
+        1px solid rgba(255,255,255,.07);
 
-    font-size: 12px;
+    font-size: 13px;
 }
 
-.emotion-grid span {
-    display: block;
-
-    margin-bottom: 5px;
-
-    font-size: 25px;
+.gift-icon {
+    margin-right: 5px;
 }
+
 
 /* =========================================================
-   RESPONSIVE
-========================================================= */
+   MOBILE
+   ========================================================= */
 
-@media (min-width: 600px) {
+@media (max-width: 420px) {
 
-    .room-members {
-        grid-template-columns: repeat(3,150px);
-        justify-content: center;
+    .room-card {
+        border-radius: 23px;
     }
 
-    .gift-grid {
-        grid-template-columns: repeat(5,1fr);
+    .room-player {
+        width: 78px;
+        height: 96px;
     }
+
+    .room-player img {
+        width: 62px;
+        height: 62px;
+    }
+
+    .room-player:nth-of-type(1) {
+        left: 12px;
+    }
+
+    .room-player:nth-of-type(2) {
+        right: 12px;
+    }
+
+    .room-player:nth-of-type(3) {
+        left: 12px;
+    }
+
+    .room-player:nth-of-type(4) {
+        right: 12px;
+    }
+
+    #spin-bottle {
+        transform:
+            translate(-50%, -50%)
+            scale(.85);
+    }
+
+    .game-icon-button {
+        width: 38px;
+        height: 38px;
+
+        border-radius: 12px;
+    }
+
 }
 
-@media (max-width: 360px) {
-
-    .top-header {
-        padding-left: 9px;
-        padding-right: 9px;
-    }
-
-    .room-number {
-        font-size: 18px;
-    }
-
-    .icon-button {
-        width: 45px;
-        height: 45px;
-    }
-
-    .room-members {
-        gap: 9px;
-        padding-left: 9px;
-        padding-right: 9px;
-    }
-
-    .gift-grid {
-        grid-template-columns: repeat(3,1fr);
-    }
-}
 
 /* =========================================================
-   SCROLLBARS
-========================================================= */
-
-* {
-    scrollbar-width: thin;
-    scrollbar-color: #38313f transparent;
-}
+   SCROLLBAR
+   ========================================================= */
 
 ::-webkit-scrollbar {
-    width: 4px;
+    width: 3px;
 }
 
 ::-webkit-scrollbar-track {
@@ -1613,23 +1458,30 @@ button {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #38313f;
+    background: #383844;
     border-radius: 10px;
 }
 
-/* =========================================================
-   SAFETY FOR MOBILE BROWSER
-========================================================= */
 
-input,
-button,
-select {
-    font-size: 16px;
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes fadeIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
 }
 
-@supports (height: 100dvh) {
-    .screen,
-    .app-screen {
-        height: 100dvh;
-    }
+.active {
+    animation:
+        fadeIn .3s ease;
 }
